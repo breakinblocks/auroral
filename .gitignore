@@ -1,0 +1,102 @@
+# ===== Gradle =====
+.gradle/
+build/
+out/
+bin/
+libs/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Gradle properties (local overrides)
+gradle.properties.local
+local.properties
+
+# ===== IDE - IntelliJ IDEA =====
+.idea/
+*.iml
+*.ipr
+*.iws
+atlassian-ide-plugin.xml
+
+# ===== IDE - Eclipse =====
+.eclipse/
+.project
+.classpath
+.settings/
+*.launch
+.metadata/
+
+# ===== IDE - VS Code =====
+.vscode/
+*.code-workspace
+
+# ===== IDE - NetBeans =====
+nbproject/
+nbbuild/
+nbdist/
+nbactions.xml
+nb-configuration.xml
+
+# ===== OS Specific =====
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ===== Minecraft Mod Development =====
+# Runtime directories
+run/
+runs/
+logs/
+crash-reports/
+saves/
+
+# Generated resources (datagen output)
+src/generated/
+
+# NeoForge/Forge specific
+*.log
+*.log.gz
+debug.log
+latest.log
+
+# Mod output
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Caches
+.cache/
+*.cache
+
+# ===== Java =====
+*.class
+hs_err_pid*
+replay_pid*
+
+# ===== Secrets & Config =====
+# Never commit tokens or secrets
+.env
+.env.local
+*.env
+secrets.properties
+tokens.properties
+
+# ===== Misc =====
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Local testing
+test-output/
+local/
