@@ -68,6 +68,9 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.AURORAL_NAUTILUS_SPAWN_EGG, "Auroral Nautilus Spawn Egg");
         addItem(ModItems.AURORAL_SNOWLETTE_SPAWN_EGG, "Auroral Snowlette Spawn Egg");
 
+        // GuideME Guide
+        add("item.auroral.guide", "The Auroral Guidebook");
+
         // Tooltips and messages
         add("block.auroral.glacial_basin.aura_level", "Aura Level: %d/%d");
         add("block.auroral.glacial_basin.infusion_hint", "Right-click with items during Aurora to infuse");

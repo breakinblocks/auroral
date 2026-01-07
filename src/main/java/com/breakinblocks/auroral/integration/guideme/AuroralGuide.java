@@ -3,7 +3,8 @@ package com.breakinblocks.auroral.integration.guideme;
 import com.breakinblocks.auroral.Auroral;
 import guideme.Guide;
 import guideme.GuideItemSettings;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +24,7 @@ import java.util.Optional;
  */
 public class AuroralGuide {
 
-    public static final ResourceLocation GUIDE_ID = Auroral.id("guide");
+    public static final Identifier GUIDE_ID = Auroral.id("guide");
 
     private static Guide guide;
 
@@ -37,7 +38,7 @@ public class AuroralGuide {
                 .defaultNamespace(Auroral.MOD_ID)
                 .folder("guide")  // Content is at assets/auroral/guide/
                 .itemSettings(new GuideItemSettings(
-                    Optional.empty(),  // Use default display name
+                    Optional.of(Component.translatable("item.auroral.guide")),  // Custom display name
                     List.of(),         // No extra tooltip lines
                     Optional.of(Auroral.id("item/guide"))  // Custom item model
                 ))

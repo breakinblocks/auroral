@@ -1,7 +1,6 @@
 package com.breakinblocks.auroral.entity;
 
 import com.breakinblocks.auroral.util.AuroraHelper;
-import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -14,6 +13,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
@@ -22,8 +23,10 @@ import net.minecraft.world.entity.ai.control.BodyRotationControl;
 import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,23 +36,29 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 import java.util.EnumSet;
+import java.util.UUID;
 
 /**
  * Auroral Nautilus - A mystical flying nautilus creature that appears during Aurora events.
- * Passive ambient mob that floats gracefully through the air, occasionally dropping Aurora Shards.
- * Based on Phantom flight mechanics but with gentler, more elegant movement.
+ * Can be tamed with Aurora Shards and ridden through the sky when saddled.
  */
-public class AuroralNautilusEntity extends Mob {
+public class AuroralNautilusEntity extends Animal implements PlayerRideable {
 
     public static final float FLAP_DEGREES_PER_TICK = 5.0F;
     public static final int TICKS_PER_FLAP = Mth.ceil(30.0F);
 
     private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_SADDLED = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_TAMED = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.BOOLEAN);
+
+    // Owner UUID stored in save data, not synced
+    @Nullable
+    private UUID ownerUUID;
 
     Vec3 moveTargetPoint = Vec3.ZERO;
     @Nullable BlockPos anchorPoint;
 
-    // Despawn timer when aurora ends
+    // Despawn timer when aurora ends (only for wild nautili)
     private int despawnTimer = 0;
     private static final int DESPAWN_DELAY = 600; // 30 seconds after aurora ends
 
@@ -60,10 +69,10 @@ public class AuroralNautilusEntity extends Mob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
-            .add(Attributes.MAX_HEALTH, 10.0)
+        return Animal.createMobAttributes()
+            .add(Attributes.MAX_HEALTH, 20.0)
             .add(Attributes.MOVEMENT_SPEED, 0.1)
-            .add(Attributes.FLYING_SPEED, 0.2);
+            .add(Attributes.FLYING_SPEED, 0.3);
     }
 
     @Override
@@ -85,6 +94,46 @@ public class AuroralNautilusEntity extends Mob {
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);
         builder.define(ID_SIZE, 0);
+        builder.define(DATA_SADDLED, false);
+        builder.define(DATA_TAMED, false);
+    }
+
+    // Taming methods
+    public boolean isTamed() {
+        return this.entityData.get(DATA_TAMED);
+    }
+
+    public void setTamed(boolean tamed) {
+        this.entityData.set(DATA_TAMED, tamed);
+    }
+
+    @Nullable
+    public UUID getOwnerUUID() {
+        return this.ownerUUID;
+    }
+
+    public void setOwnerUUID(@Nullable UUID uuid) {
+        this.ownerUUID = uuid;
+    }
+
+    public boolean isOwnedBy(LivingEntity entity) {
+        return entity instanceof Player && entity.getUUID().equals(this.getOwnerUUID());
+    }
+
+    // Saddle methods
+    public boolean isSaddleable() {
+        return this.isAlive() && isTamed();
+    }
+
+    public void equipSaddle(ItemStack saddle, @Nullable SoundSource source) {
+        this.entityData.set(DATA_SADDLED, true);
+        if (source != null) {
+            this.level().playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.HORSE_SADDLE, source, 0.5F, 1.0F);
+        }
+    }
+
+    public boolean isSaddled() {
+        return this.entityData.get(DATA_SADDLED);
     }
 
     public void setNautilusSize(int size) {
@@ -112,23 +161,163 @@ public class AuroralNautilusEntity extends Mob {
     }
 
     @Override
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        ItemStack itemStack = player.getItemInHand(hand);
+
+        // Taming with Aurora Shards
+        if (!isTamed() && itemStack.is(ModItems.AURORA_SHARD.get())) {
+            if (!player.getAbilities().instabuild) {
+                itemStack.shrink(1);
+            }
+
+            if (!this.level().isClientSide()) {
+                // 33% chance to tame
+                if (this.random.nextFloat() < 0.33f) {
+                    this.setTamed(true);
+                    this.setOwnerUUID(player.getUUID());
+                    this.level().broadcastEntityEvent(this, (byte) 7); // Heart particles
+                    // Tamed nautili don't despawn
+                    this.despawnTimer = -999999;
+                } else {
+                    this.level().broadcastEntityEvent(this, (byte) 6); // Smoke particles
+                }
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // Saddling
+        if (isTamed() && !isSaddled() && itemStack.is(Items.SADDLE)) {
+            this.equipSaddle(itemStack, SoundSource.NEUTRAL);
+            if (!player.getAbilities().instabuild) {
+                itemStack.shrink(1);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        // Mounting if tamed, saddled, and owner
+        if (isTamed() && isSaddled() && isOwnedBy(player)) {
+            if (!this.level().isClientSide()) {
+                player.startRiding(this);
+            }
+            return InteractionResult.SUCCESS;
+        }
+
+        return super.mobInteract(player, hand);
+    }
+
+    @Override
+    public void handleEntityEvent(byte id) {
+        if (id == 7) {
+            // Heart particles for successful tame
+            for (int i = 0; i < 7; i++) {
+                double dx = this.random.nextGaussian() * 0.02;
+                double dy = this.random.nextGaussian() * 0.02;
+                double dz = this.random.nextGaussian() * 0.02;
+                this.level().addParticle(ParticleTypes.HEART,
+                    this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0),
+                    dx, dy, dz);
+            }
+        } else if (id == 6) {
+            // Smoke particles for failed tame
+            for (int i = 0; i < 7; i++) {
+                double dx = this.random.nextGaussian() * 0.02;
+                double dy = this.random.nextGaussian() * 0.02;
+                double dz = this.random.nextGaussian() * 0.02;
+                this.level().addParticle(ParticleTypes.SMOKE,
+                    this.getRandomX(1.0), this.getRandomY() + 0.5, this.getRandomZ(1.0),
+                    dx, dy, dz);
+            }
+        } else {
+            super.handleEntityEvent(id);
+        }
+    }
+
+    @Override
+    @Nullable
+    public LivingEntity getControllingPassenger() {
+        if (this.isSaddled()) {
+            Entity entity = this.getFirstPassenger();
+            if (entity instanceof Player player && this.isOwnedBy(player)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    protected Vec3 getRiddenInput(Player player, Vec3 travelVector) {
+        // Get player's look direction for flying control
+        float forward = player.zza;
+        float strafe = player.xxa * 0.5F;
+
+        // Looking up/down controls vertical movement
+        float pitch = player.getXRot();
+        float verticalInput = 0;
+        if (pitch < -20) {
+            verticalInput = 0.3F; // Looking up = fly up
+        } else if (pitch > 20) {
+            verticalInput = -0.3F; // Looking down = fly down
+        }
+
+        return new Vec3(strafe, verticalInput, forward);
+    }
+
+    @Override
+    protected float getRiddenSpeed(Player player) {
+        return (float) this.getAttributeValue(Attributes.FLYING_SPEED);
+    }
+
+    @Override
+    protected void tickRidden(Player player, Vec3 travelVector) {
+        super.tickRidden(player, travelVector);
+        // Match player's yaw for steering
+        this.setYRot(player.getYRot());
+        this.yRotO = this.getYRot();
+        this.setXRot(player.getXRot() * 0.5F);
+        this.setRot(this.getYRot(), this.getXRot());
+        this.yBodyRot = this.getYRot();
+        this.yHeadRot = this.yBodyRot;
+    }
+
+    @Override
+    public void travel(Vec3 travelVector) {
+        if (this.isVehicle() && this.getControllingPassenger() != null) {
+            // Flying movement when ridden
+            LivingEntity passenger = this.getControllingPassenger();
+            if (passenger instanceof Player player) {
+                Vec3 input = this.getRiddenInput(player, travelVector);
+                float speed = this.getRiddenSpeed(player);
+
+                // Apply movement based on look direction
+                float yaw = this.getYRot() * ((float) Math.PI / 180F);
+                double moveX = -Mth.sin(yaw) * input.z * speed + Mth.cos(yaw) * input.x * speed;
+                double moveZ = Mth.cos(yaw) * input.z * speed + Mth.sin(yaw) * input.x * speed;
+                double moveY = input.y * speed;
+
+                this.setDeltaMovement(moveX, moveY, moveZ);
+                this.move(MoverType.SELF, this.getDeltaMovement());
+
+                // Slow down over time
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.91));
+            }
+        } else {
+            // Normal AI movement
+            this.travelFlying(travelVector, 0.15F);
+        }
+    }
+
+    @Override
     public void tick() {
         super.tick();
 
-        // Check aurora state and manage despawn
-        if (!this.level().isClientSide() && this.level() instanceof ServerLevel serverLevel) {
+        // Check aurora state and manage despawn (only for wild nautili)
+        if (!this.level().isClientSide() && this.level() instanceof ServerLevel serverLevel && !isTamed()) {
             boolean auroraActive = AuroraHelper.isAuroraActive(serverLevel);
 
             if (!auroraActive) {
                 despawnTimer++;
                 if (despawnTimer >= DESPAWN_DELAY) {
-                    // Gracefully fade away - drop a shard as it leaves
-                    if (random.nextFloat() < 0.3f) {
-                        ItemEntity itemEntity = new ItemEntity(serverLevel, getX(), getY(), getZ(),
-                            new ItemStack(ModItems.AURORA_SHARD.get()));
-                        serverLevel.addFreshEntity(itemEntity);
-                    }
-                    // Spawn particles and despawn
+                    // Gracefully fade away with particles
                     serverLevel.sendParticles(ParticleTypes.END_ROD, getX(), getY(), getZ(), 20, 0.5, 0.5, 0.5, 0.1);
                     this.discard();
                     return;
@@ -191,8 +380,15 @@ public class AuroralNautilusEntity extends Mob {
     }
 
     @Override
-    public void travel(Vec3 travelVector) {
-        this.travelFlying(travelVector, 0.15F);
+    public boolean isFood(ItemStack stack) {
+        return stack.is(ModItems.AURORA_SHARD.get());
+    }
+
+    @Override
+    @Nullable
+    public AgeableMob getBreedOffspring(ServerLevel level, AgeableMob otherParent) {
+        // Nautili don't breed
+        return null;
     }
 
     @Override
@@ -209,6 +405,9 @@ public class AuroralNautilusEntity extends Mob {
         super.readAdditionalSaveData(input);
         this.anchorPoint = input.read("anchor_pos", BlockPos.CODEC).orElse(null);
         this.setNautilusSize(input.getIntOr("size", 0));
+        this.setTamed(input.getBooleanOr("tamed", false));
+        this.entityData.set(DATA_SADDLED, input.getBooleanOr("saddled", false));
+        input.read("owner", net.minecraft.core.UUIDUtil.CODEC).ifPresent(this::setOwnerUUID);
     }
 
     @Override
@@ -216,6 +415,11 @@ public class AuroralNautilusEntity extends Mob {
         super.addAdditionalSaveData(output);
         output.storeNullable("anchor_pos", BlockPos.CODEC, this.anchorPoint);
         output.putInt("size", this.getNautilusSize());
+        output.putBoolean("tamed", this.isTamed());
+        output.putBoolean("saddled", this.isSaddled());
+        if (this.getOwnerUUID() != null) {
+            output.store("owner", net.minecraft.core.UUIDUtil.CODEC, this.getOwnerUUID());
+        }
     }
 
     @Override
@@ -259,16 +463,33 @@ public class AuroralNautilusEntity extends Mob {
     protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean wasRecentlyHit) {
         super.dropCustomDeathLoot(level, source, wasRecentlyHit);
 
-        // Always drop 1-2 Aurora Shards
-        int shardCount = 1 + this.random.nextInt(2);
-        for (int i = 0; i < shardCount; i++) {
-            this.spawnAtLocation(level, new ItemStack(ModItems.AURORA_SHARD.get()));
+        // Drop saddle if saddled
+        if (this.isSaddled()) {
+            this.spawnAtLocation(level, new ItemStack(Items.SADDLE));
         }
 
-        // Rare chance to drop a nautilus shell
-        if (this.random.nextFloat() < 0.15f) {
-            this.spawnAtLocation(level, new ItemStack(net.minecraft.world.item.Items.NAUTILUS_SHELL));
+        // Only drop Aurora Shards if killed by a player
+        if (source.getEntity() instanceof Player) {
+            int shardCount = 1 + this.random.nextInt(2);
+            for (int i = 0; i < shardCount; i++) {
+                this.spawnAtLocation(level, new ItemStack(ModItems.AURORA_SHARD.get()));
+            }
+
+            // Rare chance to drop a nautilus shell
+            if (this.random.nextFloat() < 0.15f) {
+                this.spawnAtLocation(level, new ItemStack(net.minecraft.world.item.Items.NAUTILUS_SHELL));
+            }
         }
+    }
+
+    @Override
+    public boolean canBeLeashed() {
+        return isTamed();
+    }
+
+    @Override
+    public boolean isPersistenceRequired() {
+        return isTamed() || super.isPersistenceRequired();
     }
 
     // Inner Classes for AI
@@ -305,6 +526,11 @@ public class AuroralNautilusEntity extends Mob {
 
         @Override
         public void tick() {
+            // Don't use AI movement when being ridden
+            if (AuroralNautilusEntity.this.isVehicle()) {
+                return;
+            }
+
             if (AuroralNautilusEntity.this.horizontalCollision) {
                 AuroralNautilusEntity.this.setYRot(AuroralNautilusEntity.this.getYRot() + 180.0F);
                 this.speed = 0.05F;
@@ -366,7 +592,8 @@ public class AuroralNautilusEntity extends Mob {
 
         @Override
         public boolean canUse() {
-            return true;
+            // Don't wander when being ridden or when tamed and owner nearby
+            return !AuroralNautilusEntity.this.isVehicle();
         }
 
         @Override
