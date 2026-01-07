@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "axis=x,lit=false": {
+      "model": "auroral:block/hearthwood_log"
+    },
+    "axis=x,lit=true": {
+      "model": "auroral:block/hearthwood_log_lit"
+    },
+    "axis=z,lit=false": {
+      "model": "auroral:block/hearthwood_log",
+      "y": 90
+    },
+    "axis=z,lit=true": {
+      "model": "auroral:block/hearthwood_log_lit",
+      "y": 90
+    }
+  }
+}

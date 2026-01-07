@@ -1,0 +1,81 @@
+{
+  "aurora_ambient": {
+    "subtitle": "subtitles.auroral.aurora_ambient",
+    "sounds": [
+      {
+        "name": "auroral:aurora/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "aurora_music": {
+    "subtitle": "subtitles.auroral.aurora_music",
+    "sounds": [
+      {
+        "name": "auroral:aurora/ambient",
+        "stream": true
+      }
+    ]
+  },
+  "aurora_start": {
+    "subtitle": "subtitles.auroral.aurora_start",
+    "sounds": ["auroral:aurora/start"]
+  },
+  "aurora_end": {
+    "subtitle": "subtitles.auroral.aurora_end",
+    "sounds": ["auroral:aurora/end"]
+  },
+
+  "basin_infuse": {
+    "subtitle": "subtitles.auroral.basin_infuse",
+    "sounds": ["auroral:block/basin_infuse"]
+  },
+  "basin_fill": {
+    "subtitle": "subtitles.auroral.basin_fill",
+    "sounds": ["auroral:block/basin_fill"]
+  },
+
+  "star_shot_fire": {
+    "subtitle": "subtitles.auroral.star_shot_fire",
+    "sounds": ["auroral:item/star_shot_fire"]
+  },
+  "star_shot_impact": {
+    "subtitle": "subtitles.auroral.star_shot_impact",
+    "sounds": ["auroral:item/star_shot_impact"]
+  },
+
+  "nautilus_ambient": {
+    "subtitle": "subtitles.auroral.nautilus_ambient",
+    "sounds": [
+      "auroral:entity/nautilus/ambient1",
+      "auroral:entity/nautilus/ambient2"
+    ]
+  },
+  "nautilus_spawn": {
+    "subtitle": "subtitles.auroral.nautilus_spawn",
+    "sounds": ["auroral:entity/nautilus/spawn"]
+  },
+  "nautilus_death": {
+    "subtitle": "subtitles.auroral.nautilus_death",
+    "sounds": ["auroral:entity/nautilus/death"]
+  },
+
+  "hearthwood_log_crackle": {
+    "subtitle": "subtitles.auroral.hearthwood_log_crackle",
+    "sounds": [
+      {
+        "name": "auroral:block/hearthwood_log_crackle",
+        "stream": true
+      }
+    ]
+  },
+  "hearthwood_log_ignite": {
+    "subtitle": "subtitles.auroral.hearthwood_log_ignite",
+    "sounds": ["auroral:block/hearthwood_log_ignite"]
+  },
+
+  "skates_slide": {
+    "subtitle": "subtitles.auroral.skates_slide",
+    "sounds": ["auroral:item/skates_slide"]
+  }
+}

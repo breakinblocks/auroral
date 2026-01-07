@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "hanging=false": {
+      "model": "auroral:block/aurora_lantern"
+    },
+    "hanging=true": {
+      "model": "auroral:block/aurora_lantern_hanging"
+    }
+  }
+}

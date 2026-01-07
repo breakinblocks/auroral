@@ -1,0 +1,9 @@
+{
+  "asset_name": "shimmersteel",
+  "description": {
+    "color": "#8CBAD2",
+    "translate": "trim_material.auroral.shimmersteel"
+  },
+  "ingredient": "auroral:shimmersteel_ingot",
+  "item_model_index": 0.9
+}

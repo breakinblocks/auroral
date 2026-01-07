@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/template_farmland",
+  "textures": {
+    "dirt": "auroral:block/shimmer_soil_side",
+    "top": "auroral:block/shimmer_soil_top"
+  }
+}

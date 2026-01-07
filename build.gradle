@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.0.175'
 }
 
 version = "${minecraft_version}-${project.mod_version}"
@@ -29,11 +29,11 @@ runs {
 
     server {
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
+        argument '--nogui'
     }
 
-    data {
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    clientData {
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -41,14 +41,73 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 configurations {
     runtimeClasspath.extendsFrom localRuntime
-}
 
-dependencies {
-    implementation "net.neoforged:neoforge:${neoforge_full_version}"
+    // Force all configurations to use the same ASM version to avoid module conflicts
+    all {
+        resolutionStrategy {
+            force 'org.ow2.asm:asm:9.7'
+            force 'org.ow2.asm:asm-commons:9.7'
+            force 'org.ow2.asm:asm-tree:9.7'
+            force 'org.ow2.asm:asm-util:9.7'
+            force 'org.ow2.asm:asm-analysis:9.7'
+        }
+    }
 }
 
 repositories {
     mavenLocal()
+
+    maven {
+        name = "Jared's Maven"
+        url = "https://maven.blamejared.com/"
+        content {
+            includeGroup "mezz.jei"
+        }
+    }
+
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    maven {
+        name = "CurseMaven"
+        url = "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neoforge_full_version}"
+
+    // JEI - Just Enough Items (CurseMaven for 1.21.11 support)
+    compileOnly("curse.maven:jei-238222:7364663") {
+        exclude group: 'org.ow2.asm'
+    }
+    localRuntime("curse.maven:jei-238222:7364663") {
+        exclude group: 'org.ow2.asm'
+    }
+
+    // Jade - Block info tooltips
+    compileOnly("curse.maven:jade-324717:7313008") {
+        exclude group: 'org.ow2.asm'
+    }
+    localRuntime("curse.maven:jade-324717:7313008") {
+        exclude group: 'org.ow2.asm'
+    }
+
+    // GuideME - In-game guidebook
+    compileOnly("curse.maven:guideme-1173950:7366493") {
+        exclude group: 'org.ow2.asm'
+    }
+    localRuntime("curse.maven:guideme-1173950:7366493") {
+        exclude group: 'org.ow2.asm'
+    }
 }
 
 tasks.withType(ProcessResources).configureEach {

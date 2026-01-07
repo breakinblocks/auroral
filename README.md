@@ -1,12 +1,12 @@
-# Aurorabound
+# Auroral
 
 > *"The sky gives, the ice remembers."*
 
-A comprehensive winter expansion mod for Minecraft 1.21.1 (NeoForge) centered around celestial energy, mystical metallurgy, and specialized survival.
+A comprehensive winter expansion mod for Minecraft 1.21.11 (NeoForge 21.11.0-beta) centered around celestial energy, mystical metallurgy, and specialized survival.
 
 ## Overview
 
-Aurorabound transforms cold biomes from barren wastes into hubs of high-tier progression. By harnessing the Aurora event, players can forge Shimmersteel, brew sub-zero concoctions, and equip gear that makes them masters of the frost.
+Auroral transforms cold biomes from barren wastes into hubs of high-tier progression. By harnessing the Aurora event, players can forge Shimmersteel, brew sub-zero concoctions, and equip gear that makes them masters of the frost.
 
 ## Features
 
@@ -38,7 +38,7 @@ Tools slightly better than Iron with significantly higher enchantability:
 
 | Piece | Special Ability |
 |-------|-----------------|
-| **Goggles** | Applies Glowing to hostiles in 32-block radius (Head or Curio slot) |
+| **Goggles** | Applies Glowing to hostiles in 32-block radius |
 | **Tunic** | Automatically extinguishes fire |
 | **Leggings** | Speed buff on snow; Soul Speed on Soul Sand |
 | **Skates** | Speed I on ice/snow, zero friction, Frost Walker, Lava→Obsidian, fall immunity on ice/obsidian |
@@ -49,64 +49,36 @@ Bypass the Nether for your alchemical needs:
 - Uses **Snowballs** instead of Blaze Powder
 - Functions exactly like vanilla brewing
 
-### Holiday Features
+### Special Blocks
 
-- **Yule Log**: Burns for 7 days, grants frostbite immunity, villager discounts, and can catalyze an Aurora
+- **Hearthwood Log**: Burns for 7 days, grants frostbite immunity, villager discounts, and can catalyze an Aurora
 - **Shimmering Ice**: Glowing ice that never freezes and hydrates farmland
 - **Glow-Leeks**: Grown on Shimmering Ice; grants Night Vision and Glowing
-- **Frost-Glaze Blooms**: Translucent flowers that spawn during Auroras, drop Frozen Petals
+- **Aurora Blooms**: Translucent flowers that spawn during Auroras, drop Frozen Petals
 
 ## Requirements
 
-- Minecraft 1.21.1
-- NeoForge 21.1.55+
+- Minecraft 1.21.11
+- NeoForge 21.11.0-beta+
 - Java 21
 
 ## Optional Dependencies
 
-- [Curios API](https://www.curseforge.com/minecraft/mc-mods/curios) - Enables Goggles in accessory slot
+- [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) - Shows Aurora status and block information tooltips
+- [GuideMe](https://www.curseforge.com/minecraft/mc-mods/guideme) - In-game guidebook for Auroral mechanics
 
 ## Installation
 
-1. Install NeoForge 21.1.55+ for Minecraft 1.21.1
-2. Download the latest Aurorabound JAR
+1. Install NeoForge 21.11.0-beta+ for Minecraft 1.21.11
+2. Download the latest Auroral JAR
 3. Place in your `mods/` folder
 4. Launch Minecraft
-
-## Building from Source
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/aurorabound.git
-cd aurorabound
-
-# Build the mod
-./gradlew build
-
-# Output JAR will be in build/libs/
-```
-
-## Development Commands
-
-```bash
-# Run Minecraft client in dev environment
-./gradlew runClient
-
-# Run Minecraft server in dev environment
-./gradlew runServer
-
-# Generate data files (recipes, tags, etc.)
-./gradlew runData
-
-# Clean build artifacts
-./gradlew clean
-```
 
 ## Configuration
 
 Server and client configuration files are generated on first run:
-- `config/aurorabound-server.toml`
-- `config/aurorabound-client.toml`
+- `config/auroral-server.toml`
+- `config/auroral-client.toml`
 
 ### Key Server Options
 | Option | Default | Description |
@@ -118,13 +90,13 @@ Server and client configuration files are generated on first run:
 
 ## License
 
-All Rights Reserved
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
 ## Credits
 
 - **Author**: Saereth
-- **Minecraft Version**: 1.21.1
-- **Mod Loader**: NeoForge
+- **Minecraft Version**: 1.21.11
+- **Mod Loader**: NeoForge 21.11.0-beta
 
 ---
 

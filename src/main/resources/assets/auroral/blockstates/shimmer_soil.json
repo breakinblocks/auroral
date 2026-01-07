@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "moisture=0": { "model": "auroral:block/shimmer_soil" },
+    "moisture=1": { "model": "auroral:block/shimmer_soil_moist" },
+    "moisture=2": { "model": "auroral:block/shimmer_soil_moist" },
+    "moisture=3": { "model": "auroral:block/shimmer_soil_moist" },
+    "moisture=4": { "model": "auroral:block/shimmer_soil_moist" },
+    "moisture=5": { "model": "auroral:block/shimmer_soil_moist" },
+    "moisture=6": { "model": "auroral:block/shimmer_soil_moist" },
+    "moisture=7": { "model": "auroral:block/shimmer_soil_moist" }
+  }
+}
