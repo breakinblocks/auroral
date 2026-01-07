@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "auroral:glow_leek" },
+    { "item": "auroral:glow_leek" },
+    { "item": "auroral:glow_leek" },
+    { "item": "auroral:glow_leek" }
+  ],
+  "result": {
+    "id": "minecraft:glowstone_dust",
+    "count": 1
+  }
+}

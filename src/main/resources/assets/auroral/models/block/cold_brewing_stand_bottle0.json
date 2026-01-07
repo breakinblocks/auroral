@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/brewing_stand_bottle0",
+  "textures": {
+    "particle": "auroral:block/cold_brewing_stand_base"
+  }
+}

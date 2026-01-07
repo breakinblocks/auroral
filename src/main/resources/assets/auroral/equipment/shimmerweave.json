@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "auroral:shimmerweave"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "auroral:shimmerweave"
+      }
+    ]
+  }
+}

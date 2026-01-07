@@ -1,8 +1,8 @@
-# Aurorabound Implementation Plan
+# Auroral Implementation Plan
 
 > "The sky gives, the ice remembers."
 
-This document outlines the phased implementation approach for Aurorabound, a comprehensive winter expansion mod for Minecraft 1.21.1 (NeoForge).
+This document outlines the phased implementation approach for Auroral, a comprehensive winter expansion mod for Minecraft 1.21.1 (NeoForge).
 
 ---
 
@@ -18,11 +18,11 @@ This document outlines the phased implementation approach for Aurorabound, a com
 - [ ] Set up `ModEntities.java`
 - [ ] Set up `ModDataAttachments.java`
 - [ ] Set up `ModCreativeTabs.java`
-- [ ] Update `Aurorabound.java` to register all deferred registers
+- [ ] Update `Auroral.java` to register all deferred registers
 
 ### 1.2 Configuration System
-- [ ] Create `AuroraboundConfig.java` with server and client specs
-- [ ] Server config: `auroraChance`, `auroraRepairRate`, `executeThreshold`, `yuleLogBurnTime`, `glowingRadius`
+- [ ] Create `AuroralConfig.java` with server and client specs
+- [ ] Server config: `auroraChance`, `auroraRepairRate`, `executeThreshold`, `hearthwoodLogBurnTime`, `glowingRadius`
 - [ ] Client config: `showAuroraParticles`, `auroraIntensity`
 - [ ] Register configs in main mod class
 
@@ -37,7 +37,7 @@ This document outlines the phased implementation approach for Aurorabound, a com
   - Store aurora state in level attachment
   - Handle aurora end at dawn
 - [ ] Create `SyncAuroraPayload.java` for client sync
-- [ ] Set up `AuroraboundNetworking.java` to register payloads
+- [ ] Set up `AuroralNetworking.java` to register payloads
 - [ ] Sync aurora state to clients when it changes
 
 ### 1.4 Basic Materials (No Special Abilities Yet)
@@ -80,7 +80,7 @@ This document outlines the phased implementation approach for Aurorabound, a com
 ### 2.3 Basin Rendering (Client)
 - [ ] Create `GlacialBasinRenderer.java` BlockEntityRenderer
 - [ ] Render glowing liquid aura based on fill level
-- [ ] Register renderer in `AuroraboundClient.java`
+- [ ] Register renderer in `AuroralClient.java`
 
 **Verification**: Place basin in snowy biome, wait for aurora, infuse iron to get shimmersteel.
 
@@ -237,17 +237,17 @@ This document outlines the phased implementation approach for Aurorabound, a com
 
 **Goal**: Implement festive blocks and farming content.
 
-### 6.1 Yule Log Block
-- [ ] Create `YuleLogBlock.java`:
+### 6.1 Hearthwood Log Block
+- [ ] Create `HearthwoodLogBlock.java`:
   - Has LIT blockstate property
   - Emits light when lit (level 15)
   - Lit duration: 7 in-game days (168,000 ticks)
-- [ ] Create `YuleLogBlockEntity.java`:
+- [ ] Create `HearthwoodLogBlockEntity.java`:
   - Track remaining burn time
   - Tick down burn time
   - Store lit time in NBT
-- [ ] Create `YuleLogEventHandler.java`:
-  - **Frostbite immunity**: Players near lit Yule Log immune to powdered snow freeze
+- [ ] Create `HearthwoodLogEventHandler.java`:
+  - **Frostbite immunity**: Players near lit Hearthwood Log immune to powdered snow freeze
   - **Villager discounts**: Nearby villagers offer temporary trade discounts
   - **Aurora Catalyst**: Detect Aurora Shard thrown into flame (entity collision), force aurora start
 
@@ -277,7 +277,7 @@ This document outlines the phased implementation approach for Aurorabound, a com
   - On consume: apply Night Vision (3 min) + Glowing (3 min)
 - [ ] Loot table: Mature crop drops seeds + glow-leeks
 
-**Verification**: Test all holiday features - Yule Log effects, grow glow-leeks, verify Frost-Glaze spawning.
+**Verification**: Test all special block features - Hearthwood Log effects, grow glow-leeks, verify Aurora Bloom spawning.
 
 ---
 
@@ -291,7 +291,7 @@ This document outlines the phased implementation approach for Aurorabound, a com
   - Render animated ribbon of neon green and pink
   - Vary intensity based on config
 - [ ] Ensure minimum light level during aurora (modify ambient light)
-- [ ] Register renderer in `AuroraboundClient.java`
+- [ ] Register renderer in `AuroralClient.java`
 
 ### 7.2 Particles
 - [ ] Create `AuroraParticle.java` custom particle
@@ -305,7 +305,7 @@ This document outlines the phased implementation approach for Aurorabound, a com
 - [ ] Aurora ambient (optional looping sound in cold biomes during aurora)
 - [ ] Basin infusion sound
 - [ ] Star-Shot firing and impact sounds
-- [ ] Yule Log crackling
+- [ ] Hearthwood Log crackling
 
 ### 7.4 Model & Texture Pass
 - [ ] Finalize all block models
@@ -370,7 +370,7 @@ This document outlines the phased implementation approach for Aurorabound, a com
   - Leggings speed effects
   - Skates frost/lava walker + fall immunity
 - [ ] Test Cold Brewing Stand with all potion types
-- [ ] Test Yule Log all effects
+- [ ] Test Hearthwood Log all effects
 - [ ] Test farming (Glow-Leeks on Shimmering Ice)
 - [ ] Test aurora repair on equipment
 

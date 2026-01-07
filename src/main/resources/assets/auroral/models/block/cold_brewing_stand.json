@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/brewing_stand",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "base": "auroral:block/cold_brewing_stand_base",
+    "stand": "auroral:block/cold_brewing_stand"
+  }
+}

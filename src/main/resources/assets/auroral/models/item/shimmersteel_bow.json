@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:item/bow",
+  "textures": {
+    "layer0": "auroral:item/shimmersteel_bow"
+  },
+  "overrides": [
+    {
+      "predicate": {"minecraft:pulling": 1},
+      "model": "auroral:item/shimmersteel_bow_pulling_0"
+    },
+    {
+      "predicate": {"minecraft:pulling": 1, "minecraft:pull": 0.65},
+      "model": "auroral:item/shimmersteel_bow_pulling_1"
+    },
+    {
+      "predicate": {"minecraft:pulling": 1, "minecraft:pull": 0.9},
+      "model": "auroral:item/shimmersteel_bow_pulling_2"
+    }
+  ]
+}

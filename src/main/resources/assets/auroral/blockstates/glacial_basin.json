@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "aura_level=0": {
+      "model": "auroral:block/glacial_basin"
+    },
+    "aura_level=1": {
+      "model": "auroral:block/glacial_basin_level1"
+    },
+    "aura_level=2": {
+      "model": "auroral:block/glacial_basin_level2"
+    },
+    "aura_level=3": {
+      "model": "auroral:block/glacial_basin_level3"
+    }
+  }
+}

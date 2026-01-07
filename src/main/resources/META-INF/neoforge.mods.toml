@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[${neoforge_loader_version},)"
-license = "All Rights Reserved"
+license = "MIT"
 
 [[mods]]
 modId = "${mod_id}"
@@ -8,17 +8,17 @@ version = "${version}"
 displayName = "${mod_name}"
 authors = "${mod_author}"
 description = '''
-Aurorabound - A Minecraft mod.
+Auroral - A winter expansion mod centered around celestial energy and cozy vibes.
 '''
 
-[[dependencies.aurorabound]]
+[[dependencies.auroral]]
 modId = "neoforge"
 type = "required"
 versionRange = "${neo_version_range}"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.aurorabound]]
+[[dependencies.auroral]]
 modId = "minecraft"
 type = "required"
 versionRange = "[${minecraft_version},)"

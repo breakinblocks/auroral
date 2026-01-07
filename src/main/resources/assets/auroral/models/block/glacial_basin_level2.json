@@ -1,0 +1,11 @@
+{
+  "parent": "minecraft:block/template_cauldron_level2",
+  "textures": {
+    "bottom": "auroral:block/glacial_basin_bottom",
+    "content": "auroral:block/liquid_aura",
+    "inside": "auroral:block/glacial_basin_inner",
+    "particle": "auroral:block/glacial_basin_side",
+    "side": "auroral:block/glacial_basin_side",
+    "top": "auroral:block/glacial_basin_top"
+  }
+}

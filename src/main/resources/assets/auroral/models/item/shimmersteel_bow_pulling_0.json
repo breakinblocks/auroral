@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/bow_pulling",
+  "textures": {
+    "layer0": "auroral:item/shimmersteel_bow_pulling_0"
+  }
+}

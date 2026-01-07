@@ -1,0 +1,7 @@
+{
+  "parent": "auroral:block/template_hearthwood_log",
+  "textures": {
+    "fire": "auroral:block/hearthwood_fire",
+    "lit_log": "auroral:block/hearthwood_log_lit"
+  }
+}

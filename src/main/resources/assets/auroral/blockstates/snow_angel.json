@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "facing=north,permanent=false": {
+      "model": "auroral:block/snow_angel",
+      "y": 180
+    },
+    "facing=north,permanent=true": {
+      "model": "auroral:block/snow_angel",
+      "y": 180
+    },
+    "facing=east,permanent=false": {
+      "model": "auroral:block/snow_angel",
+      "y": 270
+    },
+    "facing=east,permanent=true": {
+      "model": "auroral:block/snow_angel",
+      "y": 270
+    },
+    "facing=south,permanent=false": {
+      "model": "auroral:block/snow_angel",
+      "y": 0
+    },
+    "facing=south,permanent=true": {
+      "model": "auroral:block/snow_angel",
+      "y": 0
+    },
+    "facing=west,permanent=false": {
+      "model": "auroral:block/snow_angel",
+      "y": 90
+    },
+    "facing=west,permanent=true": {
+      "model": "auroral:block/snow_angel",
+      "y": 90
+    }
+  }
+}
