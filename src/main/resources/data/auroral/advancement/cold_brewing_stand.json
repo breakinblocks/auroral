@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:cold_brewing_stand"
+    },
+    "title": {
+      "translate": "advancement.auroral.cold_brewing_stand.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.cold_brewing_stand.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_cold_brewing_stand": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:cold_brewing_stand"
+          }
+        ]
+      }
+    }
+  }
+}

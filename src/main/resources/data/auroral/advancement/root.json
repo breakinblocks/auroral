@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "id": "auroral:aurora_shard"
+    },
+    "title": {
+      "translate": "advancement.auroral.root.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.root.description"
+    },
+    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
+    "show_toast": false,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "in_cold_biome": {
+      "trigger": "minecraft:location",
+      "conditions": {
+        "player": {
+          "location": {
+            "biomes": "#minecraft:is_overworld"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:hearthwood_log"
+    },
+    "title": {
+      "translate": "advancement.auroral.hearthwood_log.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.hearthwood_log.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_hearthwood_log": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:hearthwood_log"
+          }
+        ]
+      }
+    }
+  }
+}

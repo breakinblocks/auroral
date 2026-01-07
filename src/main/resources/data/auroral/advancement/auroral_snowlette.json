@@ -1,0 +1,26 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:auroral_snowlette_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.auroral.auroral_snowlette.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.auroral_snowlette.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "tamed_snowlette": {
+      "trigger": "minecraft:tame_animal",
+      "conditions": {
+        "entity": {
+          "type": "auroral:auroral_snowlette"
+        }
+      }
+    }
+  }
+}

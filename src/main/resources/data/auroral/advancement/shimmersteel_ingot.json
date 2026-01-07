@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:glacial_basin",
+  "display": {
+    "icon": {
+      "id": "auroral:shimmersteel_ingot"
+    },
+    "title": {
+      "translate": "advancement.auroral.shimmersteel_ingot.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.shimmersteel_ingot.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_shimmersteel_ingot": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_ingot"
+          }
+        ]
+      }
+    }
+  }
+}

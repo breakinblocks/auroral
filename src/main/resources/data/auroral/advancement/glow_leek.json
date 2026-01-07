@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:glow_leek"
+    },
+    "title": {
+      "translate": "advancement.auroral.glow_leek.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.glow_leek.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_glow_leek": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:glow_leek"
+          }
+        ]
+      }
+    }
+  }
+}

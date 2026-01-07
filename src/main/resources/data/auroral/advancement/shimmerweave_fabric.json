@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:glacial_basin",
+  "display": {
+    "icon": {
+      "id": "auroral:shimmerweave_fabric"
+    },
+    "title": {
+      "translate": "advancement.auroral.shimmerweave_fabric.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.shimmerweave_fabric.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_shimmerweave_fabric": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmerweave_fabric"
+          }
+        ]
+      }
+    }
+  }
+}

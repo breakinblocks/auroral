@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:glacial_basin"
+    },
+    "title": {
+      "translate": "advancement.auroral.glacial_basin.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.glacial_basin.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_glacial_basin": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:glacial_basin"
+          }
+        ]
+      }
+    }
+  }
+}

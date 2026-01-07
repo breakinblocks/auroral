@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:glacial_basin",
+  "display": {
+    "icon": {
+      "id": "auroral:aurora_lantern"
+    },
+    "title": {
+      "translate": "advancement.auroral.aurora_lantern.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.aurora_lantern.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_aurora_lantern": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:aurora_lantern"
+          }
+        ]
+      }
+    }
+  }
+}

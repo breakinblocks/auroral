@@ -129,6 +129,14 @@ public class ModLanguageProvider extends LanguageProvider {
         add("advancement.auroral.glow_leek.description", "Harvest a Glow-Leek");
         add("advancement.auroral.hearthwood_log.title", "Hearth and Home");
         add("advancement.auroral.hearthwood_log.description", "Obtain a Hearthwood Log");
+        add("advancement.auroral.auroral_snowlette.title", "Frozen Companion");
+        add("advancement.auroral.auroral_snowlette.description", "Tame an Auroral Snowlette");
+        add("advancement.auroral.ride_nautilus.title", "Sky Sailor");
+        add("advancement.auroral.ride_nautilus.description", "Ride an Auroral Nautilus");
+        add("advancement.auroral.aurora_lantern.title", "Guiding Light");
+        add("advancement.auroral.aurora_lantern.description", "Craft an Aurora Lantern");
+        add("advancement.auroral.warden_slayer.title", "Light in the Darkness");
+        add("advancement.auroral.warden_slayer.description", "Slay a Warden while holding an Aurora Lantern");
 
         // Jade integration
         add("config.jade.plugin_auroral.glacial_basin", "Glacial Basin");

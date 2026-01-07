@@ -1,0 +1,65 @@
+{
+  "parent": "auroral:aurora_lantern",
+  "display": {
+    "icon": {
+      "id": "auroral:aurora_lantern"
+    },
+    "title": {
+      "translate": "advancement.auroral.warden_slayer.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.warden_slayer.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "kill_warden_with_lantern_mainhand": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:warden"
+        },
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "equipment": {
+                "mainhand": {
+                  "items": "auroral:aurora_lantern"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    "kill_warden_with_lantern_offhand": {
+      "trigger": "minecraft:player_killed_entity",
+      "conditions": {
+        "entity": {
+          "type": "minecraft:warden"
+        },
+        "player": [
+          {
+            "condition": "minecraft:entity_properties",
+            "entity": "this",
+            "predicate": {
+              "equipment": {
+                "offhand": {
+                  "items": "auroral:aurora_lantern"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    ["kill_warden_with_lantern_mainhand", "kill_warden_with_lantern_offhand"]
+  ]
+}

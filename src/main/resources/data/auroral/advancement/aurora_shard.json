@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:aurora_shard"
+    },
+    "title": {
+      "translate": "advancement.auroral.aurora_shard.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.aurora_shard.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_aurora_shard": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:aurora_shard"
+          }
+        ]
+      }
+    }
+  }
+}

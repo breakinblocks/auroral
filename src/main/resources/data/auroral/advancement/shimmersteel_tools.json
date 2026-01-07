@@ -1,0 +1,87 @@
+{
+  "parent": "auroral:shimmersteel_ingot",
+  "display": {
+    "icon": {
+      "id": "auroral:shimmersteel_pickaxe"
+    },
+    "title": {
+      "translate": "advancement.auroral.shimmersteel_tools.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.shimmersteel_tools.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_pickaxe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_pickaxe"
+          }
+        ]
+      }
+    },
+    "has_axe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_axe"
+          }
+        ]
+      }
+    },
+    "has_shovel": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_shovel"
+          }
+        ]
+      }
+    },
+    "has_hoe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_hoe"
+          }
+        ]
+      }
+    },
+    "has_sword": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_sword"
+          }
+        ]
+      }
+    },
+    "has_bow": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmersteel_bow"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    ["has_pickaxe"],
+    ["has_axe"],
+    ["has_shovel"],
+    ["has_hoe"],
+    ["has_sword"],
+    ["has_bow"]
+  ]
+}

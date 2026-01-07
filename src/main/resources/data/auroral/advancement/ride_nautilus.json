@@ -1,0 +1,28 @@
+{
+  "parent": "auroral:root",
+  "display": {
+    "icon": {
+      "id": "auroral:auroral_nautilus_spawn_egg"
+    },
+    "title": {
+      "translate": "advancement.auroral.ride_nautilus.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.ride_nautilus.description"
+    },
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "ride_nautilus": {
+      "trigger": "minecraft:started_riding",
+      "conditions": {
+        "player": {
+          "vehicle": {
+            "type": "auroral:auroral_nautilus"
+          }
+        }
+      }
+    }
+  }
+}

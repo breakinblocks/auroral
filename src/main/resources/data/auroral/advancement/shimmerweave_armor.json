@@ -1,0 +1,65 @@
+{
+  "parent": "auroral:shimmerweave_fabric",
+  "display": {
+    "icon": {
+      "id": "auroral:shimmerweave_tunic"
+    },
+    "title": {
+      "translate": "advancement.auroral.shimmerweave_armor.title"
+    },
+    "description": {
+      "translate": "advancement.auroral.shimmerweave_armor.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "has_goggles": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmerweave_goggles"
+          }
+        ]
+      }
+    },
+    "has_tunic": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmerweave_tunic"
+          }
+        ]
+      }
+    },
+    "has_leggings": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmerweave_leggings"
+          }
+        ]
+      }
+    },
+    "has_skates": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmerweave_skates"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    ["has_goggles"],
+    ["has_tunic"],
+    ["has_leggings"],
+    ["has_skates"]
+  ]
+}
