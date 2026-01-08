@@ -22,6 +22,11 @@ public class ModTags {
          */
         public static final TagKey<Item> SHIMMERWEAVE_REPAIR = tag("shimmerweave_repair");
 
+        /**
+         * Tag for items that self-repair during aurora events (Shimmersteel tools and Shimmerweave armor).
+         */
+        public static final TagKey<Item> AURORA_SELF_REPAIR = tag("aurora_self_repair");
+
         private static TagKey<Item> tag(String name) {
             return TagKey.create(Registries.ITEM, Auroral.id(name));
         }

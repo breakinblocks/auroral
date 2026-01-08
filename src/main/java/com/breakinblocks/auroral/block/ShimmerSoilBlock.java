@@ -3,6 +3,7 @@ package com.breakinblocks.auroral.block;
 import com.breakinblocks.auroral.util.AuroraHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -29,8 +30,19 @@ public class ShimmerSoilBlock extends FarmBlock {
 
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
-        // Call parent for moisture handling
-        super.randomTick(state, level, pos, random);
+        // Handle moisture ourselves - check for water OR shimmering ice
+        int currentMoisture = state.getValue(MOISTURE);
+        if (isNearWaterOrShimmeringIce(level, pos)) {
+            if (currentMoisture < 7) {
+                level.setBlock(pos, state.setValue(MOISTURE, 7), 2);
+            }
+        } else if (currentMoisture > 0) {
+            level.setBlock(pos, state.setValue(MOISTURE, currentMoisture - 1), 2);
+        } else if (!hasCrops(level, pos)) {
+            // Only turn to dirt if no crops and completely dry
+            // But shimmer soil is magical - it stays as shimmer soil longer
+            // We skip the turnToDirt call that vanilla would do
+        }
 
         // Check for crop above
         BlockPos cropPos = pos.above();
@@ -75,12 +87,26 @@ public class ShimmerSoilBlock extends FarmBlock {
         return 0;
     }
 
-    /**
-     * Check if it's nighttime (between 13000 and 23000 day ticks).
-     */
     private boolean isNightTime(Level level) {
         long dayTime = level.getDayTime() % 24000;
         return dayTime >= 13000 && dayTime < 23000;
+    }
+
+    private boolean isNearWaterOrShimmeringIce(LevelReader level, BlockPos pos) {
+        for (BlockPos checkPos : BlockPos.betweenClosed(pos.offset(-4, 0, -4), pos.offset(4, 1, 4))) {
+            if (level.getFluidState(checkPos).is(FluidTags.WATER)) {
+                return true;
+            }
+            if (level.getBlockState(checkPos).getBlock() instanceof ShimmeringIceBlock) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean hasCrops(LevelReader level, BlockPos pos) {
+        BlockState above = level.getBlockState(pos.above());
+        return above.getBlock() instanceof CropBlock || above.getBlock() instanceof BonemealableBlock;
     }
 
     @Override

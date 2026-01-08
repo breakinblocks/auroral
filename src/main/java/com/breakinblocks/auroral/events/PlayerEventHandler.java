@@ -1,11 +1,16 @@
 package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModTags;
+import com.breakinblocks.auroral.util.AuroraHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
@@ -51,6 +56,7 @@ public class PlayerEventHandler {
 
     /**
      * Aurora Lantern grants darkness immunity when held in either hand.
+     * Also handles aurora self-repair for Shimmersteel/Shimmerweave gear.
      */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -65,6 +71,57 @@ public class PlayerEventHandler {
 
         if (holdingLantern && player.hasEffect(MobEffects.DARKNESS)) {
             player.removeEffect(MobEffects.DARKNESS);
+        }
+
+        // Aurora self-repair - once per second during aurora
+        if (player.tickCount % 20 == 0 && AuroraHelper.isExperiencingAurora(player.level(), player.blockPosition())) {
+            repairAuroraGear(player);
+        }
+    }
+
+    /**
+     * Repairs Shimmersteel tools and Shimmerweave armor during aurora events.
+     */
+    private static void repairAuroraGear(Player player) {
+        int repairAmount = AuroralConfig.SERVER.auroraRepairRate.get();
+        if (repairAmount <= 0) {
+            return;
+        }
+
+        // Repair equipped armor
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            if (slot.getType() == EquipmentSlot.Type.HUMANOID_ARMOR) {
+                ItemStack stack = player.getItemBySlot(slot);
+                tryRepairItem(stack, repairAmount);
+            }
+        }
+
+        // Repair held items (main hand and off hand)
+        tryRepairItem(player.getMainHandItem(), repairAmount);
+        tryRepairItem(player.getOffhandItem(), repairAmount);
+
+        // Repair items in hotbar
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            tryRepairItem(stack, repairAmount);
+        }
+    }
+
+    /**
+     * Attempts to repair an item if it's tagged for aurora self-repair and is damaged.
+     */
+    private static void tryRepairItem(ItemStack stack, int repairAmount) {
+        if (stack.isEmpty() || !stack.isDamageableItem()) {
+            return;
+        }
+
+        if (!stack.is(ModTags.Items.AURORA_SELF_REPAIR)) {
+            return;
+        }
+
+        int damage = stack.getDamageValue();
+        if (damage > 0) {
+            stack.setDamageValue(Math.max(0, damage - repairAmount));
         }
     }
 }
