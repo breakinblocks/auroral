@@ -183,11 +183,6 @@ public class SnowFootprintManager {
         footprints.add(footprint);
         nextIsLeftFoot = !nextIsLeftFoot;
 
-        // Debug log
-        if (footprints.size() <= 5) {
-            Auroral.LOGGER.debug("Created footprint at {} (total: {})", footPos, footprints.size());
-        }
-
         // Remove oldest footprints if over limit
         while (footprints.size() > MAX_FOOTPRINTS) {
             footprints.remove(0);

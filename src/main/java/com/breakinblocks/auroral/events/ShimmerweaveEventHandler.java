@@ -1,6 +1,7 @@
 package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.item.ShimmerweaveGogglesItem;
 import com.breakinblocks.auroral.item.ShimmerweaveLeggingsItem;
 import com.breakinblocks.auroral.item.ShimmerweaveSkatesItem;
@@ -20,7 +21,9 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -35,58 +38,30 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.List;
 
-/**
- * Event handler for Shimmerweave armor special abilities.
- */
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class ShimmerweaveEventHandler {
 
-    /**
-     * Attribute modifier ID for Shimmerweave Leggings snow speed boost.
-     * Uses movement speed attribute so it stacks with Speed effect.
-     */
     private static final Identifier LEGGINGS_SNOW_SPEED_ID = Auroral.id("shimmerweave_leggings_snow_speed");
-
-    /**
-     * Attribute modifier ID for Shimmerweave Leggings soul speed boost.
-     */
     private static final Identifier LEGGINGS_SOUL_SPEED_ID = Auroral.id("shimmerweave_leggings_soul_speed");
-
-    /**
-     * Attribute modifier ID for Shimmerweave Skates ice/snow speed boost.
-     */
-    private static final Identifier SKATES_SPEED_ID = Auroral.id("shimmerweave_skates_speed");
-
-    /**
-     * Attribute modifier ID for Shimmerweave Skates packed ice speed boost.
-     * This is a separate, larger boost specifically for packed ice and blue ice.
-     */
+    private static final Identifier SKATES_ICE_SPEED_ID = Auroral.id("shimmerweave_skates_ice_speed");
     private static final Identifier SKATES_PACKED_ICE_SPEED_ID = Auroral.id("shimmerweave_skates_packed_ice_speed");
 
-    /**
-     * Speed boost multiplier for snow (20% faster).
-     */
-    private static final double SNOW_SPEED_BOOST = 0.2;
+    private static double getSnowSpeedBoost() {
+        return AuroralConfig.SERVER.leggingsSnowSpeedBoost.get();
+    }
 
-    /**
-     * Speed boost multiplier for soul sand (30% faster, similar to Soul Speed III).
-     */
-    private static final double SOUL_SPEED_BOOST = 0.3;
+    private static double getSoulSpeedBoost() {
+        return AuroralConfig.SERVER.leggingsSoulSpeedBoost.get();
+    }
 
-    /**
-     * Speed boost multiplier for ice/snow with skates (25% faster).
-     */
-    private static final double SKATES_SPEED_BOOST = 0.25;
+    private static double getSkatesSpeedBoost() {
+        return AuroralConfig.SERVER.skatesIceSpeedBoost.get();
+    }
 
-    /**
-     * Speed boost multiplier for packed/blue ice with skates (50% faster).
-     * Packed ice is smoother and denser, allowing for faster skating.
-     */
-    private static final double SKATES_PACKED_ICE_SPEED_BOOST = 0.5;
+    private static double getSkatesPackedIceSpeedBoost() {
+        return AuroralConfig.SERVER.skatesPackedIceSpeedBoost.get();
+    }
 
-    /**
-     * Handles all Shimmerweave armor effects on player tick.
-     */
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         Player player = event.getEntity();
@@ -103,30 +78,24 @@ public class ShimmerweaveEventHandler {
         handleSkates(player, (ServerLevel) level);
     }
 
-    /**
-     * Shimmerweave Goggles: Apply Glowing to hostile mobs within radius.
-     */
     private static void handleGoggles(Player player, ServerLevel level) {
         ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
         if (!(helmet.getItem() instanceof ShimmerweaveGogglesItem)) {
             return;
         }
 
-        // Only apply effect every second (20 ticks) to reduce performance impact
         if (player.tickCount % 20 != 0) {
             return;
         }
 
-        double radius = ShimmerweaveGogglesItem.GLOWING_RADIUS;
+        double radius = AuroralConfig.SERVER.gogglesGlowingRadius.get();
         AABB searchBox = player.getBoundingBox().inflate(radius);
 
-        // Find all hostile mobs in range
         List<LivingEntity> hostiles = level.getEntitiesOfClass(LivingEntity.class, searchBox, entity -> {
             if (entity == player) return false;
             return entity.getType().getCategory() == MobCategory.MONSTER;
         });
 
-        // Apply glowing effect to each hostile
         try {
             ResourceKey<MobEffect> glowingKey = ResourceKey.create(
                 Registries.MOB_EFFECT,
@@ -147,31 +116,21 @@ public class ShimmerweaveEventHandler {
                 ));
             }
         } catch (Exception e) {
-            // Effect not found, skip
         }
     }
 
-    /**
-     * Shimmerweave Tunic: Auto-extinguish fire.
-     */
     private static void handleTunic(Player player) {
         ItemStack chestplate = player.getItemBySlot(EquipmentSlot.CHEST);
         if (!(chestplate.getItem() instanceof ShimmerweaveTunicItem)) {
             return;
         }
 
-        // Extinguish fire if player is on fire
         if (player.isOnFire()) {
             player.clearFire();
-            // Small damage to armor for balance
             chestplate.hurtAndBreak(1, player, EquipmentSlot.CHEST);
         }
     }
 
-    /**
-     * Shimmerweave Leggings: Speed boost on snow, Soul Speed on soul sand.
-     * Uses attribute modifiers so it stacks with Speed potions.
-     */
     private static void handleLeggings(Player player) {
         ItemStack leggings = player.getItemBySlot(EquipmentSlot.LEGS);
         boolean hasLeggings = leggings.getItem() instanceof ShimmerweaveLeggingsItem;
@@ -179,51 +138,45 @@ public class ShimmerweaveEventHandler {
         AttributeInstance speedAttribute = player.getAttribute(Attributes.MOVEMENT_SPEED);
         if (speedAttribute == null) return;
 
-        BlockPos belowPos = player.blockPosition().below();
+        BlockPos playerPos = player.blockPosition();
+        BlockPos belowPos = playerPos.below();
+        BlockState playerState = player.level().getBlockState(playerPos);
         BlockState belowState = player.level().getBlockState(belowPos);
 
-        // Check if on snow
-        boolean onSnow = hasLeggings && (belowState.is(BlockTags.SNOW) ||
-            belowState.is(Blocks.SNOW_BLOCK) || belowState.is(Blocks.POWDER_SNOW));
+        boolean onSnow = hasLeggings && (
+            playerState.is(BlockTags.SNOW) || playerState.is(Blocks.POWDER_SNOW) ||
+            belowState.is(BlockTags.SNOW) || belowState.is(Blocks.SNOW_BLOCK) || belowState.is(Blocks.POWDER_SNOW));
 
-        // Check if on soul sand/soil
         boolean onSoul = hasLeggings && (belowState.is(Blocks.SOUL_SAND) || belowState.is(Blocks.SOUL_SOIL));
 
-        // Handle snow speed modifier
         AttributeModifier snowModifier = speedAttribute.getModifier(LEGGINGS_SNOW_SPEED_ID);
         if (onSnow && snowModifier == null) {
             speedAttribute.addTransientModifier(new AttributeModifier(
                 LEGGINGS_SNOW_SPEED_ID,
-                SNOW_SPEED_BOOST,
+                getSnowSpeedBoost(),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             ));
         } else if (!onSnow && snowModifier != null) {
             speedAttribute.removeModifier(LEGGINGS_SNOW_SPEED_ID);
         }
 
-        // Handle soul speed modifier
         AttributeModifier soulModifier = speedAttribute.getModifier(LEGGINGS_SOUL_SPEED_ID);
         if (onSoul && soulModifier == null) {
             speedAttribute.addTransientModifier(new AttributeModifier(
                 LEGGINGS_SOUL_SPEED_ID,
-                SOUL_SPEED_BOOST,
+                getSoulSpeedBoost(),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             ));
         } else if (!onSoul && soulModifier != null) {
             speedAttribute.removeModifier(LEGGINGS_SOUL_SPEED_ID);
         }
 
-        // Remove modifiers if not wearing leggings
         if (!hasLeggings) {
             speedAttribute.removeModifier(LEGGINGS_SNOW_SPEED_ID);
             speedAttribute.removeModifier(LEGGINGS_SOUL_SPEED_ID);
         }
     }
 
-    /**
-     * Shimmerweave Skates: Speed boost on ice/snow, extra boost on packed ice, Frost Walker, Lava to Obsidian.
-     * Uses attribute modifiers so it stacks with Speed potions.
-     */
     private static void handleSkates(Player player, ServerLevel level) {
         ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
         boolean hasSkates = boots.getItem() instanceof ShimmerweaveSkatesItem;
@@ -235,51 +188,42 @@ public class ShimmerweaveEventHandler {
         BlockPos belowPos = playerPos.below();
         BlockState belowState = level.getBlockState(belowPos);
 
-        // Check if on packed ice or blue ice (premium skating surface)
         boolean onPackedIce = hasSkates && (belowState.is(Blocks.PACKED_ICE) || belowState.is(Blocks.BLUE_ICE));
+        boolean onRegularIce = hasSkates && !onPackedIce && belowState.is(BlockTags.ICE);
 
-        // Check if on regular ice or snow (but not packed ice)
-        boolean onIceOrSnow = hasSkates && !onPackedIce && (belowState.is(BlockTags.ICE) || belowState.is(BlockTags.SNOW) ||
-            belowState.is(Blocks.SNOW_BLOCK) || belowState.is(Blocks.POWDER_SNOW));
-
-        // Handle packed ice speed modifier (higher boost)
         AttributeModifier packedIceModifier = speedAttribute.getModifier(SKATES_PACKED_ICE_SPEED_ID);
         if (onPackedIce && packedIceModifier == null) {
             speedAttribute.addTransientModifier(new AttributeModifier(
                 SKATES_PACKED_ICE_SPEED_ID,
-                SKATES_PACKED_ICE_SPEED_BOOST,
+                getSkatesPackedIceSpeedBoost(),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             ));
         } else if (!onPackedIce && packedIceModifier != null) {
             speedAttribute.removeModifier(SKATES_PACKED_ICE_SPEED_ID);
         }
 
-        // Handle regular skates speed modifier
-        AttributeModifier skatesModifier = speedAttribute.getModifier(SKATES_SPEED_ID);
-        if (onIceOrSnow && skatesModifier == null) {
+        AttributeModifier iceModifier = speedAttribute.getModifier(SKATES_ICE_SPEED_ID);
+        if (onRegularIce && iceModifier == null) {
             speedAttribute.addTransientModifier(new AttributeModifier(
-                SKATES_SPEED_ID,
-                SKATES_SPEED_BOOST,
+                SKATES_ICE_SPEED_ID,
+                getSkatesSpeedBoost(),
                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL
             ));
-        } else if (!onIceOrSnow && skatesModifier != null) {
-            speedAttribute.removeModifier(SKATES_SPEED_ID);
+        } else if (!onRegularIce && iceModifier != null) {
+            speedAttribute.removeModifier(SKATES_ICE_SPEED_ID);
         }
 
-        // Remove modifiers if not wearing skates
         if (!hasSkates) {
-            speedAttribute.removeModifier(SKATES_SPEED_ID);
+            speedAttribute.removeModifier(SKATES_ICE_SPEED_ID);
             speedAttribute.removeModifier(SKATES_PACKED_ICE_SPEED_ID);
             return;
         }
 
-        // Only process frost walker effect when player is moving and on ground
         if (!player.onGround() || (player.getDeltaMovement().x == 0 && player.getDeltaMovement().z == 0)) {
             return;
         }
 
-        // Frost Walker + Lava Walker effect
-        int radius = ShimmerweaveSkatesItem.FROST_WALKER_RADIUS;
+        int radius = AuroralConfig.SERVER.skatesFrostWalkerRadius.get();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int x = -radius; x <= radius; x++) {
@@ -289,7 +233,6 @@ public class ShimmerweaveEventHandler {
                 if (mutablePos.closerThan(playerPos, radius + 0.5)) {
                     BlockState state = level.getBlockState(mutablePos);
 
-                    // Freeze water to frosted ice
                     if (state.getBlock() == Blocks.WATER && state.getValue(LiquidBlock.LEVEL) == 0) {
                         BlockState aboveState = level.getBlockState(mutablePos.above());
                         if (aboveState.isAir()) {
@@ -297,10 +240,8 @@ public class ShimmerweaveEventHandler {
                         }
                     }
 
-                    // Turn lava to obsidian (extended Frost Walker)
                     if (state.getFluidState().is(Fluids.LAVA) && state.getFluidState().isSource()) {
                         level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
-                        // Damage boots for turning lava
                         boots.hurtAndBreak(2, player, EquipmentSlot.FEET);
                     }
                 }
@@ -308,9 +249,6 @@ public class ShimmerweaveEventHandler {
         }
     }
 
-    /**
-     * Shimmerweave Skates: Fall damage immunity on ice or obsidian.
-     */
     @SubscribeEvent
     public static void onLivingFall(LivingFallEvent event) {
         if (!(event.getEntity() instanceof Player player)) {
@@ -322,7 +260,6 @@ public class ShimmerweaveEventHandler {
             return;
         }
 
-        // Check if landing on ice or obsidian
         BlockPos landingPos = player.blockPosition().below();
         BlockState landingState = player.level().getBlockState(landingPos);
 

@@ -4,7 +4,6 @@ import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.client.model.AuroralNautilusModel;
 import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.Identifier;

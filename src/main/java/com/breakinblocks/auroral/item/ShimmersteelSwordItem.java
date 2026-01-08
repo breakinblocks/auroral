@@ -1,5 +1,6 @@
 package com.breakinblocks.auroral.item;
 
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.registry.ModEffects;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -23,7 +24,8 @@ import net.minecraft.world.level.block.Blocks;
 public class ShimmersteelSwordItem extends Item {
 
     /**
-     * HP threshold for execute (15% of max HP).
+     * Default HP threshold for execute (15% of max HP).
+     * Actual threshold is configurable via server config.
      */
     public static final float EXECUTE_THRESHOLD = 0.15f;
 
@@ -46,10 +48,12 @@ public class ShimmersteelSwordItem extends Item {
 
     /**
      * Checks if a target should be executed (HP below threshold).
+     * Uses the configurable execute threshold from server config.
      */
     public static boolean shouldExecute(LivingEntity target) {
         float healthPercent = target.getHealth() / target.getMaxHealth();
-        return healthPercent < EXECUTE_THRESHOLD && healthPercent > 0;
+        float threshold = AuroralConfig.SERVER.executeThreshold.get().floatValue();
+        return healthPercent < threshold && healthPercent > 0;
     }
 
     /**

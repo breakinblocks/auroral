@@ -32,7 +32,7 @@ public class ShimmersteelEventHandler {
 
     /**
      * Handles the execute mechanic for Shimmersteel Sword.
-     * If a target is below 15% HP and hit with the sword, they die instantly.
+     * If a target would be at or below the execute threshold after taking damage, they die instantly.
      */
     @SubscribeEvent
     public static void onLivingDamage(LivingDamageEvent.Pre event) {
@@ -42,11 +42,27 @@ public class ShimmersteelEventHandler {
         if (source.getEntity() instanceof LivingEntity attacker) {
             ItemStack weapon = attacker.getMainHandItem();
 
-            if (weapon.getItem() instanceof ShimmersteelSwordItem swordItem) {
+            if (weapon.getItem() instanceof ShimmersteelSwordItem) {
                 LivingEntity target = event.getEntity();
 
-                // Check if target should be executed
-                if (ShimmersteelSwordItem.shouldExecute(target)) {
+                // Don't execute the attacker themselves
+                if (target == attacker) {
+                    return;
+                }
+
+                // Calculate health AFTER this damage would be applied
+                float currentHealth = target.getHealth();
+                float damageAmount = event.getNewDamage();
+                float healthAfterDamage = currentHealth - damageAmount;
+                float maxHealth = target.getMaxHealth();
+                float executeThreshold = com.breakinblocks.auroral.config.AuroralConfig.SERVER.executeThreshold.get().floatValue();
+                float thresholdHealth = maxHealth * executeThreshold;
+
+                // Execute if: currently below threshold OR would drop to/below threshold from this hit
+                boolean alreadyBelowThreshold = currentHealth < thresholdHealth && currentHealth > 0;
+                boolean wouldDropBelowThreshold = healthAfterDamage <= thresholdHealth && currentHealth > 0;
+
+                if (alreadyBelowThreshold || wouldDropBelowThreshold) {
                     // Set damage to a very high value to ensure death
                     event.setNewDamage(Float.MAX_VALUE);
 

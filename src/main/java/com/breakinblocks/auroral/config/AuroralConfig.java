@@ -77,7 +77,16 @@ public class AuroralConfig {
 
         // Equipment settings
         public final ModConfigSpec.IntValue gogglesGlowingRadius;
-        public final ModConfigSpec.IntValue skatesSpeedAmplifier;
+        public final ModConfigSpec.DoubleValue skatesIceSpeedBoost;
+        public final ModConfigSpec.DoubleValue skatesPackedIceSpeedBoost;
+        public final ModConfigSpec.IntValue skatesFrostWalkerRadius;
+        public final ModConfigSpec.DoubleValue leggingsSnowSpeedBoost;
+        public final ModConfigSpec.DoubleValue leggingsSoulSpeedBoost;
+
+        // Nautilus settings
+        public final ModConfigSpec.IntValue nautilusBoostDuration;
+        public final ModConfigSpec.DoubleValue nautilusBoostStrength;
+        public final ModConfigSpec.IntValue nautilusDespawnDelay;
 
         // Hearthwood Log settings
         public final ModConfigSpec.IntValue hearthwoodLogBurnTime;
@@ -121,12 +130,42 @@ public class AuroralConfig {
             builder.pop().push("equipment");
 
             gogglesGlowingRadius = builder
-                .comment("Radius in blocks for Shimmersteel Goggles to apply Glowing effect")
+                .comment("Radius in blocks for Shimmerweave Goggles to apply Glowing effect to hostile mobs")
                 .defineInRange("goggles_glowing_radius", 32, 8, 64);
 
-            skatesSpeedAmplifier = builder
-                .comment("Speed effect amplifier for Shimmerweave Skates on ice/snow (0 = Speed I)")
-                .defineInRange("skates_speed_amplifier", 0, 0, 3);
+            skatesIceSpeedBoost = builder
+                .comment("Speed multiplier for Shimmerweave Skates on regular ice (1.0 = +100% speed)")
+                .defineInRange("skates_ice_speed_boost", 1.05, 0.0, 5.0);
+
+            skatesPackedIceSpeedBoost = builder
+                .comment("Speed multiplier for Shimmerweave Skates on packed/blue ice (2.0 = +200% speed)")
+                .defineInRange("skates_packed_ice_speed_boost", 2.1, 0.0, 10.0);
+
+            skatesFrostWalkerRadius = builder
+                .comment("Radius in blocks for Shimmerweave Skates frost walker and lava walker effect")
+                .defineInRange("skates_frost_walker_radius", 2, 1, 5);
+
+            leggingsSnowSpeedBoost = builder
+                .comment("Speed multiplier for Shimmerweave Leggings on snow (0.2 = +20% speed)")
+                .defineInRange("leggings_snow_speed_boost", 0.2, 0.0, 2.0);
+
+            leggingsSoulSpeedBoost = builder
+                .comment("Speed multiplier for Shimmerweave Leggings on soul sand/soil (0.3 = +30% speed)")
+                .defineInRange("leggings_soul_speed_boost", 0.3, 0.0, 2.0);
+
+            builder.pop().push("nautilus");
+
+            nautilusBoostDuration = builder
+                .comment("Duration of charge boost in ticks (10 = 0.5 seconds)")
+                .defineInRange("nautilus_boost_duration", 10, 5, 40);
+
+            nautilusBoostStrength = builder
+                .comment("Maximum boost strength multiplier at full charge (3.0 = 3x velocity)")
+                .defineInRange("nautilus_boost_strength", 3.0, 1.0, 10.0);
+
+            nautilusDespawnDelay = builder
+                .comment("Ticks before wild nautili despawn after aurora ends (600 = 30 seconds)")
+                .defineInRange("nautilus_despawn_delay", 600, 100, 6000);
 
             builder.pop().push("hearthwood_log");
 

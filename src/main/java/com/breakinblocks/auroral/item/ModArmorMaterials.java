@@ -28,35 +28,36 @@ public class ModArmorMaterials {
 
     /**
      * Defense values for Shimmerweave armor.
-     * Leather: 1, 2, 3, 1 = 7 total
-     * Shimmerweave: 2, 3, 4, 2 = 11 total (between leather and chainmail)
+     * Diamond: 3, 6, 8, 3 = 20 total
+     * Shimmerweave: 3, 6, 8, 3 = 20 total (equivalent to diamond)
      */
     private static final Map<ArmorType, Integer> SHIMMERWEAVE_DEFENSE = createDefenseMap();
 
     private static Map<ArmorType, Integer> createDefenseMap() {
         EnumMap<ArmorType, Integer> map = new EnumMap<>(ArmorType.class);
-        map.put(ArmorType.BOOTS, 2);
-        map.put(ArmorType.LEGGINGS, 4);
-        map.put(ArmorType.CHESTPLATE, 3);
-        map.put(ArmorType.HELMET, 2);
-        map.put(ArmorType.BODY, 3); // For animal armor
+        map.put(ArmorType.BOOTS, 3);
+        map.put(ArmorType.LEGGINGS, 6);
+        map.put(ArmorType.CHESTPLATE, 8);
+        map.put(ArmorType.HELMET, 3);
+        map.put(ArmorType.BODY, 11); // For animal armor (diamond horse armor equivalent)
         return map;
     }
 
     /**
      * Shimmerweave Armor Material.
-     * Slightly better than leather, high enchantability, lightweight.
+     * Diamond-equivalent protection with high enchantability.
      *
-     * Durability: 12x multiplier (leather is 5, iron is 15)
-     * Protection: Similar to leather but with special abilities
+     * Durability: 26x multiplier (20% less than diamond's 33x)
+     * Protection: Diamond equivalent (20 total armor points)
+     * Toughness: 2.0 (same as diamond)
      * Enchantability: 22 (like gold, high for magical armor)
      */
     public static final ArmorMaterial SHIMMERWEAVE = new ArmorMaterial(
-        12, // Durability multiplier
+        26, // Durability multiplier (20% less than diamond's 33x)
         SHIMMERWEAVE_DEFENSE,
         22, // Enchantability (high, like gold)
         SoundEvents.ARMOR_EQUIP_LEATHER, // Equip sound (fabric-like)
-        0.0f, // Toughness (no extra toughness)
+        2.0f, // Toughness (same as diamond)
         0.0f, // Knockback resistance
         ModTags.Items.SHIMMERWEAVE_REPAIR, // Repair tag
         SHIMMERWEAVE_ASSET // Equipment asset key

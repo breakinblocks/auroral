@@ -1,5 +1,7 @@
 package com.breakinblocks.auroral.entity;
 
+import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.util.AuroraHelper;
 import com.breakinblocks.auroral.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -8,6 +10,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -24,6 +27,7 @@ import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
+import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -42,7 +46,7 @@ import java.util.UUID;
  * Auroral Nautilus - A mystical flying nautilus creature that appears during Aurora events.
  * Can be tamed with Aurora Shards and ridden through the sky when saddled.
  */
-public class AuroralNautilusEntity extends Animal implements PlayerRideable {
+public class AuroralNautilusEntity extends Animal implements PlayerRideable, PlayerRideableJumping {
 
     public static final float FLAP_DEGREES_PER_TICK = 5.0F;
     public static final int TICKS_PER_FLAP = Mth.ceil(30.0F);
@@ -50,17 +54,25 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
     private static final EntityDataAccessor<Integer> ID_SIZE = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_SADDLED = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_TAMED = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_SITTING = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_CHARGE_TIME = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_BOOST_REMAINING = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Float> DATA_BOOST_X = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_BOOST_Y = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Float> DATA_BOOST_Z = SynchedEntityData.defineId(AuroralNautilusEntity.class, EntityDataSerializers.FLOAT);
 
-    // Owner UUID stored in save data, not synced
     @Nullable
     private UUID ownerUUID;
 
     Vec3 moveTargetPoint = Vec3.ZERO;
     @Nullable BlockPos anchorPoint;
 
-    // Despawn timer when aurora ends (only for wild nautili)
     private int despawnTimer = 0;
-    private static final int DESPAWN_DELAY = 600; // 30 seconds after aurora ends
+    private static final int MAX_CHARGE_TIME = 40;
+
+    private boolean wasJumping = false;
+    private int jumpChargeTime = 0;
+    private int localBoostCountdown = 0;
 
     public AuroralNautilusEntity(EntityType<? extends AuroralNautilusEntity> entityType, Level level) {
         super(entityType, level);
@@ -87,7 +99,9 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
 
     @Override
     protected void registerGoals() {
-        this.goalSelector.addGoal(1, new NautilusWanderGoal());
+        this.goalSelector.addGoal(1, new NautilusTemptGoal()); // Attracted to aurora shards (wild only)
+        this.goalSelector.addGoal(2, new NautilusFollowOwnerGoal()); // Orbit owner when tamed
+        this.goalSelector.addGoal(3, new NautilusWanderGoal()); // Default wandering
     }
 
     @Override
@@ -96,15 +110,58 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
         builder.define(ID_SIZE, 0);
         builder.define(DATA_SADDLED, false);
         builder.define(DATA_TAMED, false);
+        builder.define(DATA_SITTING, false);
+        builder.define(DATA_CHARGE_TIME, 0);
+        builder.define(DATA_BOOST_REMAINING, 0); // 0 means no boost active
+        builder.define(DATA_BOOST_X, 0.0F);
+        builder.define(DATA_BOOST_Y, 0.0F);
+        builder.define(DATA_BOOST_Z, 0.0F);
     }
 
-    // Taming methods
+    public int getChargeTime() {
+        return this.entityData.get(DATA_CHARGE_TIME);
+    }
+
+    public void setChargeTime(int time) {
+        this.entityData.set(DATA_CHARGE_TIME, time);
+    }
+
+    public int getBoostRemaining() {
+        return this.entityData.get(DATA_BOOST_REMAINING);
+    }
+
+    public void setBoostRemaining(int remaining) {
+        this.entityData.set(DATA_BOOST_REMAINING, remaining);
+    }
+
+    public Vec3 getBoostVelocity() {
+        return new Vec3(
+            this.entityData.get(DATA_BOOST_X),
+            this.entityData.get(DATA_BOOST_Y),
+            this.entityData.get(DATA_BOOST_Z)
+        );
+    }
+
+    public void setBoostVelocity(double x, double y, double z) {
+        this.entityData.set(DATA_BOOST_X, (float) x);
+        this.entityData.set(DATA_BOOST_Y, (float) y);
+        this.entityData.set(DATA_BOOST_Z, (float) z);
+    }
+
     public boolean isTamed() {
         return this.entityData.get(DATA_TAMED);
     }
 
     public void setTamed(boolean tamed) {
         this.entityData.set(DATA_TAMED, tamed);
+    }
+
+    public boolean isSitting() {
+        return this.entityData.get(DATA_SITTING);
+    }
+
+    public void setSitting(boolean sitting) {
+        this.entityData.set(DATA_SITTING, sitting);
     }
 
     @Nullable
@@ -120,7 +177,6 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
         return entity instanceof Player && entity.getUUID().equals(this.getOwnerUUID());
     }
 
-    // Saddle methods
     public boolean isSaddleable() {
         return this.isAlive() && isTamed();
     }
@@ -185,17 +241,20 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
             return InteractionResult.SUCCESS;
         }
 
-        // Saddling
-        if (isTamed() && !isSaddled() && itemStack.is(Items.SADDLE)) {
-            this.equipSaddle(itemStack, SoundSource.NEUTRAL);
-            if (!player.getAbilities().instabuild) {
-                itemStack.shrink(1);
+        // Toggle sitting with shift-right-click (owner only)
+        if (isTamed() && isOwnedBy(player) && player.isSecondaryUseActive()) {
+            if (!this.level().isClientSide()) {
+                this.setSitting(!this.isSitting());
+                // Play a sound to indicate the state change
+                this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+                    this.isSitting() ? SoundEvents.AMETHYST_BLOCK_PLACE : SoundEvents.AMETHYST_BLOCK_HIT,
+                    SoundSource.NEUTRAL, 0.5F, 1.0F);
             }
             return InteractionResult.SUCCESS;
         }
 
-        // Mounting if tamed, saddled, and owner
-        if (isTamed() && isSaddled() && isOwnedBy(player)) {
+        // Mounting if tamed and owner (not when sitting)
+        if (isTamed() && isOwnedBy(player) && !isSitting()) {
             if (!this.level().isClientSide()) {
                 player.startRiding(this);
             }
@@ -235,30 +294,86 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
     @Override
     @Nullable
     public LivingEntity getControllingPassenger() {
-        if (this.isSaddled()) {
-            Entity entity = this.getFirstPassenger();
-            if (entity instanceof Player player && this.isOwnedBy(player)) {
-                return player;
-            }
+        Entity entity = this.getFirstPassenger();
+        if (entity instanceof Player player) {
+            return player;
         }
         return null;
     }
 
     @Override
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+        float sizeScale = 1.0F + 0.2F * this.getNautilusSize();
+        float yOffset = 1.2F * sizeScale;
+        return new Vec3(0.0, yOffset, 0.0);
+    }
+
+    public float getChargeProgress() {
+        return (float) getChargeTime() / MAX_CHARGE_TIME;
+    }
+
+    @Override
+    public void onPlayerJump(int jumpPower) {
+        // Called on client side by vanilla's jump charging system
+    }
+
+    private void applyJumpBoost(int jumpPower) {
+        float chargePercent = jumpPower / 100.0F;
+        float maxBoost = (float) AuroralConfig.SERVER.nautilusBoostStrength.get().doubleValue();
+        float boostStrength = 1.0F + chargePercent * (maxBoost - 1.0F);
+
+        float yaw = this.getYRot() * ((float) Math.PI / 180F);
+        float pitch = this.getXRot() * ((float) Math.PI / 180F);
+
+        double boostX = -Mth.sin(yaw) * Mth.cos(pitch) * boostStrength;
+        double boostY = -Mth.sin(pitch) * boostStrength * 0.5;
+        double boostZ = Mth.cos(yaw) * Mth.cos(pitch) * boostStrength;
+
+        int boostDuration = AuroralConfig.SERVER.nautilusBoostDuration.get();
+        this.setDeltaMovement(boostX, boostY, boostZ);
+        this.localBoostCountdown = boostDuration;
+        this.setBoostVelocity(boostX, boostY, boostZ);
+        this.setBoostRemaining(boostDuration);
+
+        this.level().playSound(null, this.getX(), this.getY(), this.getZ(),
+            SoundEvents.AMETHYST_CLUSTER_BREAK, SoundSource.NEUTRAL,
+            0.8F, 1.2F + chargePercent * 0.3F);
+
+        if (this.level() instanceof ServerLevel serverLevel) {
+            int particleCount = (int) (5 + 15 * chargePercent);
+            serverLevel.sendParticles(ParticleTypes.END_ROD,
+                this.getX(), this.getY(), this.getZ(),
+                particleCount, 0.3, 0.3, 0.3, 0.1);
+        }
+    }
+
+    @Override
+    public boolean canJump() {
+        return this.isVehicle();
+    }
+
+    @Override
+    public void handleStartJump(int jumpPower) {
+        if (jumpPower > 0 && this.getBoostRemaining() <= 0) {
+            applyJumpBoost(jumpPower);
+        }
+    }
+
+    @Override
+    public void handleStopJump() {
+    }
+
+    @Override
     protected Vec3 getRiddenInput(Player player, Vec3 travelVector) {
-        // Get player's look direction for flying control
         float forward = player.zza;
         float strafe = player.xxa * 0.5F;
-
-        // Looking up/down controls vertical movement
         float pitch = player.getXRot();
         float verticalInput = 0;
         if (pitch < -20) {
-            verticalInput = 0.3F; // Looking up = fly up
+            verticalInput = 0.3F;
         } else if (pitch > 20) {
-            verticalInput = -0.3F; // Looking down = fly down
+            verticalInput = -0.3F;
         }
-
         return new Vec3(strafe, verticalInput, forward);
     }
 
@@ -281,43 +396,96 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
 
     @Override
     public void travel(Vec3 travelVector) {
-        if (this.isVehicle() && this.getControllingPassenger() != null) {
-            // Flying movement when ridden
-            LivingEntity passenger = this.getControllingPassenger();
-            if (passenger instanceof Player player) {
-                Vec3 input = this.getRiddenInput(player, travelVector);
-                float speed = this.getRiddenSpeed(player);
+        if (this.isVehicle() && this.getControllingPassenger() instanceof Player player) {
+            this.setYRot(player.getYRot());
+            this.yRotO = this.getYRot();
+            this.setXRot(player.getXRot() * 0.5F);
+            this.setRot(this.getYRot(), this.getXRot());
+            this.yBodyRot = this.getYRot();
+            this.yHeadRot = this.yBodyRot;
 
-                // Apply movement based on look direction
-                float yaw = this.getYRot() * ((float) Math.PI / 180F);
-                double moveX = -Mth.sin(yaw) * input.z * speed + Mth.cos(yaw) * input.x * speed;
-                double moveZ = Mth.cos(yaw) * input.z * speed + Mth.sin(yaw) * input.x * speed;
-                double moveY = input.y * speed;
+            float forward = 0;
+            float strafe = 0;
+            boolean isJumping = false;
 
-                this.setDeltaMovement(moveX, moveY, moveZ);
-                this.move(MoverType.SELF, this.getDeltaMovement());
-
-                // Slow down over time
-                this.setDeltaMovement(this.getDeltaMovement().scale(0.91));
+            if (!this.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
+                Input input = serverPlayer.getLastClientInput();
+                isJumping = input.jump();
+                if (input.forward()) forward += 1.0F;
+                if (input.backward()) forward -= 1.0F;
+                if (input.left()) strafe += 1.0F;
+                if (input.right()) strafe -= 1.0F;
+                strafe *= 0.5F;
+            } else if (this.level().isClientSide()) {
+                forward = player.zza;
+                strafe = player.xxa * 0.5F;
             }
-        } else {
-            // Normal AI movement
-            this.travelFlying(travelVector, 0.15F);
+
+            int syncedBoostRemaining = this.getBoostRemaining();
+            if (syncedBoostRemaining > this.localBoostCountdown) {
+                this.localBoostCountdown = syncedBoostRemaining;
+            }
+
+            if (this.localBoostCountdown > 0) {
+                Vec3 boostVelocity = this.getBoostVelocity();
+                int boostDuration = AuroralConfig.SERVER.nautilusBoostDuration.get();
+                double decayFactor = Math.pow(0.96, boostDuration + 1 - this.localBoostCountdown);
+                Vec3 scaledBoost = boostVelocity.scale(decayFactor);
+
+                this.setDeltaMovement(scaledBoost);
+                this.move(MoverType.SELF, scaledBoost);
+                this.localBoostCountdown--;
+
+                if (!this.level().isClientSide()) {
+                    this.setBoostRemaining(this.localBoostCountdown);
+                }
+                return;
+            }
+
+            float pitch = player.getXRot();
+            float verticalInput = 0;
+            if (forward > 0) {
+                if (pitch < -20) verticalInput = 0.3F;
+                else if (pitch > 20) verticalInput = -0.3F;
+            }
+
+            float chargeSlowdown = isJumping ? 0.3F : 1.0F;
+            float speed = (float) this.getAttributeValue(Attributes.FLYING_SPEED) * chargeSlowdown;
+
+            if (forward != 0 || strafe != 0 || verticalInput != 0) {
+                float yaw = this.getYRot() * ((float) Math.PI / 180F);
+                double moveX = (-Mth.sin(yaw) * forward + Mth.cos(yaw) * strafe) * speed;
+                double moveZ = (Mth.cos(yaw) * forward + Mth.sin(yaw) * strafe) * speed;
+                double moveY = verticalInput * speed;
+                this.setDeltaMovement(moveX, moveY, moveZ);
+            } else if (!isJumping) {
+                this.setDeltaMovement(this.getDeltaMovement().scale(0.9));
+            }
+
+            this.move(MoverType.SELF, this.getDeltaMovement());
+            this.setDeltaMovement(this.getDeltaMovement().scale(0.91));
+            return;
         }
+        this.travelFlying(travelVector, 0.15F);
     }
 
     @Override
     public void tick() {
         super.tick();
 
-        // Check aurora state and manage despawn (only for wild nautili)
+        if (!this.level().isClientSide()) {
+            int remaining = this.getBoostRemaining();
+            if (remaining > 0) {
+                this.setBoostRemaining(remaining - 1);
+            }
+        }
+
         if (!this.level().isClientSide() && this.level() instanceof ServerLevel serverLevel && !isTamed()) {
             boolean auroraActive = AuroraHelper.isAuroraActive(serverLevel);
 
             if (!auroraActive) {
                 despawnTimer++;
-                if (despawnTimer >= DESPAWN_DELAY) {
-                    // Gracefully fade away with particles
+                if (despawnTimer >= AuroralConfig.SERVER.nautilusDespawnDelay.get()) {
                     serverLevel.sendParticles(ParticleTypes.END_ROD, getX(), getY(), getZ(), 20, 0.5, 0.5, 0.5, 0.1);
                     this.discard();
                     return;
@@ -327,12 +495,10 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
             }
         }
 
-        // Client-side particle effects
         if (this.level().isClientSide()) {
             float f = Mth.cos((this.getUniqueFlapTickOffset() + this.tickCount) * FLAP_DEGREES_PER_TICK * (float) (Math.PI / 180.0) + (float) Math.PI);
             float f1 = Mth.cos((this.getUniqueFlapTickOffset() + this.tickCount + 1) * FLAP_DEGREES_PER_TICK * (float) (Math.PI / 180.0) + (float) Math.PI);
 
-            // Play ambient sound on flap
             if (f > 0.0F && f1 <= 0.0F) {
                 this.level().playLocalSound(
                     this.getX(), this.getY(), this.getZ(),
@@ -344,7 +510,6 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
                 );
             }
 
-            // Aurora trail particles
             if (this.tickCount % 3 == 0) {
                 double offsetX = (this.random.nextDouble() - 0.5) * 0.5;
                 double offsetY = (this.random.nextDouble() - 0.5) * 0.3;
@@ -356,7 +521,6 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
                 );
             }
 
-            // Occasional snowflake particles
             if (this.random.nextFloat() < 0.1f) {
                 this.level().addParticle(
                     ParticleTypes.SNOWFLAKE,
@@ -407,6 +571,7 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
         this.setNautilusSize(input.getIntOr("size", 0));
         this.setTamed(input.getBooleanOr("tamed", false));
         this.entityData.set(DATA_SADDLED, input.getBooleanOr("saddled", false));
+        this.setSitting(input.getBooleanOr("sitting", false));
         input.read("owner", net.minecraft.core.UUIDUtil.CODEC).ifPresent(this::setOwnerUUID);
     }
 
@@ -417,6 +582,7 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
         output.putInt("size", this.getNautilusSize());
         output.putBoolean("tamed", this.isTamed());
         output.putBoolean("saddled", this.isSaddled());
+        output.putBoolean("sitting", this.isSitting());
         if (this.getOwnerUUID() != null) {
             output.store("owner", net.minecraft.core.UUIDUtil.CODEC, this.getOwnerUUID());
         }
@@ -531,6 +697,14 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
                 return;
             }
 
+            // When sitting, hover in place with minimal movement
+            if (AuroralNautilusEntity.this.isSitting()) {
+                // Slowly reduce velocity to hover
+                Vec3 currentVel = AuroralNautilusEntity.this.getDeltaMovement();
+                AuroralNautilusEntity.this.setDeltaMovement(currentVel.scale(0.9));
+                return;
+            }
+
             if (AuroralNautilusEntity.this.horizontalCollision) {
                 AuroralNautilusEntity.this.setYRot(AuroralNautilusEntity.this.getYRot() + 180.0F);
                 this.speed = 0.05F;
@@ -592,8 +766,11 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
 
         @Override
         public boolean canUse() {
-            // Don't wander when being ridden or when tamed and owner nearby
-            return !AuroralNautilusEntity.this.isVehicle();
+            // Don't wander when being ridden, sitting, or when tamed (follow owner handles that)
+            if (AuroralNautilusEntity.this.isVehicle()) return false;
+            if (AuroralNautilusEntity.this.isSitting()) return false;
+            if (AuroralNautilusEntity.this.isTamed()) return false;
+            return true;
         }
 
         @Override
@@ -663,6 +840,225 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable {
             this.angle = this.angle + this.direction * 10.0F * (float) (Math.PI / 180.0);
             AuroralNautilusEntity.this.moveTargetPoint = Vec3.atLowerCornerOf(AuroralNautilusEntity.this.anchorPoint)
                 .add(this.distance * Mth.cos(this.angle), -2.0F + this.height, this.distance * Mth.sin(this.angle));
+        }
+    }
+
+    /**
+     * Tempt goal - wild nautili are attracted to players holding Aurora Shards
+     */
+    class NautilusTemptGoal extends Goal {
+        private static final double TEMPT_RANGE = 10.0;
+        private static final double CLOSE_ENOUGH_DIST_SQ = 6.25; // 2.5 blocks squared
+        @Nullable
+        private Player temptingPlayer;
+        private int calmDown;
+
+        public NautilusTemptGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        }
+
+        @Override
+        public boolean canUse() {
+            // Only for wild nautili
+            if (AuroralNautilusEntity.this.isTamed()) return false;
+            if (AuroralNautilusEntity.this.isVehicle()) return false;
+            if (this.calmDown > 0) {
+                this.calmDown--;
+                return false;
+            }
+
+            this.temptingPlayer = findTemptingPlayer();
+            return this.temptingPlayer != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            if (AuroralNautilusEntity.this.isTamed()) return false;
+
+            if (this.temptingPlayer == null || !this.temptingPlayer.isAlive()) return false;
+
+            double distSq = AuroralNautilusEntity.this.distanceToSqr(this.temptingPlayer);
+            if (distSq > TEMPT_RANGE * TEMPT_RANGE) return false;
+
+            return isHoldingTemptItem(this.temptingPlayer);
+        }
+
+        @Override
+        public void start() {
+            // Set initial target toward the player
+            if (this.temptingPlayer != null) {
+                updateTargetPoint();
+            }
+        }
+
+        @Override
+        public void stop() {
+            this.temptingPlayer = null;
+            this.calmDown = 100; // Wait 5 seconds before trying again
+        }
+
+        @Override
+        public void tick() {
+            if (this.temptingPlayer == null) return;
+
+            // Look toward the player
+            AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
+            nautilus.getLookControl().setLookAt(this.temptingPlayer, 30.0F, 30.0F);
+
+            // Move closer if not close enough
+            double distSq = nautilus.distanceToSqr(this.temptingPlayer);
+            if (distSq > CLOSE_ENOUGH_DIST_SQ) {
+                updateTargetPoint();
+            } else {
+                // Close enough - hover near the player
+                nautilus.moveTargetPoint = new Vec3(
+                    nautilus.getX(),
+                    nautilus.getY(),
+                    nautilus.getZ()
+                );
+            }
+        }
+
+        private void updateTargetPoint() {
+            if (this.temptingPlayer == null) return;
+
+            AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
+            // Target a point above the player's head
+            nautilus.moveTargetPoint = this.temptingPlayer.position().add(0, 1.5, 0);
+            nautilus.anchorPoint = this.temptingPlayer.blockPosition().above(2);
+        }
+
+        @Nullable
+        private Player findTemptingPlayer() {
+            AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
+            double x = nautilus.getX();
+            double y = nautilus.getY();
+            double z = nautilus.getZ();
+
+            Player nearest = null;
+            double nearestDistSq = TEMPT_RANGE * TEMPT_RANGE;
+
+            for (Player player : nautilus.level().players()) {
+                if (!isHoldingTemptItem(player)) continue;
+
+                double distSq = player.distanceToSqr(x, y, z);
+                if (distSq < nearestDistSq) {
+                    nearestDistSq = distSq;
+                    nearest = player;
+                }
+            }
+
+            return nearest;
+        }
+
+        private boolean isHoldingTemptItem(Player player) {
+            return player.getMainHandItem().is(ModItems.AURORA_SHARD.get()) ||
+                   player.getOffhandItem().is(ModItems.AURORA_SHARD.get());
+        }
+    }
+
+    /**
+     * Follow owner goal - tamed nautili slowly orbit around their owner
+     */
+    class NautilusFollowOwnerGoal extends Goal {
+        private static final double MAX_DIST = 20.0; // Start following if further than this
+        private static final double ORBIT_RADIUS = 3.0; // Orbit radius around owner
+        private static final double ORBIT_HEIGHT = 2.0; // Height above owner's head
+        private static final float ORBIT_SPEED = 0.02F; // Radians per tick (slow orbit)
+
+        @Nullable
+        private Player owner;
+        private float orbitAngle;
+        private int ticksSinceOwnerSeen;
+
+        public NautilusFollowOwnerGoal() {
+            this.setFlags(EnumSet.of(Goal.Flag.MOVE));
+            this.orbitAngle = (float) (Math.random() * Math.PI * 2); // Random start angle
+        }
+
+        @Override
+        public boolean canUse() {
+            if (!AuroralNautilusEntity.this.isTamed()) return false;
+            if (AuroralNautilusEntity.this.isSitting()) return false;
+            if (AuroralNautilusEntity.this.isVehicle()) return false;
+
+            this.owner = findOwner();
+            return this.owner != null;
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            if (!AuroralNautilusEntity.this.isTamed()) return false;
+            if (AuroralNautilusEntity.this.isSitting()) return false;
+            if (AuroralNautilusEntity.this.isVehicle()) return false;
+            if (this.owner == null || !this.owner.isAlive()) return false;
+
+            // Stop if owner is too far for too long
+            double distSq = AuroralNautilusEntity.this.distanceToSqr(this.owner);
+            if (distSq > MAX_DIST * MAX_DIST) {
+                this.ticksSinceOwnerSeen++;
+                if (this.ticksSinceOwnerSeen > 200) { // 10 seconds
+                    return false;
+                }
+            } else {
+                this.ticksSinceOwnerSeen = 0;
+            }
+
+            return true;
+        }
+
+        @Override
+        public void start() {
+            this.ticksSinceOwnerSeen = 0;
+        }
+
+        @Override
+        public void stop() {
+            this.owner = null;
+        }
+
+        @Override
+        public void tick() {
+            if (this.owner == null) return;
+
+            AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
+
+            // Slowly increment orbit angle
+            this.orbitAngle += ORBIT_SPEED;
+            if (this.orbitAngle > Math.PI * 2) {
+                this.orbitAngle -= (float) (Math.PI * 2);
+            }
+
+            // Calculate orbit position around owner
+            double targetX = this.owner.getX() + ORBIT_RADIUS * Mth.cos(this.orbitAngle);
+            double targetY = this.owner.getY() + this.owner.getEyeHeight() + ORBIT_HEIGHT;
+            double targetZ = this.owner.getZ() + ORBIT_RADIUS * Mth.sin(this.orbitAngle);
+
+            nautilus.moveTargetPoint = new Vec3(targetX, targetY, targetZ);
+            nautilus.anchorPoint = new BlockPos((int) targetX, (int) targetY, (int) targetZ);
+        }
+
+        @Nullable
+        private Player findOwner() {
+            UUID ownerUUID = AuroralNautilusEntity.this.getOwnerUUID();
+            if (ownerUUID == null) return null;
+
+            // Search for owner in loaded players
+            if (AuroralNautilusEntity.this.level() instanceof ServerLevel serverLevel) {
+                Entity entity = serverLevel.getEntity(ownerUUID);
+                if (entity instanceof Player player) {
+                    return player;
+                }
+            }
+
+            // Fallback: search nearby players
+            for (Player player : AuroralNautilusEntity.this.level().players()) {
+                if (player.getUUID().equals(ownerUUID) && player.distanceToSqr(AuroralNautilusEntity.this) < MAX_DIST * MAX_DIST) {
+                    return player;
+                }
+            }
+
+            return null;
         }
     }
 }
