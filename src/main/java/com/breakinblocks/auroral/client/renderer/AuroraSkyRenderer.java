@@ -20,10 +20,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.state.LevelRenderState;
-import net.minecraft.client.renderer.state.SkyRenderState;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.CustomSkyboxRenderer;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -33,12 +33,12 @@ import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 /**
- * Custom skybox renderer that adds aurora borealis ribbons to the sky.
- * Returns false to allow vanilla sky rendering to continue - the aurora is additive.
+ * Custom sky renderer that adds aurora borealis ribbons to the sky.
+ * Uses RenderLevelStageEvent to inject rendering after the sky.
+ * Rewritten from skylblock modification originally implemented in 1.0.0
  */
-public class AuroraSkyRenderer implements CustomSkyboxRenderer {
-
-    public static final Identifier AURORA_SKYBOX_ID = Auroral.id("aurora");
+@EventBusSubscriber(modid = Auroral.MOD_ID, value = Dist.CLIENT)
+public class AuroraSkyRenderer {
 
     // Aurora ribbon configuration
     private static final int RIBBON_COUNT = 4;
@@ -55,12 +55,12 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
     // Time cycle to prevent float overflow
     private static final float TIME_CYCLE = 100000.0f;
 
-    private final int[] tempColor = new int[4];
+    private static final int[] tempColor = new int[4];
 
     @Nullable
-    private GpuBuffer cachedVertexBuffer;
-    private int cachedVertexBufferSize;
-    private float smoothedIntensity = 0.0f;
+    private static GpuBuffer cachedVertexBuffer;
+    private static int cachedVertexBufferSize;
+    private static float smoothedIntensity = 0.0f;
     private static final float INTENSITY_LERP_SPEED = 0.05f;
 
     @Nullable
@@ -87,12 +87,15 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         return auroraPipeline;
     }
 
-    @Override
-    public boolean renderSky(LevelRenderState levelRenderState, SkyRenderState skyRenderState, Matrix4f modelViewMatrix, Runnable setupFog) {
+    /**
+     * Event handler needed to render aurora after sky rendering.
+     */
+    @SubscribeEvent
+    public static void onRenderLevelStage(RenderLevelStageEvent.AfterSky event) {
         // Early exit if disabled in config
         if (!AuroralConfig.CLIENT.showAuroraEffect.get()) {
             smoothedIntensity = 0.0f;
-            return false;
+            return;
         }
 
         // Check if aurora should be visible
@@ -100,19 +103,19 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
             // Fade out smoothly
             smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
             if (smoothedIntensity <= 0.01f) {
-                return false;
+                return;
             }
         }
 
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null) {
-            return false;
+            return;
         }
 
         // Dimension check - only render in overworld-like dimensions
         if (!level.dimensionType().hasSkyLight()) {
-            return false;
+            return;
         }
 
         // Only render in cold biomes
@@ -120,14 +123,14 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
             // Fade out when leaving cold biomes
             smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
             if (smoothedIntensity <= 0.01f) {
-                return false;
+                return;
             }
         }
 
         // Calculate aurora intensity based on time of night
         float nightProgress = getNightProgress(level);
         if (nightProgress <= 0 && smoothedIntensity <= 0.01f) {
-            return false;
+            return;
         }
 
         float targetIntensity = calculateIntensity(nightProgress);
@@ -143,40 +146,40 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         }
 
         if (smoothedIntensity <= 0.01f) {
-            return false;
+            return;
         }
 
-        // Get player Y for relative positioning
-        Vec3 playerPos = mc.player.position();
-
         // Render the aurora
-        renderAurora(levelRenderState, modelViewMatrix, smoothedIntensity, playerPos.y);
-
-        // Return false to allow vanilla sky to render as well
-        return false;
+        LevelRenderState levelRenderState = event.getLevelRenderState();
+        renderAurora(levelRenderState, smoothedIntensity);
     }
 
-    private void renderAurora(LevelRenderState levelRenderState, Matrix4f modelViewMatrix, float intensity, double playerY) {
+    private static void renderAurora(LevelRenderState levelRenderState, float intensity) {
         long gameTime = levelRenderState.gameTime;
-        // Use modulo to prevent float precision loss over time
+        // Using a modulo here to attempt to prevent float precision loss over time
         float time = (gameTime % (long) TIME_CYCLE) * 0.05f;
 
-        // Calculate total vertices needed for all ribbons
+        // This was a lot of trial and error getting this working right butttt...
+        // We Calculate total vertices needed for all ribbons...
+        // Each ribbon has (SEGMENTS + 1) * 2 vertices for the triangle strip
+        // Plus 2 vertices between each ribbon pair
         int verticesPerRibbon = (SEGMENTS_PER_RIBBON + 1) * 2;
-        int totalVertices = verticesPerRibbon * RIBBON_COUNT;
+        int degenerateVertices = 2 * (RIBBON_COUNT - 1);
+        int totalVertices = (verticesPerRibbon * RIBBON_COUNT) + degenerateVertices;
         int vertexSize = DefaultVertexFormat.POSITION_COLOR.getVertexSize();
         int bufferSize = totalVertices * vertexSize;
 
-        // Build all ribbons into a single mesh
+        // Now we build all ribbons into a single mesh
+        // Vertices are in camera relative space (camera at 0,0,0)
         MeshData meshData = null;
         try (ByteBufferBuilder byteBuffer = ByteBufferBuilder.exactlySized(bufferSize)) {
             BufferBuilder builder = new BufferBuilder(byteBuffer, VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
 
             for (int ribbon = 0; ribbon < RIBBON_COUNT; ribbon++) {
                 if (ribbon > 0) {
-                    addDegenerateConnection(builder, ribbon, time, intensity, playerY);
+                    addDegenerateConnection(builder, ribbon, time, intensity);
                 }
-                buildRibbonVertices(builder, ribbon, time, intensity, playerY);
+                buildRibbonVertices(builder, ribbon, time, intensity);
             }
 
             meshData = builder.build();
@@ -191,7 +194,7 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
                 return;
             }
 
-            // Get render target safely
+            // Get render target... hopefully
             Minecraft mc = Minecraft.getInstance();
             var renderTarget = mc.getMainRenderTarget();
             if (renderTarget == null) {
@@ -206,9 +209,9 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
                 return;
             }
 
-            // Create transform uniform
+            // Create transform uniform using the model view matrix
             GpuBufferSlice transformSlice = RenderSystem.getDynamicUniforms().writeTransform(
-                    modelViewMatrix,
+                    RenderSystem.getModelViewMatrix(),
                     new Vector4f(1.0f, 1.0f, 1.0f, 1.0f),
                     new Vector3f(0, 0, 0),
                     new Matrix4f()
@@ -236,17 +239,15 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
     }
 
     @Nullable
-    private GpuBuffer getOrCreateVertexBuffer(int requiredSize, MeshData meshData) {
+    private static GpuBuffer getOrCreateVertexBuffer(int requiredSize, MeshData meshData) {
         try {
             if (cachedVertexBuffer != null) {
                 cachedVertexBuffer.close();
             }
-            if (cachedVertexBufferSize < requiredSize) {
-                cachedVertexBufferSize = requiredSize + 1024;
-            }
+            cachedVertexBufferSize = requiredSize;
             cachedVertexBuffer = RenderSystem.getDevice().createBuffer(
                     () -> "Aurora vertex buffer",
-                    cachedVertexBufferSize,
+                    GpuBuffer.USAGE_VERTEX,
                     meshData.vertexBuffer()
             );
             return cachedVertexBuffer;
@@ -256,20 +257,21 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         }
     }
 
-    private void addDegenerateConnection(BufferBuilder builder, int ribbonIndex, float time, float intensity, double playerY) {
+    private static void addDegenerateConnection(BufferBuilder builder, int ribbonIndex, float time, float intensity) {
         float ribbonOffset = ribbonIndex * (float) (Math.PI * 2.0 / RIBBON_COUNT);
         float drift = (time * DRIFT_SPEED) % (float) (Math.PI * 2.0) + ribbonIndex * 1.5f;
 
         float angle = ribbonOffset + drift;
         float x = (float) Math.cos(angle) * RIBBON_RADIUS;
         float z = (float) Math.sin(angle) * RIBBON_RADIUS;
-        float yOffset = (float) playerY + RIBBON_Y_OFFSET;
+        // Y is relative to camera (0,0,0), so RIBBON_Y_OFFSET puts it above the player
+        float yOffset = RIBBON_Y_OFFSET;
 
         builder.addVertex(x, yOffset, z).setColor(0, 0, 0, 0);
         builder.addVertex(x, yOffset, z).setColor(0, 0, 0, 0);
     }
 
-    private void buildRibbonVertices(BufferBuilder builder, int ribbonIndex, float time, float intensity, double playerY) {
+    private static void buildRibbonVertices(BufferBuilder builder, int ribbonIndex, float time, float intensity) {
         float ribbonOffset = ribbonIndex * (float) (Math.PI * 2.0 / RIBBON_COUNT);
         float colorPhase = ribbonIndex * 0.3f;
         float drift = (time * DRIFT_SPEED) % (float) (Math.PI * 2.0) + ribbonIndex * 1.5f;
@@ -289,7 +291,8 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
             float wave1 = (float) Math.sin(waveTime1 + segmentProgress * 8.0f + ribbonIndex) * 15.0f;
             float wave2 = (float) Math.sin(waveTime2 + segmentProgress * 12.0f + ribbonIndex * 2.0f) * 8.0f;
             float wave3 = (float) Math.sin(waveTime3 + segmentProgress * 4.0f) * 20.0f;
-            float yOffset = wave1 + wave2 + wave3 + (float) playerY + RIBBON_Y_OFFSET;
+            // above the player
+            float yOffset = wave1 + wave2 + wave3 + RIBBON_Y_OFFSET;
 
             float heightFactor = (float) Math.sin(segmentProgress * Math.PI) * 0.8f + 0.2f;
             float height = RIBBON_Y_HEIGHT * heightFactor;
@@ -307,7 +310,7 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         }
     }
 
-    private void getAuroraColor(float position, float shimmer, float intensity, float edgeFade) {
+    private static void getAuroraColor(float position, float shimmer, float intensity, float edgeFade) {
         position = position - (float) Math.floor(position);
 
         int r, g, b;
@@ -355,7 +358,7 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         return Math.max(min, Math.min(max, value));
     }
 
-    private float getNightProgress(ClientLevel level) {
+    private static float getNightProgress(ClientLevel level) {
         long dayTime = level.getDayTime() % 24000;
         if (dayTime < 13000 || dayTime >= 23000) {
             return 0;
@@ -363,7 +366,7 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         return (dayTime - 13000) / 10000.0f;
     }
 
-    private float calculateIntensity(float nightProgress) {
+    private static float calculateIntensity(float nightProgress) {
         if (nightProgress < 0.1f) {
             return nightProgress / 0.1f;
         }
@@ -373,7 +376,7 @@ public class AuroraSkyRenderer implements CustomSkyboxRenderer {
         return 1.0f;
     }
 
-    public void dispose() {
+    public static void dispose() {
         if (cachedVertexBuffer != null) {
             cachedVertexBuffer.close();
             cachedVertexBuffer = null;

@@ -28,10 +28,6 @@ public record SyncAuroraPayload(boolean active) implements CustomPacketPayload {
      * Handle the payload on the client side.
      */
     public static void handleOnClient(SyncAuroraPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            // Update client-side aurora state
-            ClientAuroraState.setAuroraActive(payload.active);
-            Auroral.LOGGER.debug("Aurora state synced from server: {}", payload.active);
-        });
+        context.enqueueWork(() -> ClientAuroraState.setAuroraActive(payload.active));
     }
 }

@@ -21,7 +21,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
-import net.neoforged.neoforge.client.event.RegisterCustomEnvironmentEffectRendererEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
@@ -42,7 +41,6 @@ public class AuroralClient {
         eventBus.addListener(AuroralClient::registerLayerDefinitions);
         eventBus.addListener(AuroralClient::registerRenderers);
         eventBus.addListener(AuroralClient::registerParticleProviders);
-        eventBus.addListener(AuroralClient::registerCustomRenderers);
         eventBus.addListener(AuroralClient::registerMenuScreens);
 
         Auroral.LOGGER.debug("Auroral client initialized");
@@ -83,18 +81,6 @@ public class AuroralClient {
         event.register(ModMenuTypes.COLD_BREWING_STAND.get(), ColdBrewingStandScreen::new);
     }
 
-    // Keep reference to aurora renderer for cleanup
-    private static AuroraSkyRenderer auroraSkyRenderer;
-
-    /**
-     * Register custom environment effect renderers (aurora skybox).
-     */
-    public static void registerCustomRenderers(RegisterCustomEnvironmentEffectRendererEvent event) {
-        auroraSkyRenderer = new AuroraSkyRenderer();
-        event.registerSkyboxRenderer(AuroraSkyRenderer.AURORA_SKYBOX_ID, auroraSkyRenderer);
-        Auroral.LOGGER.debug("Registered aurora skybox renderer");
-    }
-
     /**
      * Reset client state when disconnecting from server.
      * Releases GPU resources and clears cached state.
@@ -107,8 +93,6 @@ public class AuroralClient {
 
         // Release GPU resources
         SnowFootprintRenderer.dispose();
-        if (auroraSkyRenderer != null) {
-            auroraSkyRenderer.dispose();
-        }
+        AuroraSkyRenderer.dispose();
     }
 }

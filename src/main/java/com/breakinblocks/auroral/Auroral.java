@@ -16,6 +16,7 @@ import com.breakinblocks.auroral.registry.ModSounds;
 import com.breakinblocks.auroral.events.EntityEventHandler;
 import com.breakinblocks.auroral.events.ItemEventHandler;
 import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
+import com.breakinblocks.auroral.net.AuroralNetworking;
 import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
@@ -54,6 +55,9 @@ public class Auroral {
 
         // Register item event handlers (for modifying vanilla items)
         ItemEventHandler.register(eventBus);
+
+        // Register network payloads
+        AuroralNetworking.register(eventBus);
 
         // Register configs
         container.registerConfig(ModConfig.Type.STARTUP, AuroralConfig.startupSpec);
