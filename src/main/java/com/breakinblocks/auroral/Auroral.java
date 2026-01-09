@@ -16,13 +16,13 @@ import com.breakinblocks.auroral.registry.ModSounds;
 import com.breakinblocks.auroral.events.EntityEventHandler;
 import com.breakinblocks.auroral.events.ItemEventHandler;
 import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
-import net.minecraft.resources.Identifier;
-import net.neoforged.api.distmarker.Dist;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLLoader;
 import org.slf4j.Logger;
 
 @Mod(Auroral.MOD_ID)
@@ -30,11 +30,11 @@ public class Auroral {
     public static final String MOD_ID = "auroral";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static Identifier id(String path) {
-        return Identifier.fromNamespaceAndPath(MOD_ID, path);
+    public static ResourceLocation id(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
-    public Auroral(IEventBus eventBus, ModContainer container, Dist dist) {
+    public Auroral(IEventBus eventBus, ModContainer container) {
         LOGGER.info("Auroral initializing...");
 
         // Register all deferred registers
@@ -61,7 +61,7 @@ public class Auroral {
         container.registerConfig(ModConfig.Type.CLIENT, AuroralConfig.clientSpec);
 
         // Client-specific setup
-        if (dist.isClient()) {
+        if (FMLLoader.getDist().isClient()) {
             AuroralClient.init(eventBus);
         }
 

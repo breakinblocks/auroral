@@ -8,19 +8,19 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.types.IRecipeType;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 /**
  * JEI recipe category for Basin Infusion recipes.
  */
 public class BasinInfusionRecipeCategory implements IRecipeCategory<BasinInfusionRecipe> {
-    public static final Identifier UID = Auroral.id("basin_infusion");
-    public static final IRecipeType<BasinInfusionRecipe> RECIPE_TYPE =
-        IRecipeType.create(Auroral.MOD_ID, "basin_infusion", BasinInfusionRecipe.class);
+    public static final ResourceLocation UID = Auroral.id("basin_infusion");
+    public static final RecipeType<BasinInfusionRecipe> RECIPE_TYPE =
+        RecipeType.create(Auroral.MOD_ID, "basin_infusion", BasinInfusionRecipe.class);
 
     private final IDrawable icon;
     private final Component title;
@@ -34,7 +34,7 @@ public class BasinInfusionRecipeCategory implements IRecipeCategory<BasinInfusio
     }
 
     @Override
-    public IRecipeType<BasinInfusionRecipe> getRecipeType() {
+    public RecipeType<BasinInfusionRecipe> getRecipeType() {
         return RECIPE_TYPE;
     }
 
@@ -62,17 +62,17 @@ public class BasinInfusionRecipeCategory implements IRecipeCategory<BasinInfusio
     public void setRecipe(IRecipeLayoutBuilder builder, BasinInfusionRecipe recipe, IFocusGroup focuses) {
         // Input slot (left side)
         builder.addSlot(RecipeIngredientRole.INPUT, 10, 12)
-            .add(recipe.input());
+            .addItemStack(recipe.input());
 
         // Basin icon (center) - render only as decoration
         builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 52, 12)
-            .add(new ItemStack(ModBlocks.GLACIAL_BASIN.get()))
+            .addItemStack(new ItemStack(ModBlocks.GLACIAL_BASIN.get()))
             .addRichTooltipCallback((recipeSlotView, tooltip) -> {
                 tooltip.add(Component.translatable("auroral.jei.basin_infusion.tooltip"));
             });
 
         // Output slot (right side)
         builder.addSlot(RecipeIngredientRole.OUTPUT, 94, 12)
-            .add(recipe.output());
+            .addItemStack(recipe.output());
     }
 }

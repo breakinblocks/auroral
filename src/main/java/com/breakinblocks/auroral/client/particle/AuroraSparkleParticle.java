@@ -6,7 +6,6 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.util.RandomSource;
 
 /**
  * Aurora sparkle particle - creates a shimmering, colorful effect
@@ -42,6 +41,9 @@ public class AuroraSparkleParticle extends SimpleAnimatedParticle {
         this.xd = xSpeed;
         this.yd = ySpeed + 0.01;
         this.zd = zSpeed;
+
+        // Pick initial sprite from the sprite set
+        this.pickSprite(sprites);
     }
 
     @Override
@@ -74,8 +76,7 @@ public class AuroraSparkleParticle extends SimpleAnimatedParticle {
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                        double x, double y, double z,
-                                       double xSpeed, double ySpeed, double zSpeed,
-                                       RandomSource random) {
+                                       double xSpeed, double ySpeed, double zSpeed) {
             return new AuroraSparkleParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprites);
         }
     }

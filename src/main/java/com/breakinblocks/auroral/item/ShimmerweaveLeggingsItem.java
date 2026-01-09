@@ -1,6 +1,8 @@
 package com.breakinblocks.auroral.item;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 
 /**
  * Shimmerweave Leggings - Leg armor with special abilities.
@@ -13,7 +15,7 @@ import net.minecraft.world.item.Item;
  *
  * The speed effects are handled via event handler in ShimmerweaveEventHandler.
  */
-public class ShimmerweaveLeggingsItem extends Item {
+public class ShimmerweaveLeggingsItem extends ArmorItem {
 
     /**
      * Duration of speed effect in ticks (refreshed while on snow).
@@ -25,7 +27,7 @@ public class ShimmerweaveLeggingsItem extends Item {
      */
     public static final int SOUL_SPEED_DURATION = 40; // 2 seconds, refreshed continuously
 
-    public ShimmerweaveLeggingsItem(Properties properties) {
-        super(properties);
+    public ShimmerweaveLeggingsItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
+        super(material, type, properties);
     }
 }

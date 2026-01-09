@@ -5,19 +5,22 @@ import com.breakinblocks.auroral.registry.ModItems;
 import com.breakinblocks.auroral.registry.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
+import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.ItemTagsProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
 /**
  * Data generator for item tags.
- * NeoForge 21.11 uses simplified ItemTagsProvider from NeoForge.
  */
 public class ModItemTagsProvider extends ItemTagsProvider {
 
-    public ModItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider) {
-        super(output, lookupProvider, Auroral.MOD_ID);
+    public ModItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookupProvider,
+                               CompletableFuture<TagLookup<Block>> blockTags, @Nullable ExistingFileHelper existingFileHelper) {
+        super(output, lookupProvider, blockTags, Auroral.MOD_ID, existingFileHelper);
     }
 
     @Override
@@ -35,7 +38,6 @@ public class ModItemTagsProvider extends ItemTagsProvider {
             .add(ModItems.SHIMMERSTEEL_SWORD.get())
             .add(ModItems.SHIMMERSTEEL_HOE.get())
             .add(ModItems.SHIMMERSTEEL_BOW.get())
-            .add(ModItems.SHIMMER_SPEAR.get())
             // Shimmerweave armor
             .add(ModItems.SHIMMERWEAVE_GOGGLES.get())
             .add(ModItems.SHIMMERWEAVE_TUNIC.get())

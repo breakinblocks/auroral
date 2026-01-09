@@ -3,14 +3,14 @@ package com.breakinblocks.auroral.registry;
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.item.*;
 import net.minecraft.ChatFormatting;
-import net.minecraft.util.Util;
+import net.minecraft.Util;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.SmithingTemplateItem;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.item.equipment.ArmorType;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -82,32 +82,25 @@ public class ModItems {
 
     // Shimmerweave Armor
     public static final DeferredItem<ShimmerweaveGogglesItem> SHIMMERWEAVE_GOGGLES = ITEMS.registerItem("shimmerweave_goggles",
-        props -> new ShimmerweaveGogglesItem(props.humanoidArmor(ModArmorMaterials.SHIMMERWEAVE, ArmorType.HELMET)));
+        props -> new ShimmerweaveGogglesItem(ModArmorMaterials.SHIMMERWEAVE, ArmorItem.Type.HELMET, props));
 
     public static final DeferredItem<ShimmerweaveTunicItem> SHIMMERWEAVE_TUNIC = ITEMS.registerItem("shimmerweave_tunic",
-        props -> new ShimmerweaveTunicItem(props.humanoidArmor(ModArmorMaterials.SHIMMERWEAVE, ArmorType.CHESTPLATE)));
+        props -> new ShimmerweaveTunicItem(ModArmorMaterials.SHIMMERWEAVE, ArmorItem.Type.CHESTPLATE, props));
 
     public static final DeferredItem<ShimmerweaveLeggingsItem> SHIMMERWEAVE_LEGGINGS = ITEMS.registerItem("shimmerweave_leggings",
-        props -> new ShimmerweaveLeggingsItem(props.humanoidArmor(ModArmorMaterials.SHIMMERWEAVE, ArmorType.LEGGINGS)));
+        props -> new ShimmerweaveLeggingsItem(ModArmorMaterials.SHIMMERWEAVE, ArmorItem.Type.LEGGINGS, props));
 
     public static final DeferredItem<ShimmerweaveSkatesItem> SHIMMERWEAVE_SKATES = ITEMS.registerItem("shimmerweave_skates",
-        props -> new ShimmerweaveSkatesItem(props.humanoidArmor(ModArmorMaterials.SHIMMERWEAVE, ArmorType.BOOTS)));
+        props -> new ShimmerweaveSkatesItem(ModArmorMaterials.SHIMMERWEAVE, ArmorItem.Type.BOOTS, props));
 
-    // Shimmer Spear - Throwable spear weapon
-    public static final DeferredItem<ShimmerSpearItem> SHIMMER_SPEAR = ITEMS.registerItem("shimmer_spear",
-        props -> new ShimmerSpearItem(props
-            .durability(250)
-            .attributes(ShimmerSpearItem.createAttributes())
-            .component(net.minecraft.core.component.DataComponents.TOOL, ShimmerSpearItem.createToolProperties())));
-
-    // Spawn Eggs - In NeoForge 21.11+, SpawnEggItem entity type is set via properties.spawnEgg()
+    // Spawn Eggs
     public static final DeferredItem<SpawnEggItem> AURORAL_NAUTILUS_SPAWN_EGG = ITEMS.registerItem(
         "auroral_nautilus_spawn_egg",
-        properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.AURORAL_NAUTILUS.get())));
+        properties -> new SpawnEggItem(ModEntities.AURORAL_NAUTILUS.get(), 0x87CEEB, 0x40E0D0, properties));
 
     public static final DeferredItem<SpawnEggItem> AURORAL_SNOWLETTE_SPAWN_EGG = ITEMS.registerItem(
         "auroral_snowlette_spawn_egg",
-        properties -> new SpawnEggItem(properties.spawnEgg(ModEntities.AURORAL_SNOWLETTE.get())));
+        properties -> new SpawnEggItem(ModEntities.AURORAL_SNOWLETTE.get(), 0xF0F8FF, 0x4169E1, properties));
 
     // Smithing Template Helper
 
@@ -115,15 +108,15 @@ public class ModItems {
     private static final ChatFormatting DESCRIPTION_FORMAT = ChatFormatting.BLUE;
 
     // Empty slot icons for the smithing table UI
-    private static final Identifier EMPTY_SLOT_HELMET = Identifier.withDefaultNamespace("item/empty_armor_slot_helmet");
-    private static final Identifier EMPTY_SLOT_CHESTPLATE = Identifier.withDefaultNamespace("item/empty_armor_slot_chestplate");
-    private static final Identifier EMPTY_SLOT_LEGGINGS = Identifier.withDefaultNamespace("item/empty_armor_slot_leggings");
-    private static final Identifier EMPTY_SLOT_BOOTS = Identifier.withDefaultNamespace("item/empty_armor_slot_boots");
-    private static final Identifier EMPTY_SLOT_SWORD = Identifier.withDefaultNamespace("item/empty_slot_sword");
-    private static final Identifier EMPTY_SLOT_PICKAXE = Identifier.withDefaultNamespace("item/empty_slot_pickaxe");
-    private static final Identifier EMPTY_SLOT_AXE = Identifier.withDefaultNamespace("item/empty_slot_axe");
-    private static final Identifier EMPTY_SLOT_SHOVEL = Identifier.withDefaultNamespace("item/empty_slot_shovel");
-    private static final Identifier EMPTY_SLOT_INGOT = Identifier.withDefaultNamespace("item/empty_slot_ingot");
+    private static final ResourceLocation EMPTY_SLOT_HELMET = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_helmet");
+    private static final ResourceLocation EMPTY_SLOT_CHESTPLATE = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_chestplate");
+    private static final ResourceLocation EMPTY_SLOT_LEGGINGS = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_leggings");
+    private static final ResourceLocation EMPTY_SLOT_BOOTS = ResourceLocation.withDefaultNamespace("item/empty_armor_slot_boots");
+    private static final ResourceLocation EMPTY_SLOT_SWORD = ResourceLocation.withDefaultNamespace("item/empty_slot_sword");
+    private static final ResourceLocation EMPTY_SLOT_PICKAXE = ResourceLocation.withDefaultNamespace("item/empty_slot_pickaxe");
+    private static final ResourceLocation EMPTY_SLOT_AXE = ResourceLocation.withDefaultNamespace("item/empty_slot_axe");
+    private static final ResourceLocation EMPTY_SLOT_SHOVEL = ResourceLocation.withDefaultNamespace("item/empty_slot_shovel");
+    private static final ResourceLocation EMPTY_SLOT_INGOT = ResourceLocation.withDefaultNamespace("item/empty_slot_ingot");
 
     /**
      * Creates the Shimmersteel Upgrade Smithing Template.
@@ -140,6 +133,11 @@ public class ModItems {
             Util.makeDescriptionId("item", Auroral.id("smithing_template.shimmersteel_upgrade.ingredients"))
         ).withStyle(DESCRIPTION_FORMAT);
 
+        // Upgrade description (title shown in smithing table)
+        Component upgradeDescription = Component.translatable(
+            Util.makeDescriptionId("upgrade", Auroral.id("shimmersteel_upgrade"))
+        ).withStyle(TITLE_FORMAT);
+
         // Slot descriptions for smithing table UI
         Component baseSlotDescription = Component.translatable(
             Util.makeDescriptionId("item", Auroral.id("smithing_template.shimmersteel_upgrade.base_slot_description"))
@@ -149,7 +147,7 @@ public class ModItems {
         );
 
         // Icons for base slot (iron equipment)
-        List<Identifier> baseSlotIcons = List.of(
+        List<ResourceLocation> baseSlotIcons = List.of(
             EMPTY_SLOT_HELMET,
             EMPTY_SLOT_SWORD,
             EMPTY_SLOT_CHESTPLATE,
@@ -161,16 +159,16 @@ public class ModItems {
         );
 
         // Icons for addition slot (shimmersteel ingot / shimmerweave fabric)
-        List<Identifier> additionSlotIcons = List.of(EMPTY_SLOT_INGOT);
+        List<ResourceLocation> additionSlotIcons = List.of(EMPTY_SLOT_INGOT);
 
         return new SmithingTemplateItem(
             appliesTo,
             ingredients,
+            upgradeDescription,
             baseSlotDescription,
             additionsSlotDescription,
             baseSlotIcons,
-            additionSlotIcons,
-            properties
+            additionSlotIcons
         );
     }
 }

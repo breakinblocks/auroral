@@ -22,7 +22,7 @@ public class ModCreativeTabs {
                 // Guidebook (if GuideME is loaded)
                 if (ModList.get().isLoaded("guideme")) {
                     try {
-                        ItemStack guideItem = guideme.Guides.createGuideItem(AuroralGuide.GUIDE_ID);
+                        ItemStack guideItem = AuroralGuide.createGuideItem();
                         if (guideItem != null && !guideItem.isEmpty()) {
                             output.accept(guideItem);
                         }
@@ -63,7 +63,6 @@ public class ModCreativeTabs {
                 output.accept(ModItems.SHIMMERSTEEL_HOE.get());
                 output.accept(ModItems.SHIMMERSTEEL_SWORD.get());
                 output.accept(ModItems.SHIMMERSTEEL_BOW.get());
-                output.accept(ModItems.SHIMMER_SPEAR.get());
 
                 // Smithing Templates
                 output.accept(ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE.get());

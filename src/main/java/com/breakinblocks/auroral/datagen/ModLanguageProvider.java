@@ -46,7 +46,6 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.SHIMMERSTEEL_HOE, "Shimmersteel Hoe");
         addItem(ModItems.SHIMMERSTEEL_SWORD, "Shimmersteel Sword");
         addItem(ModItems.SHIMMERSTEEL_BOW, "Shimmersteel Bow");
-        addItem(ModItems.SHIMMER_SPEAR, "Shimmer Spear");
 
         // Items - Shimmerweave Armor
         addItem(ModItems.SHIMMERWEAVE_GOGGLES, "Shimmerweave Goggles");
@@ -56,7 +55,7 @@ public class ModLanguageProvider extends LanguageProvider {
 
         // Items - Other
         addItem(ModItems.GLOW_LEEK, "Glow-Leek");
-        addItem(ModItems.GLOW_LEEK_SEEDS, "Glow-Leek Seeds");
+        // Note: GLOW_LEEK_SEEDS is a BlockItem that uses the block's translation key
         addItem(ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE, "Smithing Template");
 
         // Items - Food
@@ -94,7 +93,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("entity.auroral.auroral_nautilus", "Auroral Nautilus");
         add("entity.auroral.auroral_snowlette", "Auroral Snowlette");
         add("entity.auroral.star_shot", "Star-Shot");
-        add("entity.auroral.thrown_shimmer_spear", "Shimmer Spear");
 
         // Smithing Template descriptions
         add("upgrade.auroral.shimmersteel_upgrade", "Shimmersteel Upgrade");
@@ -123,8 +121,6 @@ public class ModLanguageProvider extends LanguageProvider {
         add("advancement.auroral.shimmerweave_armor.description", "Craft a full set of Shimmerweave armor");
         add("advancement.auroral.cold_brewing_stand.title", "Cold Alchemy");
         add("advancement.auroral.cold_brewing_stand.description", "Craft a Cold Brewing Stand");
-        add("advancement.auroral.shimmer_spear.title", "Northern Star");
-        add("advancement.auroral.shimmer_spear.description", "Craft a Shimmer Spear");
         add("advancement.auroral.glow_leek.title", "Night Vision");
         add("advancement.auroral.glow_leek.description", "Harvest a Glow-Leek");
         add("advancement.auroral.hearthwood_log.title", "Hearth and Home");
@@ -140,8 +136,10 @@ public class ModLanguageProvider extends LanguageProvider {
 
         // Jade integration
         add("config.jade.plugin_auroral.glacial_basin", "Glacial Basin");
+        add("config.jade.plugin_auroral.hearthwood_log", "Hearthwood Log");
 
         // Sound subtitles
+        add("subtitles.auroral.aurora_music", "Aurora music plays");
         add("subtitles.auroral.aurora_ambient", "Aurora hums");
         add("subtitles.auroral.aurora_start", "Aurora begins");
         add("subtitles.auroral.aurora_end", "Aurora fades");

@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.level.redstone.Orientation;
 
 /**
  * Aurora Lantern - A decorative light source that captures and emits aurora light.
@@ -94,7 +93,7 @@ public class AuroraLanternBlock extends Block {
 
     @Override
     protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock,
-                                   Orientation orientation, boolean movedByPiston) {
+                                   BlockPos neighborPos, boolean movedByPiston) {
         // Check if the supporting block was removed
         if (!state.canSurvive(level, pos)) {
             level.destroyBlock(pos, true);

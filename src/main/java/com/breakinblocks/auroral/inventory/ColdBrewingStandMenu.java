@@ -6,7 +6,7 @@ import com.breakinblocks.auroral.registry.ModMenuTypes;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -14,6 +14,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionContents;
 
+import com.mojang.datafixers.util.Pair;
 import java.util.Optional;
 
 /**
@@ -32,12 +34,12 @@ public class ColdBrewingStandMenu extends AbstractContainerMenu {
     /**
      * Snowball fuel slot sprite - displayed when no snowball is in the fuel slot.
      */
-    public static final Identifier EMPTY_SLOT_FUEL = Auroral.id("container/slot/cold_brewing_fuel");
+    public static final ResourceLocation EMPTY_SLOT_FUEL = Auroral.id("container/slot/cold_brewing_fuel");
 
     /**
      * Potion slot sprite - same as vanilla.
      */
-    static final Identifier EMPTY_SLOT_POTION = Identifier.withDefaultNamespace("container/slot/potion");
+    static final ResourceLocation EMPTY_SLOT_POTION = ResourceLocation.withDefaultNamespace("container/slot/potion");
 
     private static final int BOTTLE_SLOT_START = 0;
     private static final int BOTTLE_SLOT_END = 2;
@@ -87,8 +89,17 @@ public class ColdBrewingStandMenu extends AbstractContainerMenu {
         // Add data slots for syncing brew time and fuel
         this.addDataSlots(data);
 
-        // Add player inventory slots
-        this.addStandardInventorySlots(playerInventory, 8, 84);
+        // Add player inventory slots (3x9 grid)
+        for (int row = 0; row < 3; row++) {
+            for (int col = 0; col < 9; col++) {
+                this.addSlot(new Slot(playerInventory, col + row * 9 + 9, 8 + col * 18, 84 + row * 18));
+            }
+        }
+
+        // Add hotbar slots
+        for (int col = 0; col < 9; col++) {
+            this.addSlot(new Slot(playerInventory, col, 8 + col * 18, 142));
+        }
     }
 
     @Override
@@ -185,8 +196,8 @@ public class ColdBrewingStandMenu extends AbstractContainerMenu {
         }
 
         @Override
-        public Identifier getNoItemIcon() {
-            return EMPTY_SLOT_FUEL;
+        public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
+            return Pair.of(InventoryMenu.BLOCK_ATLAS, EMPTY_SLOT_FUEL);
         }
     }
 
@@ -243,8 +254,8 @@ public class ColdBrewingStandMenu extends AbstractContainerMenu {
         }
 
         @Override
-        public Identifier getNoItemIcon() {
-            return EMPTY_SLOT_POTION;
+        public Pair<ResourceLocation, ResourceLocation> getNoItemIcon() {
+            return Pair.of(InventoryMenu.BLOCK_ATLAS, EMPTY_SLOT_POTION);
         }
     }
 }

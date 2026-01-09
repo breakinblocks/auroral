@@ -1,7 +1,9 @@
 package com.breakinblocks.auroral.client.model;
 
 import com.breakinblocks.auroral.Auroral;
-import com.breakinblocks.auroral.client.renderer.AuroralNautilusRenderState;
+import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -17,18 +19,17 @@ import net.minecraft.util.Mth;
  * Model for the Auroral Nautilus.
  * Exact copy of vanilla NautilusModel geometry for proper texture mapping.
  */
-public class AuroralNautilusModel extends EntityModel<AuroralNautilusRenderState> {
+public class AuroralNautilusModel extends EntityModel<AuroralNautilusEntity> {
 
     public static final ModelLayerLocation LAYER_LOCATION =
         new ModelLayerLocation(Auroral.id("auroral_nautilus"), "main");
 
-    protected final ModelPart body;
-    protected final ModelPart nautilus;
+    private final ModelPart root;
+    private final ModelPart body;
 
     public AuroralNautilusModel(ModelPart modelPart) {
-        super(modelPart);
-        this.nautilus = modelPart.getChild("root");
-        this.body = this.nautilus.getChild("body");
+        this.root = modelPart.getChild("root");
+        this.body = this.root.getChild("body");
     }
 
     public static LayerDefinition createBodyLayer() {
@@ -74,9 +75,8 @@ public class AuroralNautilusModel extends EntityModel<AuroralNautilusRenderState
     }
 
     @Override
-    public void setupAnim(AuroralNautilusRenderState renderState) {
-        super.setupAnim(renderState);
-        this.applyBodyRotation(renderState.yRot, renderState.xRot);
+    public void setupAnim(AuroralNautilusEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
+        this.applyBodyRotation(netHeadYaw, headPitch);
     }
 
     private void applyBodyRotation(float yRot, float xRot) {
@@ -84,5 +84,10 @@ public class AuroralNautilusModel extends EntityModel<AuroralNautilusRenderState
         xRot = Mth.clamp(xRot, -10.0F, 10.0F);
         this.body.yRot = yRot * ((float) Math.PI / 180.0F);
         this.body.xRot = xRot * ((float) Math.PI / 180.0F);
+    }
+
+    @Override
+    public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay, int color) {
+        this.root.render(poseStack, buffer, packedLight, packedOverlay, color);
     }
 }

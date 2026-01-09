@@ -1,6 +1,6 @@
 package com.breakinblocks.auroral.item;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ShovelItem;
 
 /**
  * Shimmersteel Shovel with inherent Silk Touch effect.
@@ -12,10 +12,10 @@ import net.minecraft.world.item.Item;
  * The silk touch behavior is implemented via event handler in
  * {@link com.breakinblocks.auroral.events.ShimmersteelEventHandler}.
  */
-public class ShimmersteelShovelItem extends Item {
+public class ShimmersteelShovelItem extends ShovelItem {
 
     public ShimmersteelShovelItem(Properties properties) {
-        super(properties.shovel(ModToolTiers.SHIMMERSTEEL, 1.5f, -3.0f));
+        super(ModToolTiers.SHIMMERSTEEL, properties);
     }
 
     /**

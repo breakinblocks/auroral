@@ -1,6 +1,8 @@
 package com.breakinblocks.auroral.item;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 
 /**
  * Shimmerweave Goggles - Head armor with special ability.
@@ -12,7 +14,7 @@ import net.minecraft.world.item.Item;
  *
  * Future enhancement: Also equippable in Curios slot when that mod is present.
  */
-public class ShimmerweaveGogglesItem extends Item {
+public class ShimmerweaveGogglesItem extends ArmorItem {
 
     /**
      * Radius within which hostile mobs receive glowing effect.
@@ -24,7 +26,7 @@ public class ShimmerweaveGogglesItem extends Item {
      */
     public static final int GLOWING_DURATION = 40; // 2 seconds, refreshed continuously
 
-    public ShimmerweaveGogglesItem(Properties properties) {
-        super(properties);
+    public ShimmerweaveGogglesItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
+        super(material, type, properties);
     }
 }

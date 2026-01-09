@@ -27,17 +27,15 @@ import net.minecraft.world.entity.ai.control.LookControl;
 import net.minecraft.world.entity.ai.control.MoveControl;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.Animal;
-import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec3;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
 import java.util.UUID;
@@ -404,22 +402,11 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             this.yBodyRot = this.getYRot();
             this.yHeadRot = this.yBodyRot;
 
-            float forward = 0;
-            float strafe = 0;
-            boolean isJumping = false;
-
-            if (!this.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
-                Input input = serverPlayer.getLastClientInput();
-                isJumping = input.jump();
-                if (input.forward()) forward += 1.0F;
-                if (input.backward()) forward -= 1.0F;
-                if (input.left()) strafe += 1.0F;
-                if (input.right()) strafe -= 1.0F;
-                strafe *= 0.5F;
-            } else if (this.level().isClientSide()) {
-                forward = player.zza;
-                strafe = player.xxa * 0.5F;
-            }
+            // Use player's movement input directly (works on both client and server)
+            float forward = player.zza;
+            float strafe = player.xxa * 0.5F;
+            // Jump is tracked via PlayerRideableJumping interface methods
+            boolean isJumping = this.getChargeTime() > 0;
 
             int syncedBoostRemaining = this.getBoostRemaining();
             if (syncedBoostRemaining > this.localBoostCountdown) {
@@ -466,7 +453,8 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             this.setDeltaMovement(this.getDeltaMovement().scale(0.91));
             return;
         }
-        this.travelFlying(travelVector, 0.15F);
+        // Apply standard flying travel
+        super.travel(travelVector);
     }
 
     @Override
@@ -557,7 +545,7 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
 
     @Override
     public SpawnGroupData finalizeSpawn(
-        ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason, @Nullable SpawnGroupData spawnData
+        ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, @Nullable SpawnGroupData spawnData
     ) {
         this.anchorPoint = this.blockPosition().above(5);
         this.setNautilusSize(this.random.nextInt(3));
@@ -565,26 +553,35 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
     }
 
     @Override
-    protected void readAdditionalSaveData(ValueInput input) {
-        super.readAdditionalSaveData(input);
-        this.anchorPoint = input.read("anchor_pos", BlockPos.CODEC).orElse(null);
-        this.setNautilusSize(input.getIntOr("size", 0));
-        this.setTamed(input.getBooleanOr("tamed", false));
-        this.entityData.set(DATA_SADDLED, input.getBooleanOr("saddled", false));
-        this.setSitting(input.getBooleanOr("sitting", false));
-        input.read("owner", net.minecraft.core.UUIDUtil.CODEC).ifPresent(this::setOwnerUUID);
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        if (tag.contains("anchor_pos")) {
+            int[] pos = tag.getIntArray("anchor_pos");
+            if (pos.length == 3) {
+                this.anchorPoint = new BlockPos(pos[0], pos[1], pos[2]);
+            }
+        }
+        this.setNautilusSize(tag.getInt("size"));
+        this.setTamed(tag.getBoolean("tamed"));
+        this.entityData.set(DATA_SADDLED, tag.getBoolean("saddled"));
+        this.setSitting(tag.getBoolean("sitting"));
+        if (tag.hasUUID("owner")) {
+            this.setOwnerUUID(tag.getUUID("owner"));
+        }
     }
 
     @Override
-    protected void addAdditionalSaveData(ValueOutput output) {
-        super.addAdditionalSaveData(output);
-        output.storeNullable("anchor_pos", BlockPos.CODEC, this.anchorPoint);
-        output.putInt("size", this.getNautilusSize());
-        output.putBoolean("tamed", this.isTamed());
-        output.putBoolean("saddled", this.isSaddled());
-        output.putBoolean("sitting", this.isSitting());
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (this.anchorPoint != null) {
+            tag.putIntArray("anchor_pos", new int[]{anchorPoint.getX(), anchorPoint.getY(), anchorPoint.getZ()});
+        }
+        tag.putInt("size", this.getNautilusSize());
+        tag.putBoolean("tamed", this.isTamed());
+        tag.putBoolean("saddled", this.isSaddled());
+        tag.putBoolean("sitting", this.isSitting());
         if (this.getOwnerUUID() != null) {
-            output.store("owner", net.minecraft.core.UUIDUtil.CODEC, this.getOwnerUUID());
+            tag.putUUID("owner", this.getOwnerUUID());
         }
     }
 
@@ -631,19 +628,19 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
 
         // Drop saddle if saddled
         if (this.isSaddled()) {
-            this.spawnAtLocation(level, new ItemStack(Items.SADDLE));
+            this.spawnAtLocation(new ItemStack(Items.SADDLE));
         }
 
         // Only drop Aurora Shards if killed by a player
         if (source.getEntity() instanceof Player) {
             int shardCount = 1 + this.random.nextInt(2);
             for (int i = 0; i < shardCount; i++) {
-                this.spawnAtLocation(level, new ItemStack(ModItems.AURORA_SHARD.get()));
+                this.spawnAtLocation(new ItemStack(ModItems.AURORA_SHARD.get()));
             }
 
             // Rare chance to drop a nautilus shell
             if (this.random.nextFloat() < 0.15f) {
-                this.spawnAtLocation(level, new ItemStack(net.minecraft.world.item.Items.NAUTILUS_SHELL));
+                this.spawnAtLocation(new ItemStack(net.minecraft.world.item.Items.NAUTILUS_SHELL));
             }
         }
     }

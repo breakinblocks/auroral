@@ -6,7 +6,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
@@ -22,10 +22,10 @@ import java.util.Optional;
  * When right-clicking on copper blocks, this axe advances the oxidation
  * state instead of removing it (opposite of normal axe behavior).
  */
-public class ShimmersteelAxeItem extends Item {
+public class ShimmersteelAxeItem extends AxeItem {
 
     public ShimmersteelAxeItem(Properties properties) {
-        super(properties.axe(ModToolTiers.SHIMMERSTEEL, 6.0f, -3.1f));
+        super(ModToolTiers.SHIMMERSTEEL, properties);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class ShimmersteelAxeItem extends Item {
                 // Play oxidation sound
                 level.playSound(player, pos, SoundEvents.AXE_SCRAPE, SoundSource.BLOCKS, 1.0f, 1.0f);
 
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(level.isClientSide());
             }
         }
 

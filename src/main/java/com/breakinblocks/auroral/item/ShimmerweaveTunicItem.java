@@ -1,6 +1,8 @@
 package com.breakinblocks.auroral.item;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 
 /**
  * Shimmerweave Tunic - Chestplate armor with special ability.
@@ -11,14 +13,14 @@ import net.minecraft.world.item.Item;
  *
  * The fire extinguishing is handled via event handler in ShimmerweaveEventHandler.
  */
-public class ShimmerweaveTunicItem extends Item {
+public class ShimmerweaveTunicItem extends ArmorItem {
 
     /**
      * Cooldown between fire extinguish effects in ticks (to prevent spam).
      */
     public static final int EXTINGUISH_COOLDOWN = 20; // 1 second
 
-    public ShimmerweaveTunicItem(Properties properties) {
-        super(properties);
+    public ShimmerweaveTunicItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
+        super(material, type, properties);
     }
 }

@@ -48,7 +48,7 @@ public class ModDataAttachments {
     public static final Supplier<AttachmentType<AuroraState>> AURORA_STATE = ATTACHMENT_TYPES.register(
         "aurora_state",
         () -> AttachmentType.builder(() -> AuroraState.INACTIVE)
-            .serialize(AuroraState.CODEC)
+            .serialize(AuroraState.CODEC.codec())
             .build()
     );
 }

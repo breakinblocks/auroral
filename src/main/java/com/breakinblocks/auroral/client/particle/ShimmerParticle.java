@@ -6,7 +6,6 @@ import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.client.particle.SimpleAnimatedParticle;
 import net.minecraft.client.particle.SpriteSet;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.minecraft.util.RandomSource;
 
 /**
  * Generic shimmer particle - used for various effects like basin infusion,
@@ -30,6 +29,9 @@ public class ShimmerParticle extends SimpleAnimatedParticle {
         this.xd = xSpeed * 0.1;
         this.yd = ySpeed * 0.1;
         this.zd = zSpeed * 0.1;
+
+        // Pick initial sprite from the sprite set
+        this.pickSprite(sprites);
     }
 
     @Override
@@ -57,8 +59,7 @@ public class ShimmerParticle extends SimpleAnimatedParticle {
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                        double x, double y, double z,
-                                       double xSpeed, double ySpeed, double zSpeed,
-                                       RandomSource random) {
+                                       double xSpeed, double ySpeed, double zSpeed) {
             return new ShimmerParticle(level, x, y, z, xSpeed, ySpeed, zSpeed,
                 this.sprites, 0.4F, 0.7F, 1.0F);
         }
@@ -75,8 +76,7 @@ public class ShimmerParticle extends SimpleAnimatedParticle {
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                        double x, double y, double z,
-                                       double xSpeed, double ySpeed, double zSpeed,
-                                       RandomSource random) {
+                                       double xSpeed, double ySpeed, double zSpeed) {
             return new ShimmerParticle(level, x, y, z, xSpeed, ySpeed, zSpeed,
                 this.sprites, 1.0F, 0.9F, 0.4F);
         }
@@ -93,8 +93,7 @@ public class ShimmerParticle extends SimpleAnimatedParticle {
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                        double x, double y, double z,
-                                       double xSpeed, double ySpeed, double zSpeed,
-                                       RandomSource random) {
+                                       double xSpeed, double ySpeed, double zSpeed) {
             return new ShimmerParticle(level, x, y, z, xSpeed, ySpeed, zSpeed,
                 this.sprites, 0.8F, 0.9F, 1.0F);
         }
@@ -111,8 +110,7 @@ public class ShimmerParticle extends SimpleAnimatedParticle {
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level,
                                        double x, double y, double z,
-                                       double xSpeed, double ySpeed, double zSpeed,
-                                       RandomSource random) {
+                                       double xSpeed, double ySpeed, double zSpeed) {
             return new ShimmerParticle(level, x, y, z, xSpeed, ySpeed, zSpeed,
                 this.sprites, 0.9F, 0.9F, 0.95F);
         }

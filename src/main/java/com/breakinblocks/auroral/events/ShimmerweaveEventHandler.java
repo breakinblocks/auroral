@@ -9,7 +9,7 @@ import com.breakinblocks.auroral.item.ShimmerweaveTunicItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
@@ -21,7 +21,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.player.Input;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -41,10 +40,10 @@ import java.util.List;
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class ShimmerweaveEventHandler {
 
-    private static final Identifier LEGGINGS_SNOW_SPEED_ID = Auroral.id("shimmerweave_leggings_snow_speed");
-    private static final Identifier LEGGINGS_SOUL_SPEED_ID = Auroral.id("shimmerweave_leggings_soul_speed");
-    private static final Identifier SKATES_ICE_SPEED_ID = Auroral.id("shimmerweave_skates_ice_speed");
-    private static final Identifier SKATES_PACKED_ICE_SPEED_ID = Auroral.id("shimmerweave_skates_packed_ice_speed");
+    private static final ResourceLocation LEGGINGS_SNOW_SPEED_ID = Auroral.id("shimmerweave_leggings_snow_speed");
+    private static final ResourceLocation LEGGINGS_SOUL_SPEED_ID = Auroral.id("shimmerweave_leggings_soul_speed");
+    private static final ResourceLocation SKATES_ICE_SPEED_ID = Auroral.id("shimmerweave_skates_ice_speed");
+    private static final ResourceLocation SKATES_PACKED_ICE_SPEED_ID = Auroral.id("shimmerweave_skates_packed_ice_speed");
 
     private static double getSnowSpeedBoost() {
         return AuroralConfig.SERVER.leggingsSnowSpeedBoost.get();
@@ -99,7 +98,7 @@ public class ShimmerweaveEventHandler {
         try {
             ResourceKey<MobEffect> glowingKey = ResourceKey.create(
                 Registries.MOB_EFFECT,
-                Identifier.withDefaultNamespace("glowing")
+                ResourceLocation.withDefaultNamespace("glowing")
             );
             Holder<MobEffect> glowingHolder = level.registryAccess()
                 .lookupOrThrow(Registries.MOB_EFFECT)

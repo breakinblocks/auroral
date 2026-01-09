@@ -4,7 +4,6 @@ import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.entity.AuroralSnowletteEntity;
 import com.breakinblocks.auroral.entity.StarShotEntity;
-import com.breakinblocks.auroral.entity.ThrownShimmerSpear;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.EntityType;
@@ -27,7 +26,7 @@ public class ModEntities {
                 .sized(0.25F, 0.25F)
                 .clientTrackingRange(4)
                 .updateInterval(10)
-                .build(STAR_SHOT_KEY));
+                .build("auroral:star_shot"));
 
     // Auroral Nautilus - Flying ambient creature during Aurora
     public static final ResourceKey<EntityType<?>> AURORAL_NAUTILUS_KEY =
@@ -40,20 +39,7 @@ public class ModEntities {
                 .eyeHeight(0.3F)
                 .clientTrackingRange(8)
                 .updateInterval(3)
-                .build(AURORAL_NAUTILUS_KEY));
-
-    // Thrown Shimmer Spear - Projectile entity
-    public static final ResourceKey<EntityType<?>> THROWN_SHIMMER_SPEAR_KEY =
-        ResourceKey.create(Registries.ENTITY_TYPE, Auroral.id("thrown_shimmer_spear"));
-
-    public static final Supplier<EntityType<ThrownShimmerSpear>> THROWN_SHIMMER_SPEAR =
-        ENTITIES.register("thrown_shimmer_spear", () ->
-            EntityType.Builder.<ThrownShimmerSpear>of(ThrownShimmerSpear::new, MobCategory.MISC)
-                .sized(0.5F, 0.5F)
-                .eyeHeight(0.13F)
-                .clientTrackingRange(4)
-                .updateInterval(20)
-                .build(THROWN_SHIMMER_SPEAR_KEY));
+                .build("auroral:auroral_nautilus"));
 
     // Auroral Snowlette - Small pet Snow Golem variant
     public static final ResourceKey<EntityType<?>> AURORAL_SNOWLETTE_KEY =
@@ -66,5 +52,5 @@ public class ModEntities {
                 .eyeHeight(0.4F)
                 .clientTrackingRange(8)
                 .updateInterval(3)
-                .build(AURORAL_SNOWLETTE_KEY));
+                .build("auroral:auroral_snowlette"));
 }

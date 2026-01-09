@@ -1,6 +1,8 @@
 package com.breakinblocks.auroral.item;
 
-import net.minecraft.world.item.Item;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 
 /**
  * Shimmerweave Skates - Boots armor with multiple special abilities.
@@ -16,7 +18,7 @@ import net.minecraft.world.item.Item;
  *
  * The special effects are handled via event handler in ShimmerweaveEventHandler.
  */
-public class ShimmerweaveSkatesItem extends Item {
+public class ShimmerweaveSkatesItem extends ArmorItem {
 
     /**
      * Duration of speed effect in ticks (refreshed while on ice/snow).
@@ -28,7 +30,7 @@ public class ShimmerweaveSkatesItem extends Item {
      */
     public static final int FROST_WALKER_RADIUS = 2;
 
-    public ShimmerweaveSkatesItem(Properties properties) {
-        super(properties);
+    public ShimmerweaveSkatesItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
+        super(material, type, properties);
     }
 }

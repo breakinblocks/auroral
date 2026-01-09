@@ -5,13 +5,13 @@ import com.breakinblocks.auroral.registry.ModSounds;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 
@@ -28,8 +28,8 @@ public class ShimmersteelBowItem extends Item {
     }
 
     @Override
-    public ItemUseAnimation getUseAnimation(ItemStack stack) {
-        return ItemUseAnimation.BOW;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.BOW;
     }
 
     @Override
@@ -38,29 +38,29 @@ public class ShimmersteelBowItem extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack bowStack = player.getItemInHand(hand);
 
         // Check if player has snowball ammo (or is creative)
         boolean hasAmmo = player.getAbilities().instabuild || hasSnowballAmmo(player);
 
         if (!hasAmmo) {
-            return InteractionResult.FAIL;
+            return InteractionResultHolder.fail(bowStack);
         }
 
         player.startUsingItem(hand);
-        return InteractionResult.CONSUME;
+        return InteractionResultHolder.consume(bowStack);
     }
 
     @Override
-    public boolean releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
+    public void releaseUsing(ItemStack stack, Level level, LivingEntity entity, int timeLeft) {
         if (!(entity instanceof Player player)) {
-            return false;
+            return;
         }
 
         int useDuration = this.getUseDuration(stack, entity) - timeLeft;
         if (useDuration < 3) {
-            return false; // Not drawn enough
+            return; // Not drawn enough
         }
 
         // Check for ammo
@@ -68,7 +68,7 @@ public class ShimmersteelBowItem extends Item {
         ItemStack ammoStack = findSnowballAmmo(player);
 
         if (ammoStack.isEmpty() && !isCreative) {
-            return false;
+            return;
         }
 
         if (!level.isClientSide()) {
@@ -100,7 +100,6 @@ public class ShimmersteelBowItem extends Item {
         }
 
         player.awardStat(Stats.ITEM_USED.get(this));
-        return true;
     }
 
     /**

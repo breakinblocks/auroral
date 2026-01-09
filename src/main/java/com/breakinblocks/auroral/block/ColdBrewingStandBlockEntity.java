@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -16,10 +16,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.level.Level;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.ValueInput;
-import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * Block entity for the Cold Brewing Stand.
@@ -108,33 +108,35 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     }
 
     @Override
-    protected void loadAdditional(ValueInput input) {
-        super.loadAdditional(input);
+    protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.loadAdditional(tag, registries);
         // Items are loaded by BaseContainerBlockEntity.loadAdditional
-        this.brewTime = input.getIntOr("BrewTime", 0);
-        this.fuel = input.getIntOr("Fuel", 0);
+        this.brewTime = tag.getInt("BrewTime");
+        this.fuel = tag.getInt("Fuel");
 
         // Load the ingredient item for mid-brew save/load
-        String ingredientId = input.getStringOr("Ingredient", "");
-        if (!ingredientId.isEmpty()) {
-            Identifier itemId = Identifier.tryParse(ingredientId);
-            if (itemId != null) {
-                this.ingredient = BuiltInRegistries.ITEM.getValue(itemId);
+        if (tag.contains("Ingredient")) {
+            String ingredientId = tag.getString("Ingredient");
+            if (!ingredientId.isEmpty()) {
+                ResourceLocation itemId = ResourceLocation.tryParse(ingredientId);
+                if (itemId != null) {
+                    this.ingredient = BuiltInRegistries.ITEM.get(itemId);
+                }
             }
         }
     }
 
     @Override
-    protected void saveAdditional(ValueOutput output) {
-        super.saveAdditional(output);
+    protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+        super.saveAdditional(tag, registries);
         // Items are saved by BaseContainerBlockEntity.saveAdditional
-        output.putInt("BrewTime", this.brewTime);
-        output.putInt("Fuel", this.fuel);
+        tag.putInt("BrewTime", this.brewTime);
+        tag.putInt("Fuel", this.fuel);
 
         // Save the ingredient item for mid-brew save/load
         if (this.ingredient != null) {
-            Identifier itemId = BuiltInRegistries.ITEM.getKey(this.ingredient);
-            output.putString("Ingredient", itemId.toString());
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(this.ingredient);
+            tag.putString("Ingredient", itemId.toString());
         }
     }
 

@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -25,10 +25,10 @@ import net.minecraft.world.level.gameevent.GameEvent;
  * The silk touch behavior is implemented via event handler in
  * {@link com.breakinblocks.auroral.events.ShimmersteelEventHandler}.
  */
-public class ShimmersteelHoeItem extends Item {
+public class ShimmersteelHoeItem extends HoeItem {
 
     public ShimmersteelHoeItem(Properties properties) {
-        super(properties.hoe(ModToolTiers.SHIMMERSTEEL, -2.0f, -1.0f));
+        super(ModToolTiers.SHIMMERSTEEL, properties);
     }
 
     /**
@@ -64,7 +64,7 @@ public class ShimmersteelHoeItem extends Item {
                 }
                 level.playSound(player, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
                 damageItem(context, player);
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(level.isClientSide());
             }
         }
         // Check if clicking on snow block or powder snow (convert directly)
@@ -78,7 +78,7 @@ public class ShimmersteelHoeItem extends Item {
                 }
                 level.playSound(player, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
                 damageItem(context, player);
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(level.isClientSide());
             }
         }
         // Check if clicking on regular farmland (upgrade to shimmer soil)
@@ -94,7 +94,7 @@ public class ShimmersteelHoeItem extends Item {
             }
             level.playSound(player, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
             damageItem(context, player);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(level.isClientSide());
         }
         // Check if clicking on dirt, grass, or similar blocks (till directly to shimmer soil)
         else if (SnowBlockHelper.canTillToShimmerSoil(state)) {
@@ -107,12 +107,12 @@ public class ShimmersteelHoeItem extends Item {
                 }
                 level.playSound(player, pos, SoundEvents.HOE_TILL, SoundSource.BLOCKS, 1.0F, 1.0F);
                 damageItem(context, player);
-                return InteractionResult.SUCCESS;
+                return InteractionResult.sidedSuccess(level.isClientSide());
             }
         }
 
-        // No valid tilling action
-        return InteractionResult.PASS;
+        // Fall back to normal hoe behavior
+        return super.useOn(context);
     }
 
     /**

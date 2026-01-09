@@ -1,7 +1,7 @@
 package com.breakinblocks.auroral.effect;
 
 import com.breakinblocks.auroral.Auroral;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -42,8 +42,8 @@ public class FrostbiteEffect extends MobEffect {
      */
     public static final double ARMOR_REDUCTION_PER_LEVEL = 2.0;
 
-    private static final Identifier ARMOR_MODIFIER_ID = Auroral.id("frostbite_armor_reduction");
-    private static final Identifier SPEED_MODIFIER_ID = Auroral.id("frostbite_speed_reduction");
+    private static final ResourceLocation ARMOR_MODIFIER_ID = Auroral.id("frostbite_armor_reduction");
+    private static final ResourceLocation SPEED_MODIFIER_ID = Auroral.id("frostbite_speed_reduction");
 
     public FrostbiteEffect(MobEffectCategory category, int color) {
         super(category, color);

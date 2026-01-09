@@ -1,8 +1,7 @@
 package com.breakinblocks.auroral.item;
 
 import com.breakinblocks.auroral.registry.ModTags;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -17,7 +16,7 @@ import java.util.Set;
  *
  * The Fortune effect is applied via event handler in ShimmersteelEventHandler.
  */
-public class ShimmersteelPickaxeItem extends Item {
+public class ShimmersteelPickaxeItem extends PickaxeItem {
 
     /**
      * Set of blocks that count as "gems" for the Fortune bonus.
@@ -39,7 +38,7 @@ public class ShimmersteelPickaxeItem extends Item {
     );
 
     public ShimmersteelPickaxeItem(Properties properties) {
-        super(properties.pickaxe(ModToolTiers.SHIMMERSTEEL, 1.0f, -2.8f));
+        super(ModToolTiers.SHIMMERSTEEL, properties);
     }
 
     /**

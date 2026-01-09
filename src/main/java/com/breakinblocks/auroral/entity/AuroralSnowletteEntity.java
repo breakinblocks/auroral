@@ -2,14 +2,15 @@ package com.breakinblocks.auroral.entity;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.registry.ModEntities;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AgeableMob;
-import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -20,12 +21,12 @@ import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.SitWhenOrderedToGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
+import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Auroral Snowlette - A tiny, friendly pet Snow Golem created by using an Aurora Shard on a Snow Golem.
@@ -93,15 +94,17 @@ public class AuroralSnowletteEntity extends TamableAnimal {
     }
 
     @Override
-    public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
+    public boolean hurt(DamageSource source, float amount) {
         // Check if hit by a snowball - heal instead of damage
         if (source.getDirectEntity() instanceof Snowball) {
             // Heal by 2 hearts when hit by snowball
             this.heal(4.0F);
 
             // Happy particles
-            level.sendParticles(ParticleTypes.HEART, getX(), getY() + 0.5, getZ(), 3, 0.3, 0.3, 0.3, 0);
-            level.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 0.3, getZ(), 8, 0.3, 0.3, 0.3, 0.05);
+            if (this.level() instanceof ServerLevel serverLevel) {
+                serverLevel.sendParticles(ParticleTypes.HEART, getX(), getY() + 0.5, getZ(), 3, 0.3, 0.3, 0.3, 0);
+                serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 0.3, getZ(), 8, 0.3, 0.3, 0.3, 0.05);
+            }
 
             // Play happy sound
             this.playSound(SoundEvents.SNOW_GOLEM_AMBIENT, 1.0F, 1.2F);
@@ -109,7 +112,7 @@ public class AuroralSnowletteEntity extends TamableAnimal {
             return false; // Don't take damage
         }
 
-        return super.hurtServer(level, source, amount);
+        return super.hurt(source, amount);
     }
 
     @Override
@@ -169,11 +172,13 @@ public class AuroralSnowletteEntity extends TamableAnimal {
      * Create a Snowlette from a Snow Golem's position and owner.
      */
     public static AuroralSnowletteEntity createFromSnowGolem(ServerLevel level, double x, double y, double z, Player owner) {
-        AuroralSnowletteEntity snowlette = ModEntities.AURORAL_SNOWLETTE.get().create(level, EntitySpawnReason.CONVERSION);
+        BlockPos spawnPos = BlockPos.containing(x, y, z);
+        AuroralSnowletteEntity snowlette = ModEntities.AURORAL_SNOWLETTE.get().create(
+            level, null, spawnPos, MobSpawnType.CONVERSION, false, false);
         if (snowlette != null) {
             snowlette.setPos(x, y, z);
-            snowlette.setTame(true, false);
-            snowlette.setOwner(owner);
+            snowlette.setTame(true, true); // (tamed, applyTamingSideEffects)
+            snowlette.setOwnerUUID(owner.getUUID());
             level.addFreshEntity(snowlette);
 
             // Spawn transformation particles

@@ -3,94 +3,84 @@ package com.breakinblocks.auroral.datagen;
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.registry.ModBlocks;
 import com.breakinblocks.auroral.registry.ModItems;
-import net.minecraft.client.data.models.BlockModelGenerators;
-import net.minecraft.client.data.models.ItemModelGenerators;
-import net.minecraft.client.data.models.ModelProvider;
-import net.minecraft.client.data.models.model.ModelTemplates;
-import net.minecraft.core.Holder;
 import net.minecraft.data.PackOutput;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
-
-import java.util.stream.Stream;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.client.model.generators.ItemModelProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 
 /**
- * Data generator for block states, block models, and item models.
- * NeoForge 21.11 uses the vanilla ModelProvider with NeoForge extensions.
+ * Data generator for item models.
+ * Uses NeoForge's ItemModelProvider for 1.21.1 compatibility.
  *
  * Complex blocks with property-based variants use static JSON files in
- * src/main/resources/assets/auroral/ as the 1.21.11 API differs significantly
- * from earlier versions and documentation is limited.
+ * src/main/resources/assets/auroral/ as they require manual configuration.
  */
-public class ModModelProvider extends ModelProvider {
+public class ModModelProvider extends ItemModelProvider {
 
-    public ModModelProvider(PackOutput output) {
-        super(output, Auroral.MOD_ID);
+    public ModModelProvider(PackOutput output, ExistingFileHelper existingFileHelper) {
+        super(output, Auroral.MOD_ID, existingFileHelper);
     }
 
     @Override
-    protected Stream<? extends Holder<Block>> getKnownBlocks() {
-        // Return empty - we manually handle blocks or use static JSON
-        return Stream.empty();
-    }
-
-    @Override
-    protected Stream<? extends Holder<Item>> getKnownItems() {
-        // Return empty - we manually handle items or use static JSON
-        return Stream.empty();
-    }
-
-    @Override
-    protected void registerModels(BlockModelGenerators blockModels, ItemModelGenerators itemModels) {
-        // === SIMPLE BLOCKS ===
-        // Shimmering Ice - simple translucent cube
-        blockModels.createTrivialCube(ModBlocks.SHIMMERING_ICE.get());
-
-        // === ITEMS - using generateFlatItem ===
+    protected void registerModels() {
+        // === ITEMS - using basicItem for flat items ===
 
         // Basic Materials - flat items
-        itemModels.generateFlatItem(ModItems.UNREFINED_SHIMMERSTEEL.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_INGOT.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERWEAVE_FABRIC.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.WOVEN_LEATHER.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.AURORA_SHARD.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.FROZEN_PETALS.get(), ModelTemplates.FLAT_ITEM);
+        basicItem(ModItems.UNREFINED_SHIMMERSTEEL.get());
+        basicItem(ModItems.SHIMMERSTEEL_INGOT.get());
+        basicItem(ModItems.SHIMMERWEAVE_FABRIC.get());
+        basicItem(ModItems.WOVEN_LEATHER.get());
+        basicItem(ModItems.AURORA_SHARD.get());
+        basicItem(ModItems.FROZEN_PETALS.get());
 
         // Food items
-        itemModels.generateFlatItem(ModItems.GLOW_LEEK.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.CANDIED_GLOW_LEEK.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.HOT_COCOA.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.FROSTED_COOKIES.get(), ModelTemplates.FLAT_ITEM);
+        basicItem(ModItems.GLOW_LEEK.get());
+        basicItem(ModItems.CANDIED_GLOW_LEEK.get());
+        basicItem(ModItems.HOT_COCOA.get());
+        basicItem(ModItems.FROSTED_COOKIES.get());
 
         // Seeds
-        itemModels.generateFlatItem(ModItems.GLOW_LEEK_SEEDS.get(), ModelTemplates.FLAT_ITEM);
+        basicItem(ModItems.GLOW_LEEK_SEEDS.get());
 
         // Tools - handheld items
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_PICKAXE.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_AXE.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_SHOVEL.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_HOE.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_SWORD.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMER_SPEAR.get(), ModelTemplates.FLAT_HANDHELD_ITEM);
+        handheldItem(ModItems.SHIMMERSTEEL_PICKAXE.get());
+        handheldItem(ModItems.SHIMMERSTEEL_AXE.get());
+        handheldItem(ModItems.SHIMMERSTEEL_SHOVEL.get());
+        handheldItem(ModItems.SHIMMERSTEEL_HOE.get());
+        handheldItem(ModItems.SHIMMERSTEEL_SWORD.get());
         // Bow uses static JSON with minecraft:item/bow parent and overrides for pulling animation
 
         // Armor - flat items
-        itemModels.generateFlatItem(ModItems.SHIMMERWEAVE_GOGGLES.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERWEAVE_TUNIC.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERWEAVE_LEGGINGS.get(), ModelTemplates.FLAT_ITEM);
-        itemModels.generateFlatItem(ModItems.SHIMMERWEAVE_SKATES.get(), ModelTemplates.FLAT_ITEM);
+        basicItem(ModItems.SHIMMERWEAVE_GOGGLES.get());
+        basicItem(ModItems.SHIMMERWEAVE_TUNIC.get());
+        basicItem(ModItems.SHIMMERWEAVE_LEGGINGS.get());
+        basicItem(ModItems.SHIMMERWEAVE_SKATES.get());
 
         // Smithing template
-        itemModels.generateFlatItem(ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE.get(), ModelTemplates.FLAT_ITEM);
+        basicItem(ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE.get());
 
-        // Spawn eggs use static JSON files with minecraft:item/template_spawn_egg parent
+        // Spawn eggs - use parent template_spawn_egg
+        withExistingParent(ModItems.AURORAL_NAUTILUS_SPAWN_EGG.getId().getPath(),
+            ResourceLocation.withDefaultNamespace("item/template_spawn_egg"));
+        withExistingParent(ModItems.AURORAL_SNOWLETTE_SPAWN_EGG.getId().getPath(),
+            ResourceLocation.withDefaultNamespace("item/template_spawn_egg"));
 
-        // Block items with flat models
-        blockModels.registerSimpleFlatItemModel(ModBlocks.AURORA_BLOOM.get());
-        blockModels.registerSimpleFlatItemModel(ModBlocks.SNOW_ANGEL.get());
+        // Block items - Aurora Bloom and Snow Angel use flat item models with block textures
+        withExistingParent(ModItems.AURORA_BLOOM_ITEM.getId().getPath(), ResourceLocation.withDefaultNamespace("item/generated"))
+            .texture("layer0", Auroral.id("block/aurora_bloom"));
+        withExistingParent(ModItems.SNOW_ANGEL_ITEM.getId().getPath(), ResourceLocation.withDefaultNamespace("item/generated"))
+            .texture("layer0", Auroral.id("block/snow_angel"));
 
         // Note: Complex blocks with property variants (glacial_basin, hearthwood_log,
-        // aurora_lantern, aurora_bloom, glow_leek, cold_brewing_stand) use static JSON
-        // files due to significant API changes in 1.21.11 that differ from documentation.
+        // aurora_lantern, glow_leek, cold_brewing_stand) use static JSON files.
+    }
+
+    /**
+     * Helper for handheld items that aren't covered by the parent handheldItem method.
+     */
+    private void simpleHandheldItem(net.minecraft.world.item.Item item) {
+        ResourceLocation id = item.builtInRegistryHolder().key().location();
+        withExistingParent(id.getPath(), ResourceLocation.withDefaultNamespace("item/handheld"))
+            .texture("layer0", Auroral.id("item/" + id.getPath()));
     }
 }

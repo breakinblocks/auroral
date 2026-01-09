@@ -11,7 +11,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.permissions.Permissions;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -30,7 +29,7 @@ public class AuroraCommand {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
 
         dispatcher.register(Commands.literal("aurora")
-            .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER)) // Op level 2
+            .requires(source -> source.hasPermission(2)) // Op level 2
             .then(Commands.literal("start")
                 .executes(ctx -> startAurora(ctx, DEFAULT_DURATION))
                 .then(Commands.argument("duration", IntegerArgumentType.integer(100, 240000))

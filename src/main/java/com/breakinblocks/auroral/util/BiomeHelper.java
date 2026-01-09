@@ -29,9 +29,7 @@ public class BiomeHelper {
         }
 
         // Check if the biome has cold enough temperature for snow
-        // In 1.21.11, coldEnoughToSnow takes BlockPos and sea level
-        int seaLevel = level.getSeaLevel();
-        if (biome.coldEnoughToSnow(pos, seaLevel)) {
+        if (biome.coldEnoughToSnow(pos)) {
             return true;
         }
 

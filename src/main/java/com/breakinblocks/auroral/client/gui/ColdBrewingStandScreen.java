@@ -4,9 +4,8 @@ import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.inventory.ColdBrewingStandMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 
@@ -15,15 +14,15 @@ import net.minecraft.world.entity.player.Inventory;
  * Uses the same layout as vanilla brewing stand but with cold/winter theming.
  */
 public class ColdBrewingStandScreen extends AbstractContainerScreen<ColdBrewingStandMenu> {
-    private static final Identifier FUEL_LENGTH_SPRITE = Identifier.withDefaultNamespace("container/brewing_stand/fuel_length");
-    private static final Identifier BREW_PROGRESS_SPRITE = Identifier.withDefaultNamespace("container/brewing_stand/brew_progress");
-    private static final Identifier BUBBLES_SPRITE = Identifier.withDefaultNamespace("container/brewing_stand/bubbles");
+    private static final ResourceLocation FUEL_LENGTH_SPRITE = ResourceLocation.withDefaultNamespace("container/brewing_stand/fuel_length");
+    private static final ResourceLocation BREW_PROGRESS_SPRITE = ResourceLocation.withDefaultNamespace("container/brewing_stand/brew_progress");
+    private static final ResourceLocation BUBBLES_SPRITE = ResourceLocation.withDefaultNamespace("container/brewing_stand/bubbles");
 
     /**
      * Use vanilla brewing stand texture as base.
      * The snowball icon is rendered via the slot's getNoItemIcon() method.
      */
-    private static final Identifier BREWING_STAND_LOCATION = Identifier.withDefaultNamespace("textures/gui/container/brewing_stand.png");
+    private static final ResourceLocation BREWING_STAND_LOCATION = ResourceLocation.withDefaultNamespace("textures/gui/container/brewing_stand.png");
 
     /**
      * Bubble animation lengths (same as vanilla).
@@ -53,13 +52,13 @@ public class ColdBrewingStandScreen extends AbstractContainerScreen<ColdBrewingS
         int y = (this.height - this.imageHeight) / 2;
 
         // Draw the background texture
-        graphics.blit(RenderPipelines.GUI_TEXTURED, BREWING_STAND_LOCATION, x, y, 0.0F, 0.0F, this.imageWidth, this.imageHeight, 256, 256);
+        graphics.blit(BREWING_STAND_LOCATION, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
         // Draw the fuel bar
         int fuel = this.menu.getFuel();
         int fuelLength = Mth.clamp((18 * fuel + 20 - 1) / 20, 0, 18);
         if (fuelLength > 0) {
-            graphics.blitSprite(RenderPipelines.GUI_TEXTURED, FUEL_LENGTH_SPRITE, 18, 4, 0, 0, x + 60, y + 44, fuelLength, 4);
+            graphics.blitSprite(FUEL_LENGTH_SPRITE, 18, 4, 0, 0, x + 60, y + 44, fuelLength, 4);
         }
 
         // Draw brew progress and bubbles
@@ -68,13 +67,13 @@ public class ColdBrewingStandScreen extends AbstractContainerScreen<ColdBrewingS
             // Progress arrow
             int progress = (int)(28.0F * (1.0F - brewingTicks / 400.0F));
             if (progress > 0) {
-                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BREW_PROGRESS_SPRITE, 9, 28, 0, 0, x + 97, y + 16, 9, progress);
+                graphics.blitSprite(BREW_PROGRESS_SPRITE, 9, 28, 0, 0, x + 97, y + 16, 9, progress);
             }
 
             // Bubbles animation
             int bubbleHeight = BUBBLELENGTHS[brewingTicks / 2 % 7];
             if (bubbleHeight > 0) {
-                graphics.blitSprite(RenderPipelines.GUI_TEXTURED, BUBBLES_SPRITE, 12, 29, 0, 29 - bubbleHeight, x + 63, y + 14 + 29 - bubbleHeight, 12, bubbleHeight);
+                graphics.blitSprite(BUBBLES_SPRITE, 12, 29, 0, 29 - bubbleHeight, x + 63, y + 14 + 29 - bubbleHeight, 12, bubbleHeight);
             }
         }
     }

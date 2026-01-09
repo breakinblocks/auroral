@@ -6,8 +6,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 
@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Blocks;
  *
  * The execute mechanic is handled via event in ShimmersteelEventHandler.
  */
-public class ShimmersteelSwordItem extends Item {
+public class ShimmersteelSwordItem extends SwordItem {
 
     /**
      * Default HP threshold for execute (15% of max HP).
@@ -35,7 +35,7 @@ public class ShimmersteelSwordItem extends Item {
     public static final int FROSTBITE_DURATION = 60;
 
     public ShimmersteelSwordItem(Properties properties) {
-        super(properties.sword(ModToolTiers.SHIMMERSTEEL, 3, -2.4f));
+        super(ModToolTiers.SHIMMERSTEEL, properties);
     }
 
     @Override

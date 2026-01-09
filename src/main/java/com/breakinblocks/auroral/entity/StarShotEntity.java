@@ -111,7 +111,7 @@ public class StarShotEntity extends Projectile {
         if (!this.level().isClientSide() && this.level() instanceof ServerLevel serverLevel) {
             // Deal damage
             DamageSource damageSource = this.damageSources().thrown(this, owner);
-            target.hurtOrSimulate(damageSource, DAMAGE);
+            target.hurt(damageSource, DAMAGE);
 
             // Create flashbang effect
             createFlashbangEffect(serverLevel);

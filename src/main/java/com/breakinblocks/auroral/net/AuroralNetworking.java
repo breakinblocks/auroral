@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 /**
  * Handles network payload registration and sending utilities.
  */
-@EventBusSubscriber(modid = Auroral.MOD_ID)
+@EventBusSubscriber(modid = Auroral.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class AuroralNetworking {
 
     @SubscribeEvent

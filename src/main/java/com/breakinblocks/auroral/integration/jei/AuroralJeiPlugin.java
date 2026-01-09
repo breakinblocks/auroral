@@ -9,7 +9,7 @@ import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -22,10 +22,10 @@ import java.util.List;
  */
 @JeiPlugin
 public class AuroralJeiPlugin implements IModPlugin {
-    private static final Identifier PLUGIN_ID = Auroral.id("jei_plugin");
+    private static final ResourceLocation PLUGIN_ID = Auroral.id("jei_plugin");
 
     @Override
-    public Identifier getPluginUid() {
+    public ResourceLocation getPluginUid() {
         return PLUGIN_ID;
     }
 
@@ -70,16 +70,16 @@ public class AuroralJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
         // Register the Glacial Basin as a crafting station for basin infusion recipes
-        registration.addCraftingStation(
-            BasinInfusionRecipeCategory.RECIPE_TYPE,
-            ModBlocks.GLACIAL_BASIN.get()
+        registration.addRecipeCatalyst(
+            new ItemStack(ModBlocks.GLACIAL_BASIN.get()),
+            BasinInfusionRecipeCategory.RECIPE_TYPE
         );
 
         // Register the Cold Brewing Stand as a catalyst for brewing recipes
         // This allows JEI to show brewing recipes when pressing U on the Cold Brewing Stand
-        registration.addCraftingStation(
-            RecipeTypes.BREWING,
-            ModBlocks.COLD_BREWING_STAND.get()
+        registration.addRecipeCatalyst(
+            new ItemStack(ModBlocks.COLD_BREWING_STAND.get()),
+            RecipeTypes.BREWING
         );
     }
 }
