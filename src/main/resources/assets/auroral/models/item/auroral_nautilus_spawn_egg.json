@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "auroral:item/auroral_nautilus_spawn_egg"
-  }
-}
