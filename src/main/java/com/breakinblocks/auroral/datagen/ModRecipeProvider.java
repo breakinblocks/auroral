@@ -232,5 +232,25 @@ public class ModRecipeProvider extends RecipeProvider {
             .define('L', ItemTags.LOGS_THAT_BURN)
             .unlockedBy("has_aurora_shard", has(ModItems.AURORA_SHARD.get()))
             .save(output);
+
+        // Shimmersteel Upgrade Smithing Template: Aurora Shard surrounded by Deepslate
+        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE.get())
+            .pattern("DDD")
+            .pattern("DAD")
+            .pattern("DDD")
+            .define('D', Blocks.DEEPSLATE)
+            .define('A', ModItems.AURORA_SHARD.get())
+            .unlockedBy("has_aurora_shard", has(ModItems.AURORA_SHARD.get()))
+            .save(output);
+
+        // Ice from Snowballs: 8 snowballs around a water bucket
+        ShapedRecipeBuilder.shaped(RecipeCategory.BUILDING_BLOCKS, Blocks.ICE)
+            .pattern("SSS")
+            .pattern("SWS")
+            .pattern("SSS")
+            .define('S', Items.SNOWBALL)
+            .define('W', Items.WATER_BUCKET)
+            .unlockedBy("has_snowball", has(Items.SNOWBALL))
+            .save(output, Auroral.id("ice_from_snowballs"));
     }
 }

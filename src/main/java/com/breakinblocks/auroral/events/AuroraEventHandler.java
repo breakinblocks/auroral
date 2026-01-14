@@ -87,7 +87,7 @@ public class AuroraEventHandler {
     /**
      * Chance to spawn an Auroral Nautilus near each player per interval.
      */
-    private static final double NAUTILUS_SPAWN_CHANCE = 0.15;
+    private static final double NAUTILUS_SPAWN_CHANCE = 0.08;
 
     /**
      * Maximum Auroral Nautiluses that can exist per player.
