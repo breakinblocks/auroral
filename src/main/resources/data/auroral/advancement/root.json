@@ -9,7 +9,7 @@
     "description": {
       "translate": "advancement.auroral.root.description"
     },
-    "background": "minecraft:textures/gui/advancements/backgrounds/adventure.png",
+    "background": "minecraft:block/blue_ice",
     "show_toast": false,
     "announce_to_chat": false
   },

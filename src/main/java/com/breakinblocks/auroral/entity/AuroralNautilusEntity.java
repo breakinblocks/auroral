@@ -634,16 +634,22 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             this.spawnAtLocation(level, new ItemStack(Items.SADDLE));
         }
 
-        // Only drop Aurora Shards if killed by a player
+        // Only drop loot if killed by a player
         if (source.getEntity() instanceof Player) {
-            int shardCount = 1 + this.random.nextInt(2);
-            for (int i = 0; i < shardCount; i++) {
-                this.spawnAtLocation(level, new ItemStack(ModItems.AURORA_SHARD.get()));
+            // Drop leather (1-2 pieces)
+            int leatherCount = 1 + this.random.nextInt(2);
+            for (int i = 0; i < leatherCount; i++) {
+                this.spawnAtLocation(level, new ItemStack(Items.LEATHER));
+            }
+
+            // Very small chance to drop prismarine shard
+            if (this.random.nextFloat() < 0.05f) {
+                this.spawnAtLocation(level, new ItemStack(Items.PRISMARINE_SHARD));
             }
 
             // Rare chance to drop a nautilus shell
             if (this.random.nextFloat() < 0.15f) {
-                this.spawnAtLocation(level, new ItemStack(net.minecraft.world.item.Items.NAUTILUS_SHELL));
+                this.spawnAtLocation(level, new ItemStack(Items.NAUTILUS_SHELL));
             }
         }
     }
