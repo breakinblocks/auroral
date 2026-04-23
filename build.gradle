@@ -97,6 +97,7 @@ dependencies {
 }
 
 tasks.withType(ProcessResources).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     var replaceProperties = [
             minecraft_version      : minecraft_version,
             neoforge_loader_version: neoforge_loader_version,
