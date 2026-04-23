@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePrope
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import com.breakinblocks.auroral.block.AuroraBloomBlock;
+import com.breakinblocks.auroral.block.GlowLeekBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantments;
 
@@ -61,6 +62,7 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.COLD_BREWING_STAND.get());
             dropSelf(ModBlocks.HEARTHWOOD_LOG.get());
             dropSelf(ModBlocks.SHIMMERING_ICE.get());
+            dropSelf(ModBlocks.AURORA_LANTERN.get());
 
             // Aurora Bloom drops Frozen Petals (1-4 with fortune) when fully grown (age=3)
             // Harvesting early yields nothing
@@ -75,9 +77,15 @@ public class ModLootTableProvider extends LootTableProvider {
                         .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1)))
                 ));
 
-            // Glow-Leek drops itself when mature, seeds otherwise
-            // For now, drop the seeds as a simple implementation
-            dropOther(ModBlocks.GLOW_LEEK.get(), ModItems.GLOW_LEEK_SEEDS.get());
+            // Glow-Leek: mature drops one leek plus bonus seeds (wheat-style), non-mature drops one seed.
+            var glowLeekMature = LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.GLOW_LEEK.get())
+                .setProperties(StatePropertiesPredicate.Builder.properties()
+                    .hasProperty(GlowLeekBlock.AGE, GlowLeekBlock.MAX_AGE));
+            add(ModBlocks.GLOW_LEEK.get(), this.createCropDrops(
+                ModBlocks.GLOW_LEEK.get(),
+                ModItems.GLOW_LEEK.get(),
+                ModItems.GLOW_LEEK_SEEDS.get(),
+                glowLeekMature));
         }
 
         @Override
@@ -88,7 +96,8 @@ public class ModLootTableProvider extends LootTableProvider {
                 ModBlocks.HEARTHWOOD_LOG.get(),
                 ModBlocks.SHIMMERING_ICE.get(),
                 ModBlocks.AURORA_BLOOM.get(),
-                ModBlocks.GLOW_LEEK.get()
+                ModBlocks.GLOW_LEEK.get(),
+                ModBlocks.AURORA_LANTERN.get()
             );
         }
     }

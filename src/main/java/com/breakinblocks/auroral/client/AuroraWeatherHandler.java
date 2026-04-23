@@ -1,6 +1,7 @@
 package com.breakinblocks.auroral.client;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.registry.ModParticles;
 import com.breakinblocks.auroral.util.BiomeHelper;
 import net.minecraft.client.Minecraft;
@@ -47,6 +48,10 @@ public class AuroraWeatherHandler {
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         // Only process client player
         if (!(event.getEntity() instanceof LocalPlayer player)) {
+            return;
+        }
+
+        if (!AuroralConfig.CLIENT.showAuroraParticles.get()) {
             return;
         }
 

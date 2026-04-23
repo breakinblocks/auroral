@@ -1,6 +1,7 @@
 package com.breakinblocks.auroral.client;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.registry.ModSounds;
 import com.breakinblocks.auroral.util.BiomeHelper;
 import net.minecraft.client.Minecraft;
@@ -37,6 +38,7 @@ public class AuroraMusicHandler {
 
         Level level = player.level();
         boolean shouldPlay = ClientAuroraState.isAuroraActive()
+            && AuroralConfig.CLIENT.playAuroraAmbientSound.get()
             && BiomeHelper.isColdBiome(level, player.blockPosition())
             && level.canSeeSky(player.blockPosition());
 

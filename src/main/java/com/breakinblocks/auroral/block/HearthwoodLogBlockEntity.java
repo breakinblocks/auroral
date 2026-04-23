@@ -105,6 +105,12 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
         }
     }
 
+    public void resetBurnTime() {
+        this.burnTimeRemaining = MAX_BURN_TIME;
+        this.effectTimer = 0;
+        this.setChanged();
+    }
+
     public int getBurnTimeRemaining() {
         return burnTimeRemaining;
     }
