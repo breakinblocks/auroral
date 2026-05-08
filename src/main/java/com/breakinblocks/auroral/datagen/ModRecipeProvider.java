@@ -10,6 +10,7 @@ import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.data.recipes.RecipeProvider;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.data.recipes.SimpleCookingRecipeBuilder;
 import net.minecraft.data.recipes.SmithingTransformRecipeBuilder;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
@@ -98,6 +99,55 @@ public class ModRecipeProvider extends RecipeProvider {
             .requires(Items.COCOA_BEANS)
             .requires(Items.SUGAR)
             .unlockedBy("has_cocoa_beans", has(Items.COCOA_BEANS))
+            .save(output);
+
+        // Roasted Snowball: smelt a snowball in a furnace
+        SimpleCookingRecipeBuilder.smelting(
+                Ingredient.of(Items.SNOWBALL),
+                RecipeCategory.FOOD,
+                ModItems.ROASTED_SNOWBALL.get(),
+                0.1f, 100)
+            .unlockedBy("has_snowball", has(Items.SNOWBALL))
+            .save(output, Auroral.id("roasted_snowball_from_smelting"));
+
+        // Roasted Snowball: also cookable over a campfire
+        SimpleCookingRecipeBuilder.campfireCooking(
+                Ingredient.of(Items.SNOWBALL),
+                RecipeCategory.FOOD,
+                ModItems.ROASTED_SNOWBALL.get(),
+                0.1f, 300)
+            .unlockedBy("has_snowball", has(Items.SNOWBALL))
+            .save(output, Auroral.id("roasted_snowball_from_campfire"));
+
+        // Sugared Roasted Snowball: Roasted Snowball + Sugar
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, ModItems.SUGARED_ROASTED_SNOWBALL.get())
+            .requires(ModItems.ROASTED_SNOWBALL.get())
+            .requires(Items.SUGAR)
+            .unlockedBy("has_roasted_snowball", has(ModItems.ROASTED_SNOWBALL.get()))
+            .save(output);
+
+        // S'nore: 2 Cookies + Sugared Roasted Snowball
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.FOOD, ModItems.SNORE.get())
+            .requires(Items.COOKIE)
+            .requires(Items.COOKIE)
+            .requires(ModItems.SUGARED_ROASTED_SNOWBALL.get())
+            .unlockedBy("has_sugared_roasted_snowball", has(ModItems.SUGARED_ROASTED_SNOWBALL.get()))
+            .save(output);
+
+        // Ender Pearl from Aurora Ender Shards
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, Items.ENDER_PEARL)
+            .requires(ModItems.AURORA_ENDER_SHARD.get())
+            .requires(ModItems.AURORA_ENDER_SHARD.get())
+            .requires(ModItems.AURORA_ENDER_SHARD.get())
+            .requires(ModItems.AURORA_ENDER_SHARD.get())
+            .unlockedBy("has_aurora_ender_shard", has(ModItems.AURORA_ENDER_SHARD.get()))
+            .save(output, Auroral.id("ender_pearl_from_shards"));
+
+        // Aurora Bloom Decorative: Frozen Petals + Aurora Shard (shapeless)
+        ShapelessRecipeBuilder.shapeless(RecipeCategory.DECORATIONS, ModBlocks.AURORA_BLOOM_DECORATIVE.get())
+            .requires(ModItems.FROZEN_PETALS.get())
+            .requires(ModItems.AURORA_SHARD.get())
+            .unlockedBy("has_frozen_petals", has(ModItems.FROZEN_PETALS.get()))
             .save(output);
 
         // Shimmersteel Tool Smithing Recipes (Iron Tool + Shimmersteel Ingot + Template)

@@ -32,12 +32,16 @@ public class ModModelProvider extends ItemModelProvider {
         basicItem(ModItems.WOVEN_LEATHER.get());
         basicItem(ModItems.AURORA_SHARD.get());
         basicItem(ModItems.FROZEN_PETALS.get());
+        basicItem(ModItems.AURORA_ENDER_SHARD.get());
 
         // Food items
         basicItem(ModItems.GLOW_LEEK.get());
         basicItem(ModItems.CANDIED_GLOW_LEEK.get());
         basicItem(ModItems.HOT_COCOA.get());
         basicItem(ModItems.FROSTED_COOKIES.get());
+        basicItem(ModItems.ROASTED_SNOWBALL.get());
+        basicItem(ModItems.SUGARED_ROASTED_SNOWBALL.get());
+        basicItem(ModItems.SNORE.get());
 
         // Seeds
         basicItem(ModItems.GLOW_LEEK_SEEDS.get());
@@ -68,6 +72,10 @@ public class ModModelProvider extends ItemModelProvider {
         // Block items - Aurora Bloom and Snow Angel use flat item models with block textures
         withExistingParent(ModItems.AURORA_BLOOM_ITEM.getId().getPath(), ResourceLocation.withDefaultNamespace("item/generated"))
             .texture("layer0", Auroral.id("block/aurora_bloom"));
+        withExistingParent(ModItems.AURORA_BLOOM_DECORATIVE_ITEM.getId().getPath(), ResourceLocation.withDefaultNamespace("item/generated"))
+            .texture("layer0", Auroral.id("block/aurora_bloom_stage3"));
+        withExistingParent(ModItems.ENDER_BLOOM_ITEM.getId().getPath(), ResourceLocation.withDefaultNamespace("item/generated"))
+            .texture("layer0", Auroral.id("block/ender_bloom_stage3"));
         withExistingParent(ModItems.SNOW_ANGEL_ITEM.getId().getPath(), ResourceLocation.withDefaultNamespace("item/generated"))
             .texture("layer0", Auroral.id("block/snow_angel"));
 

@@ -25,6 +25,8 @@ public class ModItems {
     public static final DeferredItem<BlockItem> HEARTHWOOD_LOG_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.HEARTHWOOD_LOG);
     public static final DeferredItem<BlockItem> SHIMMERING_ICE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SHIMMERING_ICE);
     public static final DeferredItem<BlockItem> AURORA_BLOOM_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_BLOOM);
+    public static final DeferredItem<BlockItem> AURORA_BLOOM_DECORATIVE_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_BLOOM_DECORATIVE);
+    public static final DeferredItem<BlockItem> ENDER_BLOOM_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.ENDER_BLOOM);
     public static final DeferredItem<BlockItem> AURORA_LANTERN_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.AURORA_LANTERN);
     public static final DeferredItem<BlockItem> SNOW_ANGEL_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SNOW_ANGEL);
     public static final DeferredItem<BlockItem> SHIMMER_SOIL_ITEM = ITEMS.registerSimpleBlockItem(ModBlocks.SHIMMER_SOIL);
@@ -36,6 +38,7 @@ public class ModItems {
     public static final DeferredItem<Item> WOVEN_LEATHER = ITEMS.registerSimpleItem("woven_leather");
     public static final DeferredItem<Item> AURORA_SHARD = ITEMS.registerSimpleItem("aurora_shard");
     public static final DeferredItem<Item> FROZEN_PETALS = ITEMS.registerSimpleItem("frozen_petals");
+    public static final DeferredItem<Item> AURORA_ENDER_SHARD = ITEMS.registerSimpleItem("aurora_ender_shard");
 
     // Shimmersteel Upgrade Smithing Template
     public static final DeferredItem<SmithingTemplateItem> SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE = ITEMS.registerItem(
@@ -60,6 +63,18 @@ public class ModItems {
     // Frosted Cookies - cozy snack with shimmer particles
     public static final DeferredItem<FrostedCookiesItem> FROSTED_COOKIES = ITEMS.registerItem("frosted_cookies",
         props -> new FrostedCookiesItem(props));
+
+    // Roasted Snowball - offends the Aurora; suppresses wild Nautilus spawns until atoned
+    public static final DeferredItem<RoastedSnowballItem> ROASTED_SNOWBALL = ITEMS.registerItem("roasted_snowball",
+        props -> new RoastedSnowballItem(props));
+
+    // Sugared Roasted Snowball - the apology a Nautilus will accept
+    public static final DeferredItem<SugaredRoastedSnowballItem> SUGARED_ROASTED_SNOWBALL = ITEMS.registerItem("sugared_roasted_snowball",
+        props -> new SugaredRoastedSnowballItem(props));
+
+    // S'nore - cookies + sugared snowball; grants Conduit Power
+    public static final DeferredItem<SnoreItem> SNORE = ITEMS.registerItem("snore",
+        props -> new SnoreItem(props));
 
     // Shimmersteel Tools - using registerItem for items with custom properties
     public static final DeferredItem<ShimmersteelPickaxeItem> SHIMMERSTEEL_PICKAXE = ITEMS.registerItem("shimmersteel_pickaxe",
@@ -119,6 +134,7 @@ public class ModItems {
     private static final ResourceLocation EMPTY_SLOT_PICKAXE = ResourceLocation.withDefaultNamespace("item/empty_slot_pickaxe");
     private static final ResourceLocation EMPTY_SLOT_AXE = ResourceLocation.withDefaultNamespace("item/empty_slot_axe");
     private static final ResourceLocation EMPTY_SLOT_SHOVEL = ResourceLocation.withDefaultNamespace("item/empty_slot_shovel");
+    private static final ResourceLocation EMPTY_SLOT_HOE = ResourceLocation.withDefaultNamespace("item/empty_slot_hoe");
     private static final ResourceLocation EMPTY_SLOT_INGOT = ResourceLocation.withDefaultNamespace("item/empty_slot_ingot");
 
     /**
@@ -158,7 +174,8 @@ public class ModItems {
             EMPTY_SLOT_LEGGINGS,
             EMPTY_SLOT_AXE,
             EMPTY_SLOT_BOOTS,
-            EMPTY_SLOT_SHOVEL
+            EMPTY_SLOT_SHOVEL,
+            EMPTY_SLOT_HOE
         );
 
         // Icons for addition slot (shimmersteel ingot / shimmerweave fabric)

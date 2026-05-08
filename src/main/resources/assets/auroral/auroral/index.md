@@ -53,6 +53,7 @@ navigation:
 * <ItemImage id="frozen_petals" scale="0.75"/> [Aurora Blooms](flora/aurora_blooms.md)
 * <ItemImage id="glow_leek" scale="0.75"/> [Glow Leeks](flora/glow_leeks.md)
 * <ItemImage id="shimmering_ice" scale="0.75"/> [Shimmering Ice](flora/shimmering_ice.md)
+* <ItemImage id="aurora_ender_shard" scale="0.75"/> [Ender Blooms](flora/ender_bloom.md)
 
 ### <Color id="aqua">Shimmersteel</Color>
 
@@ -84,6 +85,9 @@ navigation:
 
 * <ItemImage id="hot_cocoa" scale="0.75"/> [Hot Cocoa](food/hot_cocoa.md)
 * <ItemImage id="frosted_cookies" scale="0.75"/> [Frosted Cookies](food/frosted_cookies.md)
+* <ItemImage id="roasted_snowball" scale="0.75"/> [Roasted Snowball](food/roasted_snowball.md)
+* <ItemImage id="sugared_roasted_snowball" scale="0.75"/> [Sugared Roasted Snowball](food/sugared_roasted_snowball.md)
+* <ItemImage id="snore" scale="0.75"/> [S'nore](food/snore.md)
 
 </Column>
 </Row>

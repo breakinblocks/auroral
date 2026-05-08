@@ -26,6 +26,8 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.HEARTHWOOD_LOG, "Hearthwood Log");
         addBlock(ModBlocks.SHIMMERING_ICE, "Shimmering Ice");
         addBlock(ModBlocks.AURORA_BLOOM, "Aurora Bloom");
+        addBlock(ModBlocks.AURORA_BLOOM_DECORATIVE, "Aurora Bloom");
+        addBlock(ModBlocks.ENDER_BLOOM, "Ender Bloom");
         addBlock(ModBlocks.GLOW_LEEK, "Glow-Leek");
         addBlock(ModBlocks.AURORA_LANTERN, "Aurora Lantern");
         addBlock(ModBlocks.SNOW_ANGEL, "Snow Angel");
@@ -38,6 +40,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.WOVEN_LEATHER, "Woven Leather");
         addItem(ModItems.AURORA_SHARD, "Aurora Shard");
         addItem(ModItems.FROZEN_PETALS, "Frozen Petals");
+        addItem(ModItems.AURORA_ENDER_SHARD, "Aurora Ender Shard");
 
         // Items - Shimmersteel Tools
         addItem(ModItems.SHIMMERSTEEL_PICKAXE, "Shimmersteel Pickaxe");
@@ -62,6 +65,69 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.CANDIED_GLOW_LEEK, "Candied Glow-Leek");
         addItem(ModItems.HOT_COCOA, "Hot Cocoa");
         addItem(ModItems.FROSTED_COOKIES, "Frosted Cookies");
+        addItem(ModItems.ROASTED_SNOWBALL, "Roasted Snowball");
+        addItem(ModItems.SUGARED_ROASTED_SNOWBALL, "Sugared Roasted Snowball");
+        addItem(ModItems.SNORE, "S'nore");
+
+        // Roasted snowball flavor messages
+        add("item.auroral.roasted_snowball.eaten", "The Magestic Nautili will no longer Soar In your skies");
+        add("item.auroral.sugared_roasted_snowball.eaten", "The Majestic Nautili fly once again!");
+        add("item.auroral.roasted_snowball.tooltip.line1", "A toasted snowball. Delicious, lightly filling.");
+        add("item.auroral.roasted_snowball.tooltip.line2", "Eating one offends the Auroral Nautili. Wild Nautili will no longer spawn near you.");
+        add("item.auroral.sugared_roasted_snowball.tooltip.line1", "A Roasted Snowball rolled in sugar. Light snack, shiny coating.");
+        add("item.auroral.sugared_roasted_snowball.tooltip.line2", "Eating one apologizes to the Auroral Nautili so they grace your skies again.");
+
+        // Equipment and block tooltips (ability lines in blue, info lines in gray)
+        add("tooltip.auroral.shimmersteel_pickaxe.gem_fortune", "Fortune III on gem ores");
+        add("tooltip.auroral.shimmersteel_axe.force_oxidize", "Right-click copper to force oxidation");
+        add("tooltip.auroral.shimmersteel_shovel.silk_touch", "Inherent Silk Touch");
+        add("tooltip.auroral.shimmersteel_hoe.silk_touch", "Inherent Silk Touch");
+        add("tooltip.auroral.shimmersteel_hoe.shimmer_soil", "Tills snow into Shimmer Soil");
+        add("tooltip.auroral.shimmersteel_sword.frostbite", "Applies Frostbite on hit");
+        add("tooltip.auroral.shimmersteel_sword.execute", "Executes enemies below 15% health");
+        add("tooltip.auroral.shimmersteel_bow.star_shot", "Fires Star-Shots from snowballs");
+
+        add("tooltip.auroral.shimmerweave_goggles.glow_hostiles", "Highlights hostile mobs nearby");
+        add("tooltip.auroral.shimmerweave_tunic.extinguish", "Auto-extinguishes fire");
+        add("tooltip.auroral.shimmerweave_leggings.snow_speed", "Speed boost on snow");
+        add("tooltip.auroral.shimmerweave_leggings.soul_speed", "Speed boost on Soul Sand and Soul Soil");
+        add("tooltip.auroral.shimmerweave_skates.ice_speed", "Ice skating speed on ice and packed ice");
+        add("tooltip.auroral.shimmerweave_skates.frost_walker", "Freezes water underfoot");
+        add("tooltip.auroral.shimmerweave_skates.lava_to_obsidian", "Turns surface lava into obsidian");
+        add("tooltip.auroral.shimmerweave_skates.no_ice_fall", "No fall damage on ice or obsidian");
+
+        add("tooltip.auroral.hearthwood_log.burn_time", "Burns for 7 in-game days while loaded");
+        add("tooltip.auroral.hearthwood_log.frostbite_immunity", "Grants Frostbite Immunity within 16 blocks");
+        add("tooltip.auroral.hearthwood_log.phantom_ward", "Ignites phantoms; wards off targeting");
+        add("tooltip.auroral.hearthwood_log.aurora_catalyst", "Aurora Catalyst: +15% per log, up to +45%");
+
+        add("tooltip.auroral.aurora_lantern.decorative", "Decorative light with aurora sparkle");
+
+        add("tooltip.auroral.shimmering_ice.never_melts", "Never melts");
+        add("tooltip.auroral.shimmering_ice.hydrates", "Hydrates adjacent farmland");
+        add("tooltip.auroral.shimmering_ice.glow_leek", "Supports Glow-Leek crops");
+
+        add("tooltip.auroral.glacial_basin.collect_aura", "Collects Liquid Aura under open sky during auroras");
+        add("tooltip.auroral.glacial_basin.infuse", "Right-click with items during auroras to infuse");
+
+        add("tooltip.auroral.cold_brewing_stand.no_nether", "Brews potions without a Blaze Rod");
+
+        add("tooltip.auroral.snow_angel.imprint", "Imprinted by sneak-right-clicking on snow");
+        add("tooltip.auroral.snow_angel.fades", "Fades after 5 minutes; preserve with Frozen Petals");
+
+        add("tooltip.auroral.shimmer_soil.growth_boost", "3x growth at night, 5x during auroras");
+        add("tooltip.auroral.shimmer_soil.tilled", "Till snow with a Shimmersteel Hoe");
+
+        add("tooltip.auroral.aurora_bloom.grows_at_night", "Grows at night on snow; withers in daylight");
+        add("tooltip.auroral.aurora_bloom.frozen_petals", "Mature blooms drop Frozen Petals");
+
+        add("tooltip.auroral.ender_bloom.ender_shards", "Mature plants drop Aurora Ender Shards");
+
+        add("tooltip.auroral.glow_leek.grows_on_ice", "Grows on Shimmering Ice");
+        add("tooltip.auroral.glow_leek.night_vision", "Eating grants Night Vision and Glowing");
+
+        add("tooltip.auroral.frozen_petals.preserve_snow_angel", "Right-click a Snow Angel to preserve it");
+        add("tooltip.auroral.aurora_ender_shard.ender_bloom", "Right-click an Aurora Bloom to transform it");
 
         // Spawn Eggs
         addItem(ModItems.AURORAL_NAUTILUS_SPAWN_EGG, "Auroral Nautilus Spawn Egg");

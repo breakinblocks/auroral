@@ -78,6 +78,30 @@ public class ModBlocks {
             .randomTicks()
     );
 
+    // Aurora Bloom Decorative - non-crop visual variant, always full bloom
+    public static final DeferredBlock<AuroraBloomDecorativeBlock> AURORA_BLOOM_DECORATIVE = BLOCKS.registerBlock("aurora_bloom_decorative",
+        AuroraBloomDecorativeBlock::new,
+        BlockBehaviour.Properties.of()
+            .mapColor(MapColor.SNOW)
+            .noCollission()
+            .instabreak()
+            .sound(SoundType.GRASS)
+            .pushReaction(PushReaction.DESTROY)
+            .lightLevel(state -> 8)
+    );
+
+    // Ender Bloom - dark variant created by right-clicking an Aurora Bloom with an Ender Pearl
+    public static final DeferredBlock<EnderBloomBlock> ENDER_BLOOM = BLOCKS.registerBlock("ender_bloom",
+        EnderBloomBlock::new,
+        BlockBehaviour.Properties.of()
+            .mapColor(MapColor.COLOR_PURPLE)
+            .noCollission()
+            .instabreak()
+            .sound(SoundType.GRASS)
+            .pushReaction(PushReaction.DESTROY)
+            .randomTicks()
+    );
+
     // Aurora Lantern - Decorative light source that glows with aurora colors
     public static final DeferredBlock<AuroraLanternBlock> AURORA_LANTERN = BLOCKS.registerBlock("aurora_lantern",
         AuroraLanternBlock::new,

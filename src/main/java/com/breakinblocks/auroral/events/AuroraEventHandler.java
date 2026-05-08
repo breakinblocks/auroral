@@ -5,6 +5,7 @@ import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModDataAttachments;
 import com.breakinblocks.auroral.registry.ModDataAttachments.AuroraState;
 import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModSounds;
@@ -119,6 +120,11 @@ public class AuroraEventHandler {
         for (ServerPlayer player : level.players()) {
             // Only spawn near players in cold biomes
             if (!BiomeHelper.isColdBiome(level, player.blockPosition())) {
+                continue;
+            }
+
+            // Wild Nautili refuse to appear near players who have offended the Aurora.
+            if (player.getData(ModDataAttachments.VERY_NAUGHTY)) {
                 continue;
             }
 

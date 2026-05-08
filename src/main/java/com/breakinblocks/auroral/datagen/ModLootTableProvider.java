@@ -19,9 +19,11 @@ import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import com.breakinblocks.auroral.block.AuroraBloomBlock;
+import com.breakinblocks.auroral.block.EnderBloomBlock;
 import com.breakinblocks.auroral.block.GlowLeekBlock;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -63,18 +65,44 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.HEARTHWOOD_LOG.get());
             dropSelf(ModBlocks.SHIMMERING_ICE.get());
             dropSelf(ModBlocks.AURORA_LANTERN.get());
+            dropSelf(ModBlocks.AURORA_BLOOM_DECORATIVE.get());
 
-            // Aurora Bloom drops Frozen Petals (1-4 with fortune) when fully grown (age=3)
-            // Harvesting early yields nothing
+            // Aurora Bloom at full age drops Frozen Petals (1+ with fortune), one bloom for replanting,
+            // and a 15% chance of a bonus bloom. Harvesting early yields nothing.
             var fortuneEnchant = this.registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
+            var auroraBloomMature = LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.AURORA_BLOOM.get())
+                .setProperties(StatePropertiesPredicate.Builder.properties()
+                    .hasProperty(AuroraBloomBlock.AGE, AuroraBloomBlock.MAX_AGE));
             add(ModBlocks.AURORA_BLOOM.get(), LootTable.lootTable()
                 .withPool(LootPool.lootPool()
-                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.AURORA_BLOOM.get())
-                        .setProperties(StatePropertiesPredicate.Builder.properties()
-                            .hasProperty(AuroraBloomBlock.AGE, AuroraBloomBlock.MAX_AGE)))
+                    .when(auroraBloomMature)
                     .add(LootItem.lootTableItem(ModItems.FROZEN_PETALS.get())
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f)))
-                        .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1)))
+                        .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1))))
+                .withPool(LootPool.lootPool()
+                    .when(auroraBloomMature)
+                    .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM.get())))
+                .withPool(LootPool.lootPool()
+                    .when(auroraBloomMature)
+                    .when(LootItemRandomChanceCondition.randomChance(0.15f))
+                    .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM.get())))
+                );
+
+            // Ender Bloom always drops itself, plus an Aurora Ender Shard at full age and a 5% extra Ender Bloom.
+            add(ModBlocks.ENDER_BLOOM.get(), LootTable.lootTable()
+                .withPool(LootPool.lootPool()
+                    .add(LootItem.lootTableItem(ModBlocks.ENDER_BLOOM.get())))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.ENDER_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(EnderBloomBlock.AGE, EnderBloomBlock.MAX_AGE)))
+                    .add(LootItem.lootTableItem(ModItems.AURORA_ENDER_SHARD.get())))
+                .withPool(LootPool.lootPool()
+                    .when(LootItemBlockStatePropertyCondition.hasBlockStateProperties(ModBlocks.ENDER_BLOOM.get())
+                        .setProperties(StatePropertiesPredicate.Builder.properties()
+                            .hasProperty(EnderBloomBlock.AGE, EnderBloomBlock.MAX_AGE)))
+                    .when(LootItemRandomChanceCondition.randomChance(0.05f))
+                    .add(LootItem.lootTableItem(ModBlocks.ENDER_BLOOM.get()))
                 ));
 
             // Glow-Leek: mature drops one leek plus bonus seeds (wheat-style), non-mature drops one seed.
@@ -96,6 +124,8 @@ public class ModLootTableProvider extends LootTableProvider {
                 ModBlocks.HEARTHWOOD_LOG.get(),
                 ModBlocks.SHIMMERING_ICE.get(),
                 ModBlocks.AURORA_BLOOM.get(),
+                ModBlocks.AURORA_BLOOM_DECORATIVE.get(),
+                ModBlocks.ENDER_BLOOM.get(),
                 ModBlocks.GLOW_LEEK.get(),
                 ModBlocks.AURORA_LANTERN.get()
             );

@@ -18,7 +18,7 @@ navigation:
 
 <ItemImage id="minecraft:air" scale="0.25"/>
 
-<RecipeFor id="shimmersteel_bow_smithing" />
+<Recipe id="auroral:shimmersteel_bow_smithing" />
 
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***

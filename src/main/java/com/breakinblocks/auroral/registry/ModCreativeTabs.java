@@ -30,11 +30,14 @@ public class ModCreativeTabs {
                 output.accept(ModBlocks.SHIMMERING_ICE.get());
                 output.accept(ModBlocks.SHIMMER_SOIL.get());
                 output.accept(ModBlocks.AURORA_BLOOM.get());
+                output.accept(ModBlocks.AURORA_BLOOM_DECORATIVE.get());
+                output.accept(ModBlocks.ENDER_BLOOM.get());
                 output.accept(ModBlocks.AURORA_LANTERN.get());
                 output.accept(ModBlocks.SNOW_ANGEL.get());
 
                 // Materials
                 output.accept(ModItems.AURORA_SHARD.get());
+                output.accept(ModItems.AURORA_ENDER_SHARD.get());
                 output.accept(ModItems.UNREFINED_SHIMMERSTEEL.get());
                 output.accept(ModItems.SHIMMERSTEEL_INGOT.get());
                 output.accept(ModItems.SHIMMERWEAVE_FABRIC.get());
@@ -47,6 +50,9 @@ public class ModCreativeTabs {
                 output.accept(ModItems.CANDIED_GLOW_LEEK.get());
                 output.accept(ModItems.HOT_COCOA.get());
                 output.accept(ModItems.FROSTED_COOKIES.get());
+                output.accept(ModItems.ROASTED_SNOWBALL.get());
+                output.accept(ModItems.SUGARED_ROASTED_SNOWBALL.get());
+                output.accept(ModItems.SNORE.get());
 
                 // Shimmersteel Tools
                 output.accept(ModItems.SHIMMERSTEEL_PICKAXE.get());

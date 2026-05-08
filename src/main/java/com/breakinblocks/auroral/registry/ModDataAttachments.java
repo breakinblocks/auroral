@@ -51,4 +51,12 @@ public class ModDataAttachments {
             .serialize(AuroraState.CODEC.codec())
             .build()
     );
+
+    public static final Supplier<AttachmentType<Boolean>> VERY_NAUGHTY = ATTACHMENT_TYPES.register(
+        "very_naughty",
+        () -> AttachmentType.builder(() -> Boolean.FALSE)
+            .serialize(Codec.BOOL)
+            .copyOnDeath()
+            .build()
+    );
 }

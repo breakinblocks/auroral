@@ -1,6 +1,7 @@
 ---
 item_ids:
   - auroral:aurora_bloom
+  - auroral:aurora_bloom_decorative
   - auroral:frozen_petals
 navigation:
   title: Aurora Blooms
@@ -86,3 +87,17 @@ This is the only way to keep an Aurora Bloom outside of an active aurora.
 * <ItemLink id="aurora_shard" /> — infuse in a Glacial Basin with 1 aura level
 
 <RecipeFor id="glow_leek_seeds" />
+
+<ItemImage id="minecraft:air" scale="0.25"/>
+***
+
+<Column alignItems="center" fullWidth={true}>
+  ## <Color id="gold">Ender Transformation</Color>
+</Column>
+
+<Row>
+  <ItemImage id="aurora_ender_shard" />
+  ### <Color id="aqua">Right-click with an Ender Pearl</Color>
+</Row>
+
+Right-clicking an Aurora Bloom with an **Ender Pearl** transforms it into an <ItemLink id="ender_bloom" /> at the same growth stage. The pearl is consumed in the process. See [Ender Blooms](ender_bloom.md) for the full lifecycle.

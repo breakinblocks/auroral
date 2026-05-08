@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "auroral:block/aurora_bloom_stage3"
+  }
+}

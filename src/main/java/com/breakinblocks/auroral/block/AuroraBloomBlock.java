@@ -1,11 +1,19 @@
 package com.breakinblocks.auroral.block;
 
+import com.breakinblocks.auroral.registry.ModBlocks;
 import com.breakinblocks.auroral.util.AuroraHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -17,6 +25,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -166,5 +175,27 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
         // Advance to next growth stage
         int newAge = Math.min(MAX_AGE, state.getValue(AGE) + 1);
         level.setBlock(pos, state.setValue(AGE, newAge), 2);
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                              Player player, InteractionHand hand, BlockHitResult hit) {
+        if (stack.is(Items.ENDER_PEARL)) {
+            if (level instanceof ServerLevel serverLevel) {
+                int age = state.getValue(AGE);
+                BlockState newState = ModBlocks.ENDER_BLOOM.get().defaultBlockState()
+                    .setValue(EnderBloomBlock.AGE, age);
+                level.setBlock(pos, newState, Block.UPDATE_ALL);
+                level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0f, 1.0f);
+                serverLevel.sendParticles(ParticleTypes.PORTAL,
+                    pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                    20, 0.3, 0.3, 0.3, 0.0);
+                if (!player.getAbilities().instabuild) {
+                    stack.shrink(1);
+                }
+            }
+            return ItemInteractionResult.sidedSuccess(level.isClientSide());
+        }
+        return super.useItemOn(stack, state, level, pos, player, hand, hit);
     }
 }

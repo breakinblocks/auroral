@@ -23,6 +23,9 @@ navigation:
 
 * <ItemImage id="hot_cocoa" scale="0.75"/> [Hot Cocoa](hot_cocoa.md) — warming drink with brief frost resistance
 * <ItemImage id="frosted_cookies" scale="0.75"/> [Frosted Cookies](frosted_cookies.md) — a sweet treat with a magical shimmer
+* <ItemImage id="roasted_snowball" scale="0.75"/> [Roasted Snowball](roasted_snowball.md) — a toasted snowball, deeply offensive to the Nautili
+* <ItemImage id="sugared_roasted_snowball" scale="0.75"/> [Sugared Roasted Snowball](sugared_roasted_snowball.md) — the apology a Nautilus will accept
+* <ItemImage id="snore" scale="0.75"/> [S'nore](snore.md) — two cookies and a sugared snowball; grants Conduit Power
 
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***

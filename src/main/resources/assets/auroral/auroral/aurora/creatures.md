@@ -83,6 +83,13 @@ When a Nautilus fades away or is slain, it may drop:
 * 1–2 Aurora Shards (player kills only)
 * Nautilus Shells (15% chance, player kills only)
 
+<Row>
+  <ItemImage id="roasted_snowball" />
+  ### <Color id="aqua">Offending the Nautili</Color>
+</Row>
+
+Eating a <ItemLink id="roasted_snowball" /> offends the Aurora. While you carry that offense, wild Nautili **will not spawn near you** during auroras. Only tamed Nautili remain. To atone, craft and eat a <ItemLink id="sugared_roasted_snowball" /> and the skies will grace you again.
+
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***
 
