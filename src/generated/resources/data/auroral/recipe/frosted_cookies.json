@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "minecraft:cookie"
+    },
+    {
+      "item": "minecraft:cookie"
+    },
+    {
+      "item": "minecraft:cookie"
+    },
+    {
+      "item": "minecraft:cookie"
+    },
+    {
+      "item": "auroral:frozen_petals"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "id": "auroral:frosted_cookies"
+  }
+}

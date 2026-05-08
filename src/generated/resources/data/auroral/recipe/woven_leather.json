@@ -3,13 +3,14 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "minecraft:book"
+      "item": "minecraft:leather"
     },
     {
-      "item": "minecraft:snowball"
+      "tag": "minecraft:wool"
     }
   ],
   "result": {
-    "id": "auroral:guide"
+    "count": 1,
+    "id": "auroral:woven_leather"
   }
 }

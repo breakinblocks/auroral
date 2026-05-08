@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_shimmerweave_fabric": {
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:shimmerweave_fabric"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "auroral:shimmerweave_goggles_smithing"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_shimmerweave_fabric"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "auroral:shimmerweave_goggles_smithing"
+    ]
+  }
+}

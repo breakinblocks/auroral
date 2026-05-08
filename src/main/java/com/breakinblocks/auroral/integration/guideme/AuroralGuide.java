@@ -28,8 +28,7 @@ public class AuroralGuide {
 
         guide = Guide.builder(GUIDE_ID)
             .defaultNamespace(Auroral.MOD_ID)
-            .folder("guide")
-            .startPage(Auroral.id("index"))
+            .folder("auroral")
             .register(true)
             .build();
 

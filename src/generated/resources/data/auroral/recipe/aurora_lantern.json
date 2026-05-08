@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "auroral:aurora_shard"
+    },
+    "G": {
+      "item": "minecraft:glass_pane"
+    },
+    "N": {
+      "item": "minecraft:iron_nugget"
+    },
+    "S": {
+      "item": "auroral:shimmersteel_ingot"
+    }
+  },
+  "pattern": [
+    "NNN",
+    "GAS",
+    "NNN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "auroral:aurora_lantern"
+  }
+}

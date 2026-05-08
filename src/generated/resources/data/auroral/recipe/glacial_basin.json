@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "item": "minecraft:blue_ice"
+    },
+    "N": {
+      "item": "minecraft:iron_ingot"
+    },
+    "S": {
+      "item": "minecraft:stone"
+    }
+  },
+  "pattern": [
+    "S S",
+    "SIS",
+    "NNN"
+  ],
+  "result": {
+    "count": 1,
+    "id": "auroral:glacial_basin"
+  }
+}

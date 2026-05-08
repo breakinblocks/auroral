@@ -3,13 +3,14 @@
   "category": "misc",
   "ingredients": [
     {
-      "item": "minecraft:book"
+      "item": "auroral:frozen_petals"
     },
     {
-      "item": "minecraft:snowball"
+      "item": "minecraft:wheat_seeds"
     }
   ],
   "result": {
-    "id": "auroral:guide"
+    "count": 2,
+    "id": "auroral:glow_leek_seeds"
   }
 }

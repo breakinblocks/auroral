@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "auroral:shimmerweave_fabric"
+  },
+  "base": {
+    "item": "minecraft:iron_leggings"
+  },
+  "result": {
+    "count": 1,
+    "id": "auroral:shimmerweave_leggings"
+  },
+  "template": {
+    "item": "auroral:shimmersteel_upgrade_smithing_template"
+  }
+}

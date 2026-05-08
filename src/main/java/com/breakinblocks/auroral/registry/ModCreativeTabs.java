@@ -1,7 +1,6 @@
 package com.breakinblocks.auroral.registry;
 
 import com.breakinblocks.auroral.Auroral;
-import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
@@ -21,14 +20,7 @@ public class ModCreativeTabs {
             .displayItems((parameters, output) -> {
                 // Guidebook (if GuideME is loaded)
                 if (ModList.get().isLoaded("guideme")) {
-                    try {
-                        ItemStack guideItem = AuroralGuide.createGuideItem();
-                        if (guideItem != null && !guideItem.isEmpty()) {
-                            output.accept(guideItem);
-                        }
-                    } catch (Exception e) {
-                        Auroral.LOGGER.debug("Could not add GuideME guidebook to creative tab: {}", e.getMessage());
-                    }
+                    output.accept(ModItems.GUIDE.get());
                 }
 
                 // Blocks

@@ -102,6 +102,9 @@ public class ModItems {
         "auroral_snowlette_spawn_egg",
         properties -> new SpawnEggItem(ModEntities.AURORAL_SNOWLETTE.get(), 0xF0F8FF, 0x4169E1, properties));
 
+    public static final DeferredItem<AuroralGuideItem> GUIDE = ITEMS.registerItem("guide",
+        props -> new AuroralGuideItem(props.stacksTo(1)));
+
     // Smithing Template Helper
 
     private static final ChatFormatting TITLE_FORMAT = ChatFormatting.GRAY;

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": {
+    "item": "auroral:shimmersteel_ingot"
+  },
+  "base": {
+    "item": "minecraft:iron_hoe"
+  },
+  "result": {
+    "count": 1,
+    "id": "auroral:shimmersteel_hoe"
+  },
+  "template": {
+    "item": "auroral:shimmersteel_upgrade_smithing_template"
+  }
+}

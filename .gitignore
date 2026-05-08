@@ -54,9 +54,6 @@ logs/
 crash-reports/
 saves/
 
-# Generated resources (datagen output)
-src/generated/
-
 # NeoForge/Forge specific
 *.log
 *.log.gz
@@ -106,3 +103,4 @@ local/
 !LICENSE.md
 !README.md
 !metadata/changelogs/*.md
+!src/main/resources/assets/auroral/auroral/**/*.md

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "A": {
+      "item": "auroral:aurora_shard"
+    },
+    "D": {
+      "item": "minecraft:deepslate"
+    }
+  },
+  "pattern": [
+    "DDD",
+    "DAD",
+    "DDD"
+  ],
+  "result": {
+    "count": 1,
+    "id": "auroral:shimmersteel_upgrade_smithing_template"
+  }
+}

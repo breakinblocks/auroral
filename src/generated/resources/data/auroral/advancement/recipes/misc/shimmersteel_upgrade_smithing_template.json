@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_aurora_shard": {
+      "conditions": {
+        "items": [
+          {
+            "items": "auroral:aurora_shard"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "auroral:shimmersteel_upgrade_smithing_template"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_aurora_shard"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "auroral:shimmersteel_upgrade_smithing_template"
+    ]
+  }
+}
