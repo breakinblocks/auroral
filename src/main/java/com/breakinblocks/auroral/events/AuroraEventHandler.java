@@ -42,6 +42,8 @@ public class AuroraEventHandler {
     // Track spawned bloom positions per dimension for O(1) removal instead of O(n³)
     private static final Map<ResourceKey<Level>, Set<BlockPos>> spawnedBloomsByDimension = new ConcurrentHashMap<>();
 
+    private static final Map<ResourceKey<Level>, Long> auroraStartSoundDayByDimension = new ConcurrentHashMap<>();
+
     @SubscribeEvent
     public static void onLevelTick(LevelTickEvent.Post event) {
         if (!(event.getLevel() instanceof ServerLevel level)) {
@@ -349,12 +351,16 @@ public class AuroraEventHandler {
         Auroral.LOGGER.info("Aurora started! Duration: {} ticks ({} seconds)",
             duration, duration / 20);
 
-        // Play aurora start sound for all players in cold biomes
-        for (ServerPlayer player : level.players()) {
-            if (BiomeHelper.isColdBiome(level, player.blockPosition())) {
-                level.playSound(null, player.getX(), player.getY(), player.getZ(),
-                    ModSounds.AURORA_START.get(), SoundSource.AMBIENT, 1.0f, 1.0f);
+        long currentDay = level.getDayTime() / 24000L;
+        Long lastSoundDay = auroraStartSoundDayByDimension.get(level.dimension());
+        if (lastSoundDay == null || lastSoundDay != currentDay) {
+            for (ServerPlayer player : level.players()) {
+                if (BiomeHelper.isColdBiome(level, player.blockPosition())) {
+                    level.playSound(null, player.getX(), player.getY(), player.getZ(),
+                        ModSounds.AURORA_START.get(), SoundSource.WEATHER, 0.3f, 1.0f);
+                }
             }
+            auroraStartSoundDayByDimension.put(level.dimension(), currentDay);
         }
 
         // Sync to all clients

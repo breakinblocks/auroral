@@ -95,6 +95,9 @@ dependencies {
     // GuideME - Guidebook mod (1.21.1 NeoForge version 21.1.1)
     compileOnly("curse.maven:guideme-1173950:6223759")
     localRuntime("curse.maven:guideme-1173950:6223759")
+
+    localRuntime("maven.modrinth:sodium:mc1.21.1-0.6.13-neoforge")
+    localRuntime("maven.modrinth:iris:1.8.12+1.21.1-neoforge")
 }
 
 tasks.withType(ProcessResources).configureEach {

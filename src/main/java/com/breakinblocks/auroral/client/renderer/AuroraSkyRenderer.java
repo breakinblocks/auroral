@@ -2,9 +2,9 @@ package com.breakinblocks.auroral.client.renderer;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.client.ClientAuroraState;
+import com.breakinblocks.auroral.client.compat.IrisCompat;
 import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.util.BiomeHelper;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -14,7 +14,6 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -53,12 +52,14 @@ public class AuroraSkyRenderer {
      * Called from RenderLevelStageEvent to render the aurora.
      */
     public static void onRenderLevelStage(RenderLevelStageEvent event) {
-        // Only render during SKY stage
         if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_SKY) {
             return;
         }
 
-        // Early exit if disabled in config
+        if (IrisCompat.isRenderingShadowPass()) {
+            return;
+        }
+
         if (!AuroralConfig.CLIENT.showAuroraEffect.get()) {
             smoothedIntensity = 0.0f;
             return;
@@ -121,29 +122,15 @@ public class AuroraSkyRenderer {
     }
 
     private static void renderAurora(PoseStack poseStack, Matrix4f projectionMatrix, long gameTime, float intensity, Camera camera) {
-        // Use modulo to prevent float precision loss over time
         float time = (gameTime % (long) TIME_CYCLE) * 0.05f;
 
-        // Setup render state for additive blending
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.blendFunc(
-            com.mojang.blaze3d.platform.GlStateManager.SourceFactor.SRC_ALPHA,
-            com.mojang.blaze3d.platform.GlStateManager.DestFactor.ONE
-        );
-        RenderSystem.disableCull();
-        RenderSystem.depthMask(false);
-        RenderSystem.disableDepthTest();
-        RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        AuroraRenderType.AURORA_RIBBON.setupRenderState();
 
         Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder builder = tesselator.begin(VertexFormat.Mode.TRIANGLE_STRIP, DefaultVertexFormat.POSITION_COLOR);
+        BufferBuilder builder = tesselator.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
 
-        // Push a new pose and cancel out camera rotation so aurora stays fixed in world space
         poseStack.pushPose();
 
-        // Get camera rotation and apply its inverse to cancel out the view rotation
-        // This makes the aurora render in world space rather than view space
         Quaternionf cameraRotation = camera.rotation();
         Quaternionf inverseRotation = new Quaternionf(cameraRotation).conjugate();
         poseStack.mulPose(inverseRotation);
@@ -151,9 +138,6 @@ public class AuroraSkyRenderer {
         Matrix4f matrix = poseStack.last().pose();
 
         for (int ribbon = 0; ribbon < RIBBON_COUNT; ribbon++) {
-            if (ribbon > 0) {
-                addDegenerateConnection(builder, matrix, ribbon, time, intensity);
-            }
             buildRibbonVertices(builder, matrix, ribbon, time, intensity);
         }
 
@@ -161,26 +145,7 @@ public class AuroraSkyRenderer {
 
         poseStack.popPose();
 
-        // Restore render state
-        RenderSystem.enableDepthTest();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableCull();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-    }
-
-    private static void addDegenerateConnection(BufferBuilder builder, Matrix4f matrix, int ribbonIndex, float time, float intensity) {
-        float ribbonOffset = ribbonIndex * (float) (Math.PI * 2.0 / RIBBON_COUNT);
-        float drift = (time * DRIFT_SPEED) % (float) (Math.PI * 2.0) + ribbonIndex * 1.5f;
-
-        float angle = ribbonOffset + drift;
-        float x = (float) Math.cos(angle) * RIBBON_RADIUS;
-        float z = (float) Math.sin(angle) * RIBBON_RADIUS;
-        // Y is relative to camera (0,0,0), so RIBBON_Y_OFFSET puts it above the player
-        float yOffset = RIBBON_Y_OFFSET;
-
-        builder.addVertex(matrix, x, yOffset, z).setColor(0, 0, 0, 0);
-        builder.addVertex(matrix, x, yOffset, z).setColor(0, 0, 0, 0);
+        AuroraRenderType.AURORA_RIBBON.clearRenderState();
     }
 
     private static void buildRibbonVertices(BufferBuilder builder, Matrix4f matrix, int ribbonIndex, float time, float intensity) {
@@ -193,7 +158,15 @@ public class AuroraSkyRenderer {
         float waveTime3 = time * WAVE_SPEED * 0.5f;
         float shimmerTime = time * SHIMMER_SPEED;
 
-        for (int i = 0; i <= SEGMENTS_PER_RIBBON; i++) {
+        int n = SEGMENTS_PER_RIBBON + 1;
+        float[] vX = new float[n];
+        float[] vZ = new float[n];
+        float[] vYBot = new float[n];
+        float[] vYTop = new float[n];
+        int[][] vColorBot = new int[n][];
+        int[][] vColorTop = new int[n][];
+
+        for (int i = 0; i < n; i++) {
             float segmentProgress = (float) i / SEGMENTS_PER_RIBBON;
             float angle = segmentProgress * (float) (Math.PI * 1.5) + ribbonOffset + drift;
 
@@ -203,7 +176,6 @@ public class AuroraSkyRenderer {
             float wave1 = (float) Math.sin(waveTime1 + segmentProgress * 8.0f + ribbonIndex) * 15.0f;
             float wave2 = (float) Math.sin(waveTime2 + segmentProgress * 12.0f + ribbonIndex * 2.0f) * 8.0f;
             float wave3 = (float) Math.sin(waveTime3 + segmentProgress * 4.0f) * 20.0f;
-            // Y is relative to camera (0,0,0), so RIBBON_Y_OFFSET puts it above the player
             float yOffset = wave1 + wave2 + wave3 + RIBBON_Y_OFFSET;
 
             float heightFactor = (float) Math.sin(segmentProgress * Math.PI) * 0.8f + 0.2f;
@@ -212,14 +184,28 @@ public class AuroraSkyRenderer {
             float shimmer = (float) Math.sin(shimmerTime + segmentProgress * 10.0f + colorPhase) * 0.5f + 0.5f;
             float edgeFade = (float) Math.sin(segmentProgress * Math.PI);
 
-            int[] bottomColor = getAuroraColor(segmentProgress + colorPhase, shimmer, intensity * 0.3f, edgeFade);
-            builder.addVertex(matrix, x, yOffset, z)
-                    .setColor(bottomColor[0], bottomColor[1], bottomColor[2], bottomColor[3]);
-
-            int[] topColor = getAuroraColor(segmentProgress + colorPhase + 0.2f, shimmer, intensity * 0.7f, edgeFade);
-            builder.addVertex(matrix, x, yOffset + height, z)
-                    .setColor(topColor[0], topColor[1], topColor[2], topColor[3]);
+            vX[i] = x;
+            vZ[i] = z;
+            vYBot[i] = yOffset;
+            vYTop[i] = yOffset + height;
+            vColorBot[i] = getAuroraColor(segmentProgress + colorPhase, shimmer, intensity * 0.3f, edgeFade);
+            vColorTop[i] = getAuroraColor(segmentProgress + colorPhase + 0.2f, shimmer, intensity * 0.7f, edgeFade);
         }
+
+        for (int i = 0; i < SEGMENTS_PER_RIBBON; i++) {
+            int j = i + 1;
+            emitVertex(builder, matrix, vX[i], vYBot[i], vZ[i], vColorBot[i]);
+            emitVertex(builder, matrix, vX[j], vYBot[j], vZ[j], vColorBot[j]);
+            emitVertex(builder, matrix, vX[j], vYTop[j], vZ[j], vColorTop[j]);
+
+            emitVertex(builder, matrix, vX[i], vYBot[i], vZ[i], vColorBot[i]);
+            emitVertex(builder, matrix, vX[j], vYTop[j], vZ[j], vColorTop[j]);
+            emitVertex(builder, matrix, vX[i], vYTop[i], vZ[i], vColorTop[i]);
+        }
+    }
+
+    private static void emitVertex(BufferBuilder builder, Matrix4f matrix, float x, float y, float z, int[] color) {
+        builder.addVertex(matrix, x, y, z).setColor(color[0], color[1], color[2], color[3]);
     }
 
     private static int[] getAuroraColor(float position, float shimmer, float intensity, float edgeFade) {
