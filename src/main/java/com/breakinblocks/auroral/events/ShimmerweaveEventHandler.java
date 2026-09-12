@@ -219,11 +219,13 @@ public class ShimmerweaveEventHandler {
             return;
         }
 
+        int radius = AuroralConfig.SERVER.skatesFrostWalkerRadius.get();
+
         if (!player.onGround()) {
+            handleFallingOverLava(player, level, playerPos, radius);
             return;
         }
 
-        int radius = AuroralConfig.SERVER.skatesFrostWalkerRadius.get();
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int x = -radius; x <= radius; x++) {
@@ -243,6 +245,44 @@ public class ShimmerweaveEventHandler {
                     if (state.getFluidState().is(Fluids.LAVA) && state.getFluidState().isSource()) {
                         level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
                     }
+                }
+            }
+        }
+    }
+
+    private static void handleFallingOverLava(Player player, ServerLevel level, BlockPos playerPos, int radius) {
+        int scanDepth = AuroralConfig.SERVER.skatesLavaFallScanDepth.get();
+        if (scanDepth <= 0 || player.getDeltaMovement().y >= 0 || player.isInLava()) {
+            return;
+        }
+
+        int minY = Math.max(level.getMinY(), playerPos.getY() - scanDepth);
+        BlockPos.MutableBlockPos scanPos = playerPos.mutable();
+
+        while (scanPos.getY() > minY) {
+            scanPos.move(0, -1, 0);
+            BlockState state = level.getBlockState(scanPos);
+
+            if (state.getFluidState().is(Fluids.LAVA)) {
+                convertLavaAround(level, scanPos, radius);
+                return;
+            }
+
+            if (!state.isAir()) {
+                return;
+            }
+        }
+    }
+
+    private static void convertLavaAround(ServerLevel level, BlockPos center, int radius) {
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int z = -radius; z <= radius; z++) {
+                mutablePos.set(center.getX() + x, center.getY(), center.getZ() + z);
+
+                if (mutablePos.closerThan(center, radius + 0.5) && level.getFluidState(mutablePos).is(Fluids.LAVA)) {
+                    level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
                 }
             }
         }
