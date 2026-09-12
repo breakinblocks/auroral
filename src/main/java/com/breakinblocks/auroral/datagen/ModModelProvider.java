@@ -52,6 +52,7 @@ public class ModModelProvider extends ItemModelProvider {
         handheldItem(ModItems.SHIMMERSTEEL_SHOVEL.get());
         handheldItem(ModItems.SHIMMERSTEEL_HOE.get());
         handheldItem(ModItems.SHIMMERSTEEL_SWORD.get());
+        handheldItem(ModItems.SHIMMER_SPEAR.get());
         // Bow uses static JSON with minecraft:item/bow parent and overrides for pulling animation
 
         // Armor - flat items
@@ -59,6 +60,7 @@ public class ModModelProvider extends ItemModelProvider {
         basicItem(ModItems.SHIMMERWEAVE_TUNIC.get());
         basicItem(ModItems.SHIMMERWEAVE_LEGGINGS.get());
         basicItem(ModItems.SHIMMERWEAVE_SKATES.get());
+        basicItem(ModItems.SHIMMERSTEEL_NAUTILUS_ARMOR.get());
 
         // Smithing template
         basicItem(ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE.get());

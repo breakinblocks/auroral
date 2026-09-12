@@ -3,20 +3,24 @@ package com.breakinblocks.auroral.entity;
 import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModSounds;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -32,7 +36,24 @@ import java.util.List;
  */
 public class StarShotEntity extends Projectile {
 
-    private static final float DAMAGE = 6.0f;
+    private static final double BASE_DAMAGE = 2.4;
+    private ItemStack weaponItem = ItemStack.EMPTY;
+
+    public void setWeaponItem(ItemStack stack) {
+        this.weaponItem = stack.copy();
+        if (level() instanceof ServerLevel serverLevel) {
+            var itemInUse = new EnchantedItemInUse(
+                this.weaponItem, null, getOwner() instanceof LivingEntity living ? living : null,
+                brokenItem -> this.weaponItem = ItemStack.EMPTY);
+            EnchantmentHelper.runIterationOnItem(this.weaponItem, (enchantment, enchantmentLevel) ->
+                enchantment.value().onProjectileSpawned(serverLevel, enchantmentLevel, itemInUse, this));
+        }
+    }
+
+    @Override
+    public ItemStack getWeaponItem() {
+        return this.weaponItem;
+    }
     private static final int BLINDNESS_DURATION = 60; // 3 seconds
     private static final int GLOWING_DURATION = 100; // 5 seconds
     private static final double FLASHBANG_RADIUS = 8.0;
@@ -109,9 +130,33 @@ public class StarShotEntity extends Projectile {
         Entity owner = this.getOwner();
 
         if (!this.level().isClientSide() && this.level() instanceof ServerLevel serverLevel) {
-            // Deal damage
-            DamageSource damageSource = this.damageSources().thrown(this, owner);
-            target.hurt(damageSource, DAMAGE);
+            float velocity = (float) this.getDeltaMovement().length();
+            DamageSource damageSource = this.damageSources().source(DamageTypes.ARROW, this, owner != null ? owner : this);
+
+            double damage = BASE_DAMAGE;
+            if (!this.weaponItem.isEmpty()) {
+                damage = EnchantmentHelper.modifyDamage(serverLevel, this.weaponItem, target, damageSource, (float) damage);
+            }
+
+            int finalDamage = Mth.ceil(Mth.clamp(velocity * damage, 0.0, Integer.MAX_VALUE));
+            int previousFire = target.getRemainingFireTicks();
+            if (isOnFire() && target.getType() != EntityType.ENDERMAN) {
+                target.igniteForSeconds(5.0F);
+            }
+            if (target.hurt(damageSource, finalDamage)) {
+                if (target instanceof LivingEntity living && !weaponItem.isEmpty()) {
+                    float knockback = EnchantmentHelper.modifyKnockback(serverLevel, weaponItem, living, damageSource, 0.0F);
+                    double resistance = Math.max(0.0, 1.0 - living.getAttributeValue(
+                        Attributes.KNOCKBACK_RESISTANCE));
+                    Vec3 push = getDeltaMovement().multiply(1, 0, 1).normalize().scale(knockback * 0.6 * resistance);
+                    if (push.lengthSqr() > 0) {
+                        living.push(push.x, 0.1, push.z);
+                    }
+                    EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, living, damageSource, weaponItem);
+                }
+            } else {
+                target.setRemainingFireTicks(previousFire);
+            }
 
             // Create flashbang effect
             createFlashbangEffect(serverLevel);
@@ -177,6 +222,22 @@ public class StarShotEntity extends Projectile {
     @Override
     protected void defineSynchedData(net.minecraft.network.syncher.SynchedEntityData.Builder builder) {
         // No additional synched data needed
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        if (!weaponItem.isEmpty()) {
+            tag.put("Weapon", weaponItem.save(registryAccess()));
+        }
+        tag.putInt("Life", life);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        weaponItem = ItemStack.parseOptional(registryAccess(), tag.getCompound("Weapon"));
+        life = tag.getInt("Life");
     }
 
     @Override

@@ -3,6 +3,19 @@
     {
       "type": "single",
       "resource": "auroral:container/slot/cold_brewing_fuel"
+    },
+    {
+      "type": "paletted_permutations",
+      "textures": [
+        "trims/items/leggings_trim",
+        "trims/items/chestplate_trim",
+        "trims/items/helmet_trim",
+        "trims/items/boots_trim"
+      ],
+      "palette_key": "trims/color_palettes/trim_palette",
+      "permutations": {
+        "shimmersteel": "auroral:trims/color_palettes/shimmersteel"
+      }
     }
   ]
 }

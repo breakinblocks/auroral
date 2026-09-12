@@ -2,6 +2,8 @@ package com.breakinblocks.auroral.registry;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.block.*;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
@@ -88,6 +90,15 @@ public class ModBlocks {
             .sound(SoundType.GRASS)
             .pushReaction(PushReaction.DESTROY)
             .lightLevel(state -> 8)
+    );
+
+    public static final DeferredBlock<FlowerPotBlock> POTTED_AURORA_BLOOM_DECORATIVE = BLOCKS.registerBlock("potted_aurora_bloom_decorative",
+        props -> new FlowerPotBlock(() -> (FlowerPotBlock) Blocks.FLOWER_POT, AURORA_BLOOM_DECORATIVE, props),
+        BlockBehaviour.Properties.of()
+            .instabreak()
+            .noOcclusion()
+            .lightLevel(state -> 8)
+            .pushReaction(PushReaction.DESTROY)
     );
 
     // Ender Bloom - dark variant created by right-clicking an Aurora Bloom with an Ender Pearl

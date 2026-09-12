@@ -17,6 +17,7 @@ public class AuroralNautilusRenderer extends MobRenderer<AuroralNautilusEntity, 
 
     public AuroralNautilusRenderer(EntityRendererProvider.Context context) {
         super(context, new AuroralNautilusModel(context.bakeLayer(AuroralNautilusModel.LAYER_LOCATION)), 0.4F);
+        this.addLayer(new AuroralNautilusArmorLayer(this, context.getModelSet()));
     }
 
     @Override

@@ -2,9 +2,13 @@ package com.breakinblocks.auroral.block;
 
 import com.breakinblocks.auroral.registry.ModBlocks;
 import com.breakinblocks.auroral.util.AuroraHelper;
+import com.breakinblocks.auroral.util.SnowBlockHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -14,6 +18,7 @@ import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -24,6 +29,7 @@ import net.minecraft.world.level.block.BushBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -46,6 +52,10 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     public static final int MAX_AGE = 3;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
+    public static final BooleanProperty SNOW_LOGGED = BooleanProperty.create("snow_logged");
+    public static final BooleanProperty SNOW_LOGGED_LAYER = BooleanProperty.create("snow_logged_layer");
+
+    public static final IntegerProperty SNOW_LAYERS = IntegerProperty.create("snow_layers", 1, 8);
 
     // Shapes for each growth stage
     private static final VoxelShape[] SHAPES = new VoxelShape[] {
@@ -57,12 +67,28 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     public AuroraBloomBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0));
+        this.registerDefaultState(this.stateDefinition.any()
+            .setValue(AGE, 0)
+            .setValue(SNOW_LOGGED, false)
+            .setValue(SNOW_LOGGED_LAYER, false).setValue(SNOW_LAYERS, 1));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(AGE);
+        builder.add(AGE, SNOW_LOGGED, SNOW_LOGGED_LAYER, SNOW_LAYERS);
+    }
+
+    @Override
+    public BlockState getStateForPlacement(BlockPlaceContext context) {
+        BlockState clicked = context.getLevel().getBlockState(context.getClickedPos());
+        if (SnowBlockHelper.isSnowLayer(clicked)) {
+            return defaultBlockState().setValue(SNOW_LOGGED, true).setValue(SNOW_LOGGED_LAYER, true)
+                .setValue(SNOW_LAYERS, clicked.getValue(BlockStateProperties.LAYERS));
+        }
+        if (clicked.is(Blocks.POWDER_SNOW)) {
+            return defaultBlockState().setValue(SNOW_LOGGED, true);
+        }
+        return defaultBlockState();
     }
 
     @SuppressWarnings("unchecked")
@@ -73,7 +99,8 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPES[state.getValue(AGE)];
+        return SHAPES[state.getValue(AGE)].move(0,
+            state.getValue(SNOW_LOGGED_LAYER) ? state.getValue(SNOW_LAYERS) / 8.0 : 0, 0);
     }
 
     @Override
@@ -83,12 +110,18 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
         return state.is(Blocks.SNOW) ||
                state.is(Blocks.SNOW_BLOCK) ||
                state.is(Blocks.POWDER_SNOW) ||
+               state.is(Blocks.ICE) ||
+               state.is(Blocks.PACKED_ICE) ||
+               state.is(Blocks.BLUE_ICE) ||
                state.getBlock() instanceof ShimmeringIceBlock ||
-               state.isSolid();
+               state.isFaceSturdy(level, pos, Direction.UP);
     }
 
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        if (state.getValue(SNOW_LOGGED)) {
+            return true;
+        }
         BlockPos below = pos.below();
         return this.mayPlaceOn(level.getBlockState(below), level, below);
     }
@@ -104,7 +137,7 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         // Check if we should die (if not on valid block)
         if (!canSurvive(state, level, pos)) {
-            level.destroyBlock(pos, false); // Don't drop anything if dying
+            decay(state, level, pos);
             return;
         }
 
@@ -114,7 +147,7 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             level.sendParticles(ParticleTypes.SNOWFLAKE,
                 pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
                 5, 0.3, 0.3, 0.3, 0.01);
-            level.destroyBlock(pos, false); // Don't drop anything when wilting
+            decay(state, level, pos);
             return;
         }
 
@@ -123,6 +156,38 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             int newAge = state.getValue(AGE) + 1;
             level.setBlock(pos, state.setValue(AGE, newAge), 2);
         }
+    }
+
+    private void decay(BlockState state, ServerLevel level, BlockPos pos) {
+        if (state.getValue(SNOW_LOGGED)) {
+            level.setBlock(pos, restoredSnowState(state), Block.UPDATE_ALL);
+        } else {
+            level.destroyBlock(pos, false);
+        }
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        super.onRemove(state, level, pos, newState, movedByPiston);
+        restoreSnowAfterRemoval(state, level, pos, newState);
+    }
+
+    public static void restoreSnowAfterRemoval(BlockState state, Level level, BlockPos pos, BlockState newState) {
+        if (state.getValue(SNOW_LOGGED) && newState.isAir() && level instanceof ServerLevel serverLevel) {
+            BlockState snow = restoredSnowState(state);
+            MinecraftServer server = serverLevel.getServer();
+            server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                if (serverLevel.getBlockState(pos).isAir()) {
+                    serverLevel.setBlock(pos, snow, Block.UPDATE_ALL);
+                }
+            }));
+        }
+    }
+
+    private static BlockState restoredSnowState(BlockState state) {
+        return state.getValue(SNOW_LOGGED_LAYER)
+            ? Blocks.SNOW.defaultBlockState().setValue(BlockStateProperties.LAYERS, state.getValue(SNOW_LAYERS))
+            : Blocks.POWDER_SNOW.defaultBlockState();
     }
 
     @Override
@@ -147,6 +212,13 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             double y = pos.getY() + 0.5 + (age * 0.2);
             double z = pos.getZ() + random.nextDouble();
             level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0, -0.02, 0);
+        }
+
+        if (state.getValue(SNOW_LOGGED) && random.nextInt(40) == 0) {
+            double x = pos.getX() + 0.3 + random.nextDouble() * 0.4;
+            double y = pos.getY() + 1.05 + random.nextDouble() * 0.4;
+            double z = pos.getZ() + 0.3 + random.nextDouble() * 0.4;
+            level.addParticle(ParticleTypes.SNOWFLAKE, x, y, z, 0.0, 0.015, 0.0);
         }
     }
 
@@ -184,7 +256,10 @@ public class AuroraBloomBlock extends BushBlock implements BonemealableBlock {
             if (level instanceof ServerLevel serverLevel) {
                 int age = state.getValue(AGE);
                 BlockState newState = ModBlocks.ENDER_BLOOM.get().defaultBlockState()
-                    .setValue(EnderBloomBlock.AGE, age);
+                    .setValue(EnderBloomBlock.AGE, age)
+                    .setValue(SNOW_LOGGED, state.getValue(SNOW_LOGGED))
+                    .setValue(SNOW_LOGGED_LAYER, state.getValue(SNOW_LOGGED_LAYER))
+                    .setValue(SNOW_LAYERS, state.getValue(SNOW_LAYERS));
                 level.setBlock(pos, newState, Block.UPDATE_ALL);
                 level.playSound(null, pos, SoundEvents.ENDERMAN_TELEPORT, SoundSource.BLOCKS, 1.0f, 1.0f);
                 serverLevel.sendParticles(ParticleTypes.PORTAL,

@@ -36,7 +36,7 @@ public class SnowAngelEventHandler {
             return;
         }
 
-        if (!player.getMainHandItem().isEmpty()) {
+        if (!player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty()) {
             return;
         }
 

@@ -25,7 +25,8 @@ import java.util.Optional;
 public class ShimmersteelAxeItem extends AxeItem {
 
     public ShimmersteelAxeItem(Properties properties) {
-        super(ModToolTiers.SHIMMERSTEEL, properties);
+        super(ModToolTiers.SHIMMERSTEEL, properties.attributes(
+            AxeItem.createAttributes(ModToolTiers.SHIMMERSTEEL, 6.0F, -3.1F)));
     }
 
     @Override

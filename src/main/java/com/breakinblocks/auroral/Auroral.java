@@ -5,6 +5,7 @@ import com.breakinblocks.auroral.client.AuroralClient;
 import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.registry.ModBlockEntities;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModCapabilities;
 import com.breakinblocks.auroral.registry.ModCreativeTabs;
 import com.breakinblocks.auroral.registry.ModDataAttachments;
 import com.breakinblocks.auroral.registry.ModEffects;
@@ -17,11 +18,14 @@ import com.breakinblocks.auroral.events.EntityEventHandler;
 import com.breakinblocks.auroral.events.ItemEventHandler;
 import com.breakinblocks.auroral.integration.guideme.AuroralGuide;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.FlowerPotBlock;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import org.slf4j.Logger;
 
@@ -29,6 +33,11 @@ import org.slf4j.Logger;
 public class Auroral {
     public static final String MOD_ID = "auroral";
     public static final Logger LOGGER = LogUtils.getLogger();
+
+    private static void commonSetup(FMLCommonSetupEvent event) {
+        event.enqueueWork(() -> ((FlowerPotBlock) Blocks.FLOWER_POT).addPlant(
+            ModBlocks.AURORA_BLOOM_DECORATIVE.getId(), ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE));
+    }
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
@@ -48,6 +57,8 @@ public class Auroral {
         ModSounds.SOUNDS.register(eventBus);
         ModParticles.PARTICLES.register(eventBus);
         ModMenuTypes.MENU_TYPES.register(eventBus);
+        ModCapabilities.register(eventBus);
+        eventBus.addListener(Auroral::commonSetup);
 
         // Register entity event handlers (for attributes)
         EntityEventHandler.register(eventBus);
@@ -62,7 +73,7 @@ public class Auroral {
 
         // Client-specific setup
         if (FMLLoader.getDist().isClient()) {
-            AuroralClient.init(eventBus);
+            AuroralClient.init(eventBus, container);
         }
 
         // Optional mod integrations

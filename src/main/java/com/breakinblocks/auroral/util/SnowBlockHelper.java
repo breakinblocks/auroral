@@ -45,7 +45,10 @@ public final class SnowBlockHelper {
      */
     public static boolean isBloomSurface(BlockState state) {
         return isSnow(state) ||
-               state.is(ModBlocks.SHIMMERING_ICE.get());
+               state.is(ModBlocks.SHIMMERING_ICE.get()) ||
+               state.is(Blocks.ICE) ||
+               state.is(Blocks.PACKED_ICE) ||
+               state.is(Blocks.BLUE_ICE);
     }
 
     /**
@@ -54,7 +57,10 @@ public final class SnowBlockHelper {
      */
     public static boolean isSnowOrIce(BlockState state) {
         return isSnow(state) ||
-               state.is(ModBlocks.SHIMMERING_ICE.get());
+               state.is(ModBlocks.SHIMMERING_ICE.get()) ||
+               state.is(Blocks.ICE) ||
+               state.is(Blocks.PACKED_ICE) ||
+               state.is(Blocks.BLUE_ICE);
     }
 
     /**

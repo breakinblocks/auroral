@@ -120,6 +120,10 @@ tasks.withType(ProcessResources).configureEach {
     }
 }
 
+tasks.named('jar', Jar) {
+    from('LICENSE.md')
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = "UTF-8"
 }

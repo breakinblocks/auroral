@@ -66,6 +66,8 @@ public class ModLootTableProvider extends LootTableProvider {
             dropSelf(ModBlocks.SHIMMERING_ICE.get());
             dropSelf(ModBlocks.AURORA_LANTERN.get());
             dropSelf(ModBlocks.AURORA_BLOOM_DECORATIVE.get());
+            add(ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE.get(),
+                createPotFlowerItemTable(ModBlocks.AURORA_BLOOM_DECORATIVE.get()));
 
             // Aurora Bloom at full age drops Frozen Petals (1+ with fortune), one bloom for replanting,
             // and a 15% chance of a bonus bloom. Harvesting early yields nothing.
@@ -76,14 +78,21 @@ public class ModLootTableProvider extends LootTableProvider {
             add(ModBlocks.AURORA_BLOOM.get(), LootTable.lootTable()
                 .withPool(LootPool.lootPool()
                     .when(auroraBloomMature)
+                    .when(this.hasSilkTouch())
+                    .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM_DECORATIVE.get())))
+                .withPool(LootPool.lootPool()
+                    .when(auroraBloomMature)
+                    .when(this.doesNotHaveSilkTouch())
                     .add(LootItem.lootTableItem(ModItems.FROZEN_PETALS.get())
                         .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0f)))
                         .apply(ApplyBonusCount.addUniformBonusCount(fortuneEnchant, 1))))
                 .withPool(LootPool.lootPool()
                     .when(auroraBloomMature)
+                    .when(this.doesNotHaveSilkTouch())
                     .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM.get())))
                 .withPool(LootPool.lootPool()
                     .when(auroraBloomMature)
+                    .when(this.doesNotHaveSilkTouch())
                     .when(LootItemRandomChanceCondition.randomChance(0.15f))
                     .add(LootItem.lootTableItem(ModBlocks.AURORA_BLOOM.get())))
                 );
@@ -125,6 +134,7 @@ public class ModLootTableProvider extends LootTableProvider {
                 ModBlocks.SHIMMERING_ICE.get(),
                 ModBlocks.AURORA_BLOOM.get(),
                 ModBlocks.AURORA_BLOOM_DECORATIVE.get(),
+                ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE.get(),
                 ModBlocks.ENDER_BLOOM.get(),
                 ModBlocks.GLOW_LEEK.get(),
                 ModBlocks.AURORA_LANTERN.get()

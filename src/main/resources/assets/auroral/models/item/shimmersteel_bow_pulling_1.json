@@ -1,5 +1,5 @@
 {
-  "parent": "minecraft:item/bow_pulling",
+  "parent": "minecraft:item/bow_pulling_1",
   "textures": {
     "layer0": "auroral:item/shimmersteel_bow_pulling_1"
   }

@@ -60,6 +60,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.SHIMMERSTEEL_SHOVEL.get());
                 output.accept(ModItems.SHIMMERSTEEL_HOE.get());
                 output.accept(ModItems.SHIMMERSTEEL_SWORD.get());
+                output.accept(ModItems.SHIMMER_SPEAR.get());
                 output.accept(ModItems.SHIMMERSTEEL_BOW.get());
 
                 // Smithing Templates
@@ -70,6 +71,7 @@ public class ModCreativeTabs {
                 output.accept(ModItems.SHIMMERWEAVE_TUNIC.get());
                 output.accept(ModItems.SHIMMERWEAVE_LEGGINGS.get());
                 output.accept(ModItems.SHIMMERWEAVE_SKATES.get());
+                output.accept(ModItems.SHIMMERSTEEL_NAUTILUS_ARMOR.get());
 
                 // Spawn Eggs
                 output.accept(ModItems.AURORAL_NAUTILUS_SPAWN_EGG.get());

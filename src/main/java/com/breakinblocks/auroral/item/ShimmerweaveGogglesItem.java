@@ -27,6 +27,6 @@ public class ShimmerweaveGogglesItem extends ArmorItem {
     public static final int GLOWING_DURATION = 40; // 2 seconds, refreshed continuously
 
     public ShimmerweaveGogglesItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
-        super(material, type, properties);
+        super(material, type, properties.durability(type.getDurability(26)));
     }
 }

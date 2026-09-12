@@ -1,6 +1,9 @@
 modLoader = "javafml"
 loaderVersion = "[${neoforge_loader_version},)"
-license = "MIT"
+license = "PolyForm Shield License 1.0.0 AND PolyForm Perimeter License 1.0.0"
+
+[[mixins]]
+config = "auroral.mixins.json"
 
 [[mods]]
 modId = "${mod_id}"

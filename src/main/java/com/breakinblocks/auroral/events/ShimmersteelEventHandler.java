@@ -1,18 +1,25 @@
 package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.item.ShimmerSpearItem;
 import com.breakinblocks.auroral.item.ShimmersteelHoeItem;
 import com.breakinblocks.auroral.item.ShimmersteelPickaxeItem;
 import com.breakinblocks.auroral.item.ShimmersteelShovelItem;
 import com.breakinblocks.auroral.item.ShimmersteelSwordItem;
+import com.breakinblocks.auroral.registry.ModEffects;
+import com.breakinblocks.auroral.util.AuroraHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -25,9 +32,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.player.AttackEntityEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,6 +42,19 @@ import java.util.List;
  */
 @EventBusSubscriber(modid = Auroral.MOD_ID)
 public class ShimmersteelEventHandler {
+
+    private static final int SPEAR_FROSTBITE_DURATION_TICKS = 100;
+    private static final int SPEAR_AURORA_FROSTBITE_DURATION_TICKS = 200;
+    private static final float SPEAR_AURORA_DAMAGE_BONUS = 2.0F;
+
+    @SubscribeEvent
+    public static void onAttackEntity(AttackEntityEvent event) {
+        Player player = event.getEntity();
+        if (player.getMainHandItem().getItem() instanceof ShimmerSpearItem
+                && player.getAttackStrengthScale(0.5F) < 1.0F) {
+            event.setCanceled(true);
+        }
+    }
 
     /**
      * Handles the execute mechanic for Shimmersteel Sword.
@@ -44,46 +64,88 @@ public class ShimmersteelEventHandler {
     public static void onLivingDamage(LivingDamageEvent.Pre event) {
         DamageSource source = event.getSource();
 
-        // Check if attacker is using Shimmersteel Sword
-        if (source.getEntity() instanceof LivingEntity attacker) {
-            ItemStack weapon = attacker.getMainHandItem();
+        if (!(source.getEntity() instanceof LivingEntity attacker)) {
+            return;
+        }
 
-            if (weapon.getItem() instanceof ShimmersteelSwordItem) {
-                LivingEntity target = event.getEntity();
+        LivingEntity target = event.getEntity();
+        if (target == attacker) {
+            return;
+        }
 
-                // Don't execute the attacker themselves
-                if (target == attacker) {
-                    return;
-                }
+        // Only direct melee strikes may use the sword and spear abilities.
+        if (source.getDirectEntity() != attacker || !(source.is(DamageTypes.PLAYER_ATTACK)
+                || source.is(DamageTypes.MOB_ATTACK) || source.is(DamageTypes.MOB_ATTACK_NO_AGGRO))) {
+            return;
+        }
+        ItemStack weapon = source.getWeaponItem();
+        if (weapon == null) {
+            weapon = attacker.getMainHandItem();
+        }
+        if (weapon.getItem() instanceof ShimmerSpearItem) {
+            applyShimmerSpearEffects(event, attacker, target);
+            return;
+        }
+        if (!(weapon.getItem() instanceof ShimmersteelSwordItem)) {
+            return;
+        }
 
-                // Calculate health AFTER this damage would be applied
-                float currentHealth = target.getHealth();
-                float damageAmount = event.getNewDamage();
-                float healthAfterDamage = currentHealth - damageAmount;
-                float maxHealth = target.getMaxHealth();
-                float executeThreshold = com.breakinblocks.auroral.config.AuroralConfig.SERVER.executeThreshold.get().floatValue();
-                float thresholdHealth = maxHealth * executeThreshold;
+        float currentHealth = target.getHealth();
+        float damageAmount = event.getNewDamage();
+        float healthAfterDamage = currentHealth - damageAmount;
+        float maxHealth = target.getMaxHealth();
+        float executeThreshold = com.breakinblocks.auroral.config.AuroralConfig.SERVER.executeThreshold.get().floatValue();
+        float thresholdHealth = maxHealth * executeThreshold;
 
-                // Execute if: currently below threshold OR would drop to/below threshold from this hit
-                boolean alreadyBelowThreshold = currentHealth < thresholdHealth && currentHealth > 0;
-                boolean wouldDropBelowThreshold = healthAfterDamage <= thresholdHealth && currentHealth > 0;
+        boolean alreadyBelowThreshold = currentHealth <= thresholdHealth && currentHealth > 0;
+        boolean wouldDropBelowThreshold = healthAfterDamage <= thresholdHealth && currentHealth > 0;
 
-                if (alreadyBelowThreshold || wouldDropBelowThreshold) {
-                    // Set damage to a very high value to ensure death
-                    event.setNewDamage(Float.MAX_VALUE);
+        if (alreadyBelowThreshold || wouldDropBelowThreshold) {
+            event.setNewDamage(Float.MAX_VALUE);
 
-                    // Schedule snow placement (will be placed on death)
-                    if (target.level() instanceof ServerLevel serverLevel) {
-                        BlockPos deathPos = target.blockPosition();
-                        // Use a small delay to ensure the entity has died
-                        MinecraftServer server = serverLevel.getServer();
-                        server.tell(new TickTask(server.getTickCount() + 1, () -> {
-                            if (target.isDeadOrDying()) {
-                                ShimmersteelSwordItem.placeSnowOnKill(serverLevel, deathPos);
-                            }
-                        }));
+            if (target.level() instanceof ServerLevel serverLevel) {
+                double x = target.getX();
+                double y = target.getY() + target.getBbHeight() * 0.5;
+                double z = target.getZ();
+
+                serverLevel.sendParticles(ParticleTypes.ENCHANT, x, y, z, 30, 0.5, 0.8, 0.5, 0.5);
+                serverLevel.sendParticles(ParticleTypes.CRIT, x, y, z, 20, 0.4, 0.6, 0.4, 0.2);
+                serverLevel.sendParticles(ParticleTypes.END_ROD, x, y, z, 8, 0.3, 0.5, 0.3, 0.05);
+
+                serverLevel.playSound(null, x, y, z,
+                    SoundEvents.PLAYER_ATTACK_CRIT, SoundSource.PLAYERS, 1.0F, 0.6F);
+                serverLevel.playSound(null, x, y, z,
+                    SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5F, 1.5F);
+
+                BlockPos deathPos = target.blockPosition();
+                MinecraftServer server = serverLevel.getServer();
+                server.tell(new TickTask(server.getTickCount() + 1, () -> {
+                    if (target.isDeadOrDying()) {
+                        ShimmersteelSwordItem.placeSnowOnKill(serverLevel, deathPos);
                     }
-                }
+                }));
+            }
+        }
+    }
+
+    private static void applyShimmerSpearEffects(LivingDamageEvent.Pre event, LivingEntity attacker, LivingEntity target) {
+        boolean auroraActive = AuroraHelper.isAuroraActive(attacker.level());
+
+        if (auroraActive) {
+            event.setNewDamage(event.getNewDamage() + SPEAR_AURORA_DAMAGE_BONUS);
+        }
+
+        int duration = auroraActive ? SPEAR_AURORA_FROSTBITE_DURATION_TICKS : SPEAR_FROSTBITE_DURATION_TICKS;
+        int amplifier = auroraActive ? 1 : 0;
+        target.addEffect(new MobEffectInstance(ModEffects.FROSTBITE, duration, amplifier));
+
+        if (target.level() instanceof ServerLevel serverLevel) {
+            double x = target.getX();
+            double y = target.getY() + target.getBbHeight() * 0.5;
+            double z = target.getZ();
+            serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, x, y, z, 8, 0.3, 0.3, 0.3, 0.05);
+            if (auroraActive) {
+                serverLevel.sendParticles(ParticleTypes.END_ROD, x, y, z, 4, 0.2, 0.2, 0.2, 0.03);
             }
         }
     }
@@ -101,51 +163,41 @@ public class ShimmersteelEventHandler {
 
         ItemStack tool = event.getTool();
         BlockState state = event.getState();
-        ServerLevel level = event.getLevel();
-        BlockPos pos = event.getPos();
 
         // Shimmersteel Pickaxe: Fortune III for gems
         if (tool.getItem() instanceof ShimmersteelPickaxeItem) {
             if (ShimmersteelPickaxeItem.isGemBlock(state)) {
-                applyFortuneBonus(event.getDrops(), level.getRandom(), 3);
+                applyFortuneBonus(event, tool, 3);
             }
         }
 
         // Shimmersteel Shovel: Silk Touch
         if (tool.getItem() instanceof ShimmersteelShovelItem) {
-            applySilkTouch(event, state, pos, tool);
+            applySilkTouch(event, tool);
         }
 
         // Shimmersteel Hoe: Silk Touch (for crops and other blocks)
         if (tool.getItem() instanceof ShimmersteelHoeItem) {
-            applySilkTouch(event, state, pos, tool);
+            applySilkTouch(event, tool);
         }
     }
 
-    /**
-     * Applies Fortune bonus to drops by multiplying item counts.
-     * Uses vanilla Fortune formula: bonus = random(0 to fortuneLevel) + 1
-     */
-    private static void applyFortuneBonus(List<ItemEntity> drops, RandomSource random, int fortuneLevel) {
-        for (ItemEntity itemEntity : drops) {
-            ItemStack stack = itemEntity.getItem();
-            // Only apply fortune to stackable items (the actual drops, not blocks)
-            if (stack.getMaxStackSize() > 1) {
-                // Fortune formula: multiplier is 1 + random(0 to fortuneLevel)
-                // So Fortune III gives 1-4x drops
-                int multiplier = 1 + random.nextInt(fortuneLevel + 1);
-                if (multiplier > 1) {
-                    int newCount = Math.min(stack.getCount() * multiplier, stack.getMaxStackSize());
-                    stack.setCount(newCount);
-                }
-            }
+    private static void applyFortuneBonus(BlockDropsEvent event, ItemStack tool, int fortuneLevel) {
+        var enchantments = event.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        Holder<Enchantment> silkTouch = enchantments.getOrThrow(Enchantments.SILK_TOUCH);
+        Holder<Enchantment> fortune = enchantments.getOrThrow(Enchantments.FORTUNE);
+        if (tool.getEnchantmentLevel(silkTouch) > 0 || tool.getEnchantmentLevel(fortune) >= fortuneLevel) {
+            return;
         }
+        ItemStack fortuneTool = tool.copy();
+        fortuneTool.enchant(fortune, fortuneLevel);
+        replaceDrops(event, fortuneTool);
     }
 
     /**
      * Replaces normal drops with silk touch drops (the block itself).
      */
-    private static void applySilkTouch(BlockDropsEvent event, BlockState state, BlockPos pos, ItemStack tool) {
+    private static void applySilkTouch(BlockDropsEvent event, ItemStack tool) {
         ServerLevel level = event.getLevel();
         Holder<Enchantment> silkTouch = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
         if (tool.getEnchantmentLevel(silkTouch) > 0) {
@@ -155,10 +207,16 @@ public class ShimmersteelEventHandler {
         ItemStack silkTool = tool.copy();
         silkTool.enchant(silkTouch, 1);
 
+        replaceDrops(event, silkTool);
+    }
+
+    private static void replaceDrops(BlockDropsEvent event, ItemStack effectiveTool) {
+        ServerLevel level = event.getLevel();
+        BlockPos pos = event.getPos();
         List<ItemEntity> drops = event.getDrops();
         drops.clear();
 
-        for (ItemStack drop : Block.getDrops(state, level, pos, event.getBlockEntity(), event.getBreaker(), silkTool)) {
+        for (ItemStack drop : Block.getDrops(event.getState(), level, pos, event.getBlockEntity(), event.getBreaker(), effectiveTool)) {
             ItemEntity newDrop = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
             newDrop.setDefaultPickUpDelay();
             drops.add(newDrop);

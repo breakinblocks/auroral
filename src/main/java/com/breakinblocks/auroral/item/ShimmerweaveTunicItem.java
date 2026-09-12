@@ -21,6 +21,6 @@ public class ShimmerweaveTunicItem extends ArmorItem {
     public static final int EXTINGUISH_COOLDOWN = 20; // 1 second
 
     public ShimmerweaveTunicItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
-        super(material, type, properties);
+        super(material, type, properties.durability(type.getDurability(26)));
     }
 }

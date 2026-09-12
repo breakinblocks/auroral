@@ -76,3 +76,4 @@ Shimmersteel Ingots upgrade iron equipment via the Smithing Table. You'll need a
 
 * <ItemImage id="shimmersteel_pickaxe" scale="0.75"/> [Shimmersteel Tools](tools.md) — Pickaxe, Axe, Shovel, Hoe, Sword
 * <ItemImage id="shimmersteel_bow" scale="0.75"/> [Shimmersteel Bow](bow.md) — fires Star-Shots from snowballs
+* <ItemImage id="shimmer_spear" scale="0.75"/> [Shimmer Spear](spear.md) — long-reach piercing spear

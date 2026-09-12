@@ -225,11 +225,7 @@ public class ShimmerweaveEventHandler {
         int radius = AuroralConfig.SERVER.skatesFrostWalkerRadius.get();
 
         if (!player.onGround()) {
-            handleFallingOverLava(player, level, boots, playerPos, radius);
-            return;
-        }
-
-        if (player.getDeltaMovement().x == 0 && player.getDeltaMovement().z == 0) {
+            handleFallingOverLava(player, level, playerPos, radius);
             return;
         }
 
@@ -251,14 +247,13 @@ public class ShimmerweaveEventHandler {
 
                     if (state.getFluidState().is(Fluids.LAVA) && state.getFluidState().isSource()) {
                         level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
-                        boots.hurtAndBreak(2, player, EquipmentSlot.FEET);
                     }
                 }
             }
         }
     }
 
-    private static void handleFallingOverLava(Player player, ServerLevel level, ItemStack boots, BlockPos playerPos, int radius) {
+    private static void handleFallingOverLava(Player player, ServerLevel level, BlockPos playerPos, int radius) {
         int configDepth = AuroralConfig.SERVER.skatesLavaFallScanDepth.get();
         Vec3 movement = player.getKnownMovement();
         if (configDepth <= 0 || movement.y >= 0 || player.isSpectator() || player.isInLava()) {
@@ -275,7 +270,7 @@ public class ShimmerweaveEventHandler {
             FluidState fluid = state.getFluidState();
 
             if (fluid.is(FluidTags.LAVA)) {
-                convertLavaAround(player, level, boots, scanPos, radius);
+                convertLavaAround(level, scanPos, radius);
                 return;
             }
 
@@ -285,7 +280,7 @@ public class ShimmerweaveEventHandler {
         }
     }
 
-    private static void convertLavaAround(Player player, ServerLevel level, ItemStack boots, BlockPos center, int radius) {
+    private static void convertLavaAround(ServerLevel level, BlockPos center, int radius) {
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int x = -radius; x <= radius; x++) {
@@ -294,7 +289,6 @@ public class ShimmerweaveEventHandler {
 
                 if (mutablePos.closerThan(center, radius + 0.5) && level.getFluidState(mutablePos).is(FluidTags.LAVA)) {
                     level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
-                    boots.hurtAndBreak(2, player, EquipmentSlot.FEET);
                 }
             }
         }

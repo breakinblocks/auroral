@@ -1,0 +1,6 @@
+{
+  "parent": "auroral:block/aurora_bloom_cross_snow_logged",
+  "textures": {
+    "cross": "auroral:block/aurora_bloom_stage0"
+  }
+}

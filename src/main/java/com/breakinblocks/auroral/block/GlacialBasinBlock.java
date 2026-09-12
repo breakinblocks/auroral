@@ -77,6 +77,15 @@ public class GlacialBasinBlock extends BaseEntityBlock {
     }
 
     @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (!state.is(newState.getBlock()) && !level.isClientSide()
+                && level.getBlockEntity(pos) instanceof GlacialBasinBlockEntity basin) {
+            basin.dropContents(level, pos);
+        }
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
     public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
@@ -143,6 +152,14 @@ public class GlacialBasinBlock extends BaseEntityBlock {
 
         // Empty hand - show status
         if (stack.isEmpty()) {
+            if (player.isShiftKeyDown() && basin.hasOutput()) {
+                ItemStack pulled = basin.takeOutput();
+                if (!player.getInventory().add(pulled)) {
+                    player.drop(pulled, false);
+                }
+                level.playSound(null, pos, SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.2F, 1.5F);
+                return ItemInteractionResult.SUCCESS;
+            }
             player.displayClientMessage(
                 Component.translatable("block.auroral.glacial_basin.aura_level", auraLevel, 3),
                 true

@@ -202,6 +202,24 @@ public class ModRecipeProvider extends RecipeProvider {
             .unlocks("has_shimmersteel_ingot", has(ModItems.SHIMMERSTEEL_INGOT.get()))
             .save(output, Auroral.id("shimmersteel_sword_smithing"));
 
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.SHIMMERSTEEL_NAUTILUS_ARMOR.get())
+            .pattern("I I")
+            .pattern("INI")
+            .pattern("I I")
+            .define('I', ModItems.SHIMMERSTEEL_INGOT.get())
+            .define('N', Items.NAUTILUS_SHELL)
+            .unlockedBy("has_shimmersteel_ingot", has(ModItems.SHIMMERSTEEL_INGOT.get()))
+            .save(output, Auroral.id("shimmersteel_nautilus_armor"));
+
+        ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, ModItems.SHIMMER_SPEAR.get())
+            .pattern("  I")
+            .pattern(" S ")
+            .pattern("S  ")
+            .define('I', ModItems.SHIMMERSTEEL_INGOT.get())
+            .define('S', Items.STICK)
+            .unlockedBy("has_shimmersteel_ingot", has(ModItems.SHIMMERSTEEL_INGOT.get()))
+            .save(output, Auroral.id("shimmer_spear"));
+
         // Shimmersteel Bow: Bow upgraded with Shimmersteel (smithing)
         SmithingTransformRecipeBuilder.smithing(
                 Ingredient.of(ModItems.SHIMMERSTEEL_UPGRADE_SMITHING_TEMPLATE.get()),

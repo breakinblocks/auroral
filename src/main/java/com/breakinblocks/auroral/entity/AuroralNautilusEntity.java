@@ -3,7 +3,9 @@ package com.breakinblocks.auroral.entity;
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.util.AuroraHelper;
+import com.breakinblocks.auroral.item.ShimmersteelNautilusArmorItem;
 import com.breakinblocks.auroral.registry.ModItems;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -30,6 +32,7 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.neoforged.neoforge.common.ItemAbilities;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
@@ -175,6 +178,16 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
         return entity instanceof Player && entity.getUUID().equals(this.getOwnerUUID());
     }
 
+    @Override
+    public boolean canUseSlot(EquipmentSlot slot) {
+        return true;
+    }
+
+    @Override
+    public boolean isBodyArmorItem(ItemStack stack) {
+        return stack.getItem() instanceof ShimmersteelNautilusArmorItem;
+    }
+
     public boolean isSaddleable() {
         return this.isAlive() && isTamed();
     }
@@ -237,6 +250,29 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
                 }
             }
             return InteractionResult.SUCCESS;
+        }
+
+        if (isTamed() && isOwnedBy(player) && !player.isSecondaryUseActive()) {
+            if (isBodyArmorItem(itemStack) && !isWearingBodyArmor()) {
+                if (!this.level().isClientSide()) {
+                    this.setBodyArmorItem(itemStack.copyWithCount(1));
+                    if (!player.getAbilities().instabuild) {
+                        itemStack.shrink(1);
+                    }
+                    this.playSound(SoundEvents.HORSE_ARMOR, 0.5F, 1.0F);
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide());
+            }
+            if (itemStack.canPerformAction(ItemAbilities.SHEARS_REMOVE_ARMOR) && isWearingBodyArmor()) {
+                if (!this.level().isClientSide()) {
+                    itemStack.hurtAndBreak(1, player, getSlotForHand(hand));
+                    this.playSound(SoundEvents.SHEEP_SHEAR, 1.0F, 1.0F);
+                    ItemStack armor = this.getBodyArmorItem();
+                    this.setBodyArmorItem(ItemStack.EMPTY);
+                    this.spawnAtLocation(armor);
+                }
+                return InteractionResult.sidedSuccess(this.level().isClientSide());
+            }
         }
 
         // Toggle sitting with shift-right-click (owner only)
@@ -592,7 +628,7 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
 
     @Override
     public SoundSource getSoundSource() {
-        return SoundSource.AMBIENT;
+        return SoundSource.NEUTRAL;
     }
 
     @Override
@@ -851,13 +887,18 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
      */
     class NautilusTemptGoal extends Goal {
         private static final double TEMPT_RANGE = 10.0;
-        private static final double CLOSE_ENOUGH_DIST_SQ = 6.25; // 2.5 blocks squared
+        private static final double ORBIT_ENGAGE_DIST_SQ = 16.0;
+        private static final double ORBIT_RADIUS = 2.0;
+        private static final double ORBIT_HEIGHT = 1.0;
+        private static final float ORBIT_SPEED = 0.03F;
         @Nullable
         private Player temptingPlayer;
         private int calmDown;
+        private float orbitAngle;
 
         public NautilusTemptGoal() {
             this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+            this.orbitAngle = (float) (Math.random() * Math.PI * 2);
         }
 
         @Override
@@ -908,17 +949,21 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             AuroralNautilusEntity nautilus = AuroralNautilusEntity.this;
             nautilus.getLookControl().setLookAt(this.temptingPlayer, 30.0F, 30.0F);
 
-            // Move closer if not close enough
             double distSq = nautilus.distanceToSqr(this.temptingPlayer);
-            if (distSq > CLOSE_ENOUGH_DIST_SQ) {
+            if (distSq > ORBIT_ENGAGE_DIST_SQ) {
                 updateTargetPoint();
             } else {
-                // Close enough - hover near the player
-                nautilus.moveTargetPoint = new Vec3(
-                    nautilus.getX(),
-                    nautilus.getY(),
-                    nautilus.getZ()
-                );
+                this.orbitAngle += ORBIT_SPEED;
+                if (this.orbitAngle > Math.PI * 2) {
+                    this.orbitAngle -= (float) (Math.PI * 2);
+                }
+
+                double targetX = this.temptingPlayer.getX() + ORBIT_RADIUS * Mth.cos(this.orbitAngle);
+                double targetY = this.temptingPlayer.getY() + this.temptingPlayer.getEyeHeight() + ORBIT_HEIGHT;
+                double targetZ = this.temptingPlayer.getZ() + ORBIT_RADIUS * Mth.sin(this.orbitAngle);
+
+                nautilus.moveTargetPoint = new Vec3(targetX, targetY, targetZ);
+                nautilus.anchorPoint = new BlockPos((int) targetX, (int) targetY, (int) targetZ);
             }
         }
 
@@ -965,8 +1010,8 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
      */
     class NautilusFollowOwnerGoal extends Goal {
         private static final double MAX_DIST = 20.0; // Start following if further than this
-        private static final double ORBIT_RADIUS = 3.0; // Orbit radius around owner
-        private static final double ORBIT_HEIGHT = 2.0; // Height above owner's head
+        private static final double ORBIT_RADIUS = 2.0; // Orbit radius around owner
+        private static final double ORBIT_HEIGHT = 1.0; // Height above owner's head
         private static final float ORBIT_SPEED = 0.02F; // Radians per tick (slow orbit)
 
         @Nullable

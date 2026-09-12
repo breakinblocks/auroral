@@ -28,7 +28,8 @@ import net.minecraft.world.level.gameevent.GameEvent;
 public class ShimmersteelHoeItem extends HoeItem {
 
     public ShimmersteelHoeItem(Properties properties) {
-        super(ModToolTiers.SHIMMERSTEEL, properties);
+        super(ModToolTiers.SHIMMERSTEEL, properties.attributes(
+            HoeItem.createAttributes(ModToolTiers.SHIMMERSTEEL, -2.0F, -1.0F)));
     }
 
     /**

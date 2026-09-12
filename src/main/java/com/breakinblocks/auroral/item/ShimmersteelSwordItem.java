@@ -30,7 +30,8 @@ public class ShimmersteelSwordItem extends SwordItem {
     public static final float EXECUTE_THRESHOLD = 0.15f;
 
     public ShimmersteelSwordItem(Properties properties) {
-        super(ModToolTiers.SHIMMERSTEEL, properties);
+        super(ModToolTiers.SHIMMERSTEEL, properties.attributes(
+            SwordItem.createAttributes(ModToolTiers.SHIMMERSTEEL, 3.0F, -2.4F)));
     }
 
     @Override

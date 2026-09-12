@@ -2,6 +2,7 @@ package com.breakinblocks.auroral.item;
 
 import com.breakinblocks.auroral.entity.StarShotEntity;
 import com.breakinblocks.auroral.registry.ModSounds;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -13,6 +14,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
 
 /**
@@ -25,6 +27,17 @@ public class ShimmersteelBowItem extends Item {
 
     public ShimmersteelBowItem(Properties properties) {
         super(properties);
+    }
+
+    @Override
+    public int getEnchantmentValue() {
+        return ModToolTiers.SHIMMERSTEEL.getEnchantmentValue();
+    }
+
+    @Override
+    public boolean isValidRepairItem(ItemStack stack, ItemStack ingredient) {
+        return ModToolTiers.SHIMMERSTEEL.getRepairIngredient().test(ingredient)
+            || super.isValidRepairItem(stack, ingredient);
     }
 
     @Override
@@ -42,7 +55,7 @@ public class ShimmersteelBowItem extends Item {
         ItemStack bowStack = player.getItemInHand(hand);
 
         // Check if player has snowball ammo (or is creative)
-        boolean hasAmmo = player.getAbilities().instabuild || hasSnowballAmmo(player);
+        boolean hasAmmo = player.getAbilities().instabuild || hasInfinity(level, bowStack) || hasSnowballAmmo(player);
 
         if (!hasAmmo) {
             return InteractionResultHolder.fail(bowStack);
@@ -65,9 +78,10 @@ public class ShimmersteelBowItem extends Item {
 
         // Check for ammo
         boolean isCreative = player.getAbilities().instabuild;
+        boolean hasInfinity = hasInfinity(level, stack);
         ItemStack ammoStack = findSnowballAmmo(player);
 
-        if (ammoStack.isEmpty() && !isCreative) {
+        if (ammoStack.isEmpty() && !isCreative && !hasInfinity) {
             return;
         }
 
@@ -77,6 +91,7 @@ public class ShimmersteelBowItem extends Item {
 
             // Create and shoot Star-Shot
             StarShotEntity starShot = new StarShotEntity(level, player);
+            starShot.setWeaponItem(stack);
             starShot.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, power * 3.0f, 1.0f);
 
             // Apply item damage based on which hand is used
@@ -91,7 +106,7 @@ public class ShimmersteelBowItem extends Item {
                 ModSounds.STAR_SHOT_FIRE.get(), SoundSource.PLAYERS, 1.0f, 1.0f / (level.getRandom().nextFloat() * 0.4f + 1.2f) + power * 0.5f);
 
             // Consume ammo (unless creative)
-            if (!isCreative) {
+            if (!isCreative && !hasInfinity) {
                 ammoStack.shrink(1);
                 if (ammoStack.isEmpty()) {
                     player.getInventory().removeItem(ammoStack);
@@ -105,6 +120,14 @@ public class ShimmersteelBowItem extends Item {
     /**
      * Calculates power based on draw duration.
      */
+    private static boolean hasInfinity(Level level, ItemStack stack) {
+        return level.registryAccess()
+            .lookup(Registries.ENCHANTMENT)
+            .flatMap(reg -> reg.get(Enchantments.INFINITY))
+            .map(holder -> stack.getEnchantmentLevel(holder) > 0)
+            .orElse(false);
+    }
+
     private static float getPowerForTime(int useTime) {
         float power = (float) useTime / MAX_DRAW_DURATION;
         power = (power * power + power * 2.0f) / 3.0f;

@@ -38,7 +38,8 @@ public class ShimmersteelPickaxeItem extends PickaxeItem {
     );
 
     public ShimmersteelPickaxeItem(Properties properties) {
-        super(ModToolTiers.SHIMMERSTEEL, properties);
+        super(ModToolTiers.SHIMMERSTEEL, properties.attributes(
+            PickaxeItem.createAttributes(ModToolTiers.SHIMMERSTEEL, 1.0F, -2.8F)));
     }
 
     /**

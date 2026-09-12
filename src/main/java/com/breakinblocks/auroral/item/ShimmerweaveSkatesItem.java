@@ -31,6 +31,6 @@ public class ShimmerweaveSkatesItem extends ArmorItem {
     public static final int FROST_WALKER_RADIUS = 2;
 
     public ShimmerweaveSkatesItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
-        super(material, type, properties);
+        super(material, type, properties.durability(type.getDurability(26)));
     }
 }

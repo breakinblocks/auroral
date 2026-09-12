@@ -2,10 +2,13 @@ package com.breakinblocks.auroral.block;
 
 import com.breakinblocks.auroral.util.AuroraHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.RandomSource;
+import net.neoforged.neoforge.common.util.TriState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -120,6 +123,14 @@ public class ShimmerSoilBlock extends FarmBlock {
     @Override
     public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
         entity.causeFallDamage(fallDistance, 1.0F, entity.damageSources().fall());
+    }
+
+    @Override
+    public TriState canSustainPlant(BlockState state, BlockGetter level, BlockPos pos, Direction direction, BlockState plantState) {
+        if (direction == Direction.UP && (plantState.getBlock() instanceof CropBlock || plantState.getBlock() instanceof BonemealableBlock)) {
+            return TriState.TRUE;
+        }
+        return TriState.DEFAULT;
     }
 
     /**

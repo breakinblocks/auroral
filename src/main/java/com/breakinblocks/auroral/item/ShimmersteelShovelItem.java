@@ -15,7 +15,8 @@ import net.minecraft.world.item.ShovelItem;
 public class ShimmersteelShovelItem extends ShovelItem {
 
     public ShimmersteelShovelItem(Properties properties) {
-        super(ModToolTiers.SHIMMERSTEEL, properties);
+        super(ModToolTiers.SHIMMERSTEEL, properties.attributes(
+            ShovelItem.createAttributes(ModToolTiers.SHIMMERSTEEL, 1.5F, -3.0F)));
     }
 
     /**

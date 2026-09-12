@@ -30,5 +30,8 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
         // Requires stone tool or better
         tag(BlockTags.NEEDS_STONE_TOOL)
             .add(ModBlocks.GLACIAL_BASIN.get());
+
+        tag(BlockTags.REPLACEABLE)
+            .add(ModBlocks.SNOW_ANGEL.get());
     }
 }

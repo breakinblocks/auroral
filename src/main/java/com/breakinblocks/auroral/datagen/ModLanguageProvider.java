@@ -17,6 +17,15 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("auroral.configuration.show_aurora_effect", "Aurora Sky Effect");
+        add("auroral.configuration.show_aurora_effect.tooltip", "Show the aurora sky ribbons. This setting only affects your visuals.");
+        add("auroral.configuration.play_aurora_ambient_sound", "Aurora Sounds");
+        add("auroral.configuration.play_aurora_ambient_sound.tooltip", "Play aurora music and the sounds announcing the start and end of an aurora.");
+        add("tooltip.auroral.glacial_basin.aura_level", "Liquid Aura: %s / %s");
+        add("tooltip.auroral.glacial_basin.empty", "No Liquid Aura");
+        add("tooltip.auroral.hearthwood_log.burning", "Burning");
+        add("tooltip.auroral.hearthwood_log.unlit", "Unlit");
+
         // Creative tab
         add("itemGroup." + Auroral.MOD_ID, "Auroral");
 
@@ -27,6 +36,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addBlock(ModBlocks.SHIMMERING_ICE, "Shimmering Ice");
         addBlock(ModBlocks.AURORA_BLOOM, "Aurora Bloom");
         addBlock(ModBlocks.AURORA_BLOOM_DECORATIVE, "Aurora Bloom");
+        addBlock(ModBlocks.POTTED_AURORA_BLOOM_DECORATIVE, "Aurora Bloom");
         addBlock(ModBlocks.ENDER_BLOOM, "Ender Bloom");
         addBlock(ModBlocks.GLOW_LEEK, "Glow-Leek");
         addBlock(ModBlocks.AURORA_LANTERN, "Aurora Lantern");
@@ -48,6 +58,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.SHIMMERSTEEL_SHOVEL, "Shimmersteel Shovel");
         addItem(ModItems.SHIMMERSTEEL_HOE, "Shimmersteel Hoe");
         addItem(ModItems.SHIMMERSTEEL_SWORD, "Shimmersteel Sword");
+        addItem(ModItems.SHIMMER_SPEAR, "Shimmer Spear");
         addItem(ModItems.SHIMMERSTEEL_BOW, "Shimmersteel Bow");
 
         // Items - Shimmerweave Armor
@@ -55,6 +66,7 @@ public class ModLanguageProvider extends LanguageProvider {
         addItem(ModItems.SHIMMERWEAVE_TUNIC, "Shimmerweave Tunic");
         addItem(ModItems.SHIMMERWEAVE_LEGGINGS, "Shimmerweave Leggings");
         addItem(ModItems.SHIMMERWEAVE_SKATES, "Shimmerweave Skates");
+        addItem(ModItems.SHIMMERSTEEL_NAUTILUS_ARMOR, "Shimmersteel Nautilus Armor");
 
         // Items - Other
         addItem(ModItems.GLOW_LEEK, "Glow-Leek");
@@ -95,6 +107,12 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.auroral.shimmerweave_skates.frost_walker", "Freezes water underfoot");
         add("tooltip.auroral.shimmerweave_skates.lava_to_obsidian", "Turns surface lava into obsidian");
         add("tooltip.auroral.shimmerweave_skates.lava_fall", "Turns lava beneath you into obsidian while falling");
+        add("tooltip.auroral.shimmersteel_nautilus_armor.equip", "Right click a tamed Auroral Nautilus to equip");
+        add("tooltip.auroral.shimmersteel_nautilus_armor.remove", "Shear the nautilus to take it off");
+        add("tooltip.auroral.shimmer_spear.frostbite", "Applies Frostbite on hit");
+        add("tooltip.auroral.shimmer_spear.aurora_empowered", "Aurora: bonus damage, stronger Frostbite");
+        add("advancement.auroral.shimmer_spear.title", "Northern Star");
+        add("advancement.auroral.shimmer_spear.description", "Craft a Shimmer Spear");
         add("item.auroral.guide.missing_guideme", "Install GuideME to read the Auroral guide");
         add("tooltip.auroral.shimmerweave_skates.no_ice_fall", "No fall damage on ice or obsidian");
 

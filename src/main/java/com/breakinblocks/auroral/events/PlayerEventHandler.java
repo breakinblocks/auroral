@@ -2,19 +2,30 @@ package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.config.AuroralConfig;
+import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import com.breakinblocks.auroral.registry.ModBlocks;
+import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModTags;
 import com.breakinblocks.auroral.util.AuroraHelper;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Handles player-related events.
@@ -41,6 +52,65 @@ public class PlayerEventHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             // Sync aurora state for the new dimension
             AuroralNetworking.syncAuroraToPlayer(player);
+            Vec3 origin = preTransitPositions.remove(player.getUUID());
+            ServerLevel sourceLevel = player.serverLevel().getServer().getLevel(event.getFrom());
+            if (sourceLevel != null && origin != null) {
+                bringTamedNautili(player, sourceLevel, origin);
+            }
+        }
+    }
+
+    private static final Map<UUID, Vec3> preTransitPositions = new HashMap<>();
+    private static final double NAUTILUS_FOLLOW_RADIUS = 32.0;
+
+    @SubscribeEvent
+    public static void onEntityTravelToDimension(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer player && event.getDimension() != player.level().dimension()) {
+            preTransitPositions.put(player.getUUID(), player.position());
+        }
+    }
+
+    public static void onSameDimensionTeleport(ServerPlayer player, ServerLevel sourceLevel, Vec3 origin) {
+        if (sourceLevel == player.serverLevel() && !preTransitPositions.containsKey(player.getUUID())
+                && origin.distanceToSqr(player.position()) > 1.0E-6) {
+            bringTamedNautili(player, sourceLevel, origin);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        preTransitPositions.remove(event.getEntity().getUUID());
+    }
+
+    private static void bringTamedNautili(ServerPlayer player, ServerLevel sourceLevel, Vec3 origin) {
+        ServerLevel destLevel = player.serverLevel();
+
+        UUID playerId = player.getUUID();
+        double radiusSq = NAUTILUS_FOLLOW_RADIUS * NAUTILUS_FOLLOW_RADIUS;
+
+        List<? extends AuroralNautilusEntity> followers = sourceLevel.getEntities(
+            ModEntities.AURORAL_NAUTILUS.get(),
+            n -> n.isTamed()
+                && !n.isSitting()
+                && playerId.equals(n.getOwnerUUID())
+                && n.position().distanceToSqr(origin) <= radiusSq
+        );
+
+        for (AuroralNautilusEntity nautilus : followers) {
+            // Dismount the owner without moving them back to the old mount position.
+            if (player.getVehicle() == nautilus) {
+                player.removeVehicle();
+            }
+            nautilus.stopRiding();
+            nautilus.ejectPassengers();
+            nautilus.changeDimension(new DimensionTransition(
+                destLevel,
+                player.position(),
+                Vec3.ZERO,
+                player.getYRot(),
+                player.getXRot(),
+                DimensionTransition.DO_NOTHING
+            ));
         }
     }
 
@@ -64,6 +134,8 @@ public class PlayerEventHandler {
         if (player.level().isClientSide()) {
             return;
         }
+        // A cancelled dimension-travel event has no completion callback.
+        preTransitPositions.remove(player.getUUID());
 
         // Check if player is holding Aurora Lantern in either hand
         boolean holdingLantern = player.getMainHandItem().is(ModBlocks.AURORA_LANTERN.asItem()) ||

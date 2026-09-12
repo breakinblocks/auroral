@@ -37,6 +37,12 @@ public class TooltipEventHandler {
         b.ability(ModItems.SHIMMERSTEEL_SWORD::get, "tooltip.auroral.shimmersteel_sword.execute");
         b.ability(ModItems.SHIMMERSTEEL_BOW::get, "tooltip.auroral.shimmersteel_bow.star_shot");
 
+        b.info(ModItems.SHIMMERSTEEL_NAUTILUS_ARMOR::get, "tooltip.auroral.shimmersteel_nautilus_armor.equip");
+        b.info(ModItems.SHIMMERSTEEL_NAUTILUS_ARMOR::get, "tooltip.auroral.shimmersteel_nautilus_armor.remove");
+
+        b.ability(ModItems.SHIMMER_SPEAR::get, "tooltip.auroral.shimmer_spear.frostbite");
+        b.ability(ModItems.SHIMMER_SPEAR::get, "tooltip.auroral.shimmer_spear.aurora_empowered");
+
         b.ability(ModItems.SHIMMERWEAVE_GOGGLES::get, "tooltip.auroral.shimmerweave_goggles.glow_hostiles");
         b.ability(ModItems.SHIMMERWEAVE_TUNIC::get, "tooltip.auroral.shimmerweave_tunic.extinguish");
         b.ability(ModItems.SHIMMERWEAVE_LEGGINGS::get, "tooltip.auroral.shimmerweave_leggings.snow_speed");

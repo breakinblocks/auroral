@@ -46,6 +46,10 @@ public class AuroraSkyRenderer {
     private static final float TIME_CYCLE = 100000.0f;
 
     private static float smoothedIntensity = 0.0f;
+
+    public static void reset() {
+        smoothedIntensity = 0.0f;
+    }
     private static final float INTENSITY_LERP_SPEED = 0.05f;
 
     /**
@@ -65,42 +69,22 @@ public class AuroraSkyRenderer {
             return;
         }
 
-        // Check if aurora should be visible
-        if (!ClientAuroraState.isAuroraActive()) {
-            // Fade out smoothly
-            smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
-            if (smoothedIntensity <= 0.01f) {
-                return;
-            }
-        }
-
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null) {
+            smoothedIntensity = 0.0f;
             return;
         }
 
         // Dimension check - only render in overworld-like dimensions
         if (!level.dimensionType().hasSkyLight()) {
+            smoothedIntensity = 0.0f;
             return;
         }
 
-        // Only render in cold biomes
-        if (!BiomeHelper.canExperienceAurora(level, mc.player.blockPosition())) {
-            // Fade out when leaving cold biomes
-            smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
-            if (smoothedIntensity <= 0.01f) {
-                return;
-            }
-        }
-
-        // Calculate aurora intensity based on time of night
-        float nightProgress = getNightProgress(level);
-        if (nightProgress <= 0 && smoothedIntensity <= 0.01f) {
-            return;
-        }
-
-        float targetIntensity = calculateIntensity(nightProgress);
+        boolean visible = ClientAuroraState.isAuroraActive()
+            && BiomeHelper.canExperienceAurora(level, mc.player.blockPosition());
+        float targetIntensity = visible ? calculateIntensity(getNightProgress(level)) : 0.0f;
 
         // Apply config intensity multiplier
         targetIntensity *= AuroralConfig.CLIENT.auroraIntensity.get().floatValue();

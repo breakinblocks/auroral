@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "I": {
+      "item": "auroral:shimmersteel_ingot"
+    },
+    "N": {
+      "item": "minecraft:nautilus_shell"
+    }
+  },
+  "pattern": [
+    "I I",
+    "INI",
+    "I I"
+  ],
+  "result": {
+    "count": 1,
+    "id": "auroral:shimmersteel_nautilus_armor"
+  }
+}

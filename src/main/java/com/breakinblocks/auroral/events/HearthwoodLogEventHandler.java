@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.npc.Villager;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MerchantMenu;
@@ -18,6 +19,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingChangeTargetEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 
@@ -36,6 +38,17 @@ public class HearthwoodLogEventHandler {
      * Radius to check for Hearthwood Logs for villager discounts.
      */
     private static final double VILLAGER_DISCOUNT_RADIUS = 16.0;
+
+    @SubscribeEvent
+    public static void onPhantomChangeTarget(LivingChangeTargetEvent event) {
+        if (!(event.getEntity() instanceof Phantom)) {
+            return;
+        }
+        LivingEntity newTarget = event.getNewAboutToBeSetTarget();
+        if (newTarget instanceof Player player && player.hasEffect(ModEffects.FROSTBITE_IMMUNITY)) {
+            event.setCanceled(true);
+        }
+    }
 
     /**
      * Prevents Frostbite from being applied when the entity has Frostbite Immunity.

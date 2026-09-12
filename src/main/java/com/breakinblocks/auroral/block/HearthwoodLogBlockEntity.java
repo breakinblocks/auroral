@@ -9,6 +9,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.core.HolderLookup;
@@ -77,11 +78,19 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
         if (blockEntity.effectTimer >= EFFECT_INTERVAL) {
             blockEntity.effectTimer = 0;
             blockEntity.applyEffectsToNearbyPlayers(serverLevel, pos);
+            blockEntity.igniteNearbyPhantoms(serverLevel, pos);
         }
 
         // Mark changed occasionally for saving
         if (blockEntity.burnTimeRemaining % 1200 == 0) { // Every minute
             blockEntity.setChanged();
+        }
+    }
+
+    private void igniteNearbyPhantoms(ServerLevel level, BlockPos pos) {
+        AABB effectBox = new AABB(pos).inflate(getEffectRadius());
+        for (Phantom phantom : level.getEntitiesOfClass(Phantom.class, effectBox)) {
+            phantom.igniteForSeconds(5.0f);
         }
     }
 

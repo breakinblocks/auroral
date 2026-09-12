@@ -28,6 +28,6 @@ public class ShimmerweaveLeggingsItem extends ArmorItem {
     public static final int SOUL_SPEED_DURATION = 40; // 2 seconds, refreshed continuously
 
     public ShimmerweaveLeggingsItem(Holder<ArmorMaterial> material, ArmorItem.Type type, Properties properties) {
-        super(material, type, properties);
+        super(material, type, properties.durability(type.getDurability(26)));
     }
 }

@@ -61,6 +61,7 @@ Feed a wild Nautilus an Aurora Shard. Each shard has a **33% chance** to tame. O
 </Row>
 
 * **Shift + Right-click** — toggle between **Follow** (orbits you) and **Stay** (hovers in place).
+* Nearby Nautili in Follow mode travel with you through portals and teleports. Nautili in Stay mode remain where you left them.
 
 <Row>
   <ItemImage id="auroral_nautilus_spawn_egg" />
@@ -74,13 +75,23 @@ Tamed Nautili can be ridden without a saddle.
 3. Hold **Space** to charge, release for a speed boost up to **3x** when fully charged.
 
 <Row>
+  <ItemImage id="shimmersteel_nautilus_armor" />
+  ### <Color id="aqua">Nautilus Armor</Color>
+</Row>
+
+A tamed Auroral Nautilus can wear <ItemLink id="shimmersteel_nautilus_armor" />. Right-click the nautilus while holding the armor to equip it. Right-click with **shears** (without sneaking) to take it off again. The armor drops when the nautilus dies.
+
+<RecipeFor id="shimmersteel_nautilus_armor" />
+
+<Row>
   <ItemImage id="aurora_shard" />
   ### <Color id="aqua">Drops</Color>
 </Row>
 
-When a Nautilus fades away or is slain, it may drop:
+When a player kills a Nautilus, it may drop:
 
-* 1–2 Aurora Shards (player kills only)
+* 1–2 Leather
+* A Prismarine Shard (5% chance)
 * Nautilus Shells (15% chance, player kills only)
 
 <Row>

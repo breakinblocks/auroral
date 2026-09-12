@@ -1,18 +1,20 @@
 package com.breakinblocks.auroral.events;
 
 import com.breakinblocks.auroral.Auroral;
+import com.breakinblocks.auroral.block.AuroraBloomBlock;
 import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.entity.AuroralNautilusEntity;
 import com.breakinblocks.auroral.net.AuroralNetworking;
 import com.breakinblocks.auroral.registry.ModBlocks;
-import com.breakinblocks.auroral.registry.ModDataAttachments;
 import com.breakinblocks.auroral.registry.ModDataAttachments.AuroraState;
+import com.breakinblocks.auroral.registry.ModDataAttachments;
 import com.breakinblocks.auroral.registry.ModEntities;
 import com.breakinblocks.auroral.registry.ModSounds;
 import com.breakinblocks.auroral.util.AuroraHelper;
 import com.breakinblocks.auroral.util.BiomeHelper;
 import com.breakinblocks.auroral.util.SnowBlockHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -21,9 +23,14 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.util.BlockSnapshot;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.Map;
@@ -39,7 +46,7 @@ public class AuroraEventHandler {
     // Track last day time to detect night transition (per dimension)
     private static final Map<ResourceKey<Level>, Long> lastDayTimeByDimension = new ConcurrentHashMap<>();
 
-    // Track spawned bloom positions per dimension for O(1) removal instead of O(n³)
+    // Track spawned bloom positions per dimension for O(1) removal instead of O(nÂ³)
     private static final Map<ResourceKey<Level>, Set<BlockPos>> spawnedBloomsByDimension = new ConcurrentHashMap<>();
 
     private static final Map<ResourceKey<Level>, Long> auroraStartSoundDayByDimension = new ConcurrentHashMap<>();
@@ -96,6 +103,8 @@ public class AuroraEventHandler {
      * Maximum Auroral Nautiluses that can exist per player.
      */
     private static final int MAX_NAUTILUSES_PER_PLAYER = 3;
+    private static final double NAUTILUS_LOCAL_RADIUS = 64.0;
+    private static final int MAX_NAUTILUSES_PER_AREA = 2;
 
     /**
      * Attempts to spawn Auroral Nautilus entities near players in cold biomes during aurora.
@@ -127,6 +136,12 @@ public class AuroraEventHandler {
 
             // Wild Nautili refuse to appear near players who have offended the Aurora.
             if (player.getData(ModDataAttachments.VERY_NAUGHTY)) {
+                continue;
+            }
+
+            AABB localArea = player.getBoundingBox().inflate(NAUTILUS_LOCAL_RADIUS);
+            int localNautiluses = level.getEntitiesOfClass(AuroralNautilusEntity.class, localArea).size();
+            if (localNautiluses >= MAX_NAUTILUSES_PER_AREA) {
                 continue;
             }
 
@@ -233,34 +248,59 @@ public class AuroraEventHandler {
 
                 // Find surface
                 BlockPos surfacePos = findSurfaceSnow(level, checkPos);
-                if (surfacePos != null && canPlaceBloom(level, surfacePos)) {
-                    BlockState surfaceState = level.getBlockState(surfacePos);
+                if (surfacePos == null || !canPlaceBloom(level, surfacePos)) {
+                    continue;
+                }
+                BlockState surfaceState = level.getBlockState(surfacePos);
 
-                    // If it's a snow layer, replace it with the bloom
-                    if (SnowBlockHelper.isSnowLayer(surfaceState)) {
-                        level.setBlock(surfacePos, ModBlocks.AURORA_BLOOM.get().defaultBlockState(), 3);
-                        trackBloomPosition(level, surfacePos);
+                if (SnowBlockHelper.isSnowLayer(surfaceState)) {
+                    BlockPos belowPos = surfacePos.below();
+                    if (!SnowBlockHelper.isBloomSurface(level.getBlockState(belowPos))) {
+                        continue;
+                    }
+                    BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
+                        .setValue(AuroraBloomBlock.SNOW_LOGGED, true)
+                        .setValue(AuroraBloomBlock.SNOW_LOGGED_LAYER, true)
+                        .setValue(AuroraBloomBlock.SNOW_LAYERS, surfaceState.getValue(BlockStateProperties.LAYERS));
+                    if (tryPlaceBloom(level, surfacePos, bloom, player)) {
                         break;
-                    } else {
-                        // For snow blocks, powder snow, or shimmering ice, place above
-                        BlockPos bloomPos = surfacePos.above();
-                        if (level.isEmptyBlock(bloomPos)) {
-                            level.setBlock(bloomPos, ModBlocks.AURORA_BLOOM.get().defaultBlockState(), 3);
-                            trackBloomPosition(level, bloomPos);
-                            break;
-                        }
+                    }
+                } else if (surfaceState.is(Blocks.POWDER_SNOW)) {
+                    BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
+                        .setValue(AuroraBloomBlock.SNOW_LOGGED, true);
+                    if (tryPlaceBloom(level, surfacePos, bloom, player)) {
+                        break;
+                    }
+                } else {
+                    BlockPos bloomPos = surfacePos.above();
+                    if (level.isEmptyBlock(bloomPos)
+                            && tryPlaceBloom(level, bloomPos,
+                                ModBlocks.AURORA_BLOOM.get().defaultBlockState(), player)) {
+                        break;
                     }
                 }
             }
         }
     }
 
+    private static boolean tryPlaceBloom(ServerLevel level, BlockPos pos, BlockState bloom, ServerPlayer player) {
+        BlockSnapshot snapshot = BlockSnapshot.create(level.dimension(), level, pos);
+        if (!level.setBlock(pos, bloom, 3)) {
+            return false;
+        }
+        if (EventHooks.onBlockPlace(player, snapshot, Direction.UP)) {
+            snapshot.restore();
+            return false;
+        }
+        trackBloomPosition(level, pos);
+        return true;
+    }
+
     /**
      * Finds a snow surface block at or near the given position.
      */
     private static BlockPos findSurfaceSnow(ServerLevel level, BlockPos pos) {
-        // Search from player Y up and down
-        for (int y = -10; y <= 10; y++) {
+        for (int y = 10; y >= -10; y--) {
             BlockPos checkPos = pos.offset(0, y, 0);
             BlockState state = level.getBlockState(checkPos);
             if (isValidBloomSurface(state)) {
@@ -337,9 +377,11 @@ public class AuroraEventHandler {
     private static void startAurora(ServerLevel level, long gameTime, RandomSource random) {
         int minDuration = AuroralConfig.SERVER.auroraMinDuration.get();
         int maxDuration = AuroralConfig.SERVER.auroraMaxDuration.get();
+        int lowerBound = Math.min(minDuration, maxDuration);
+        int upperBound = Math.max(minDuration, maxDuration);
 
         // Random duration between min and max
-        int duration = minDuration + random.nextInt(maxDuration - minDuration + 1);
+        int duration = lowerBound + random.nextInt(upperBound - lowerBound + 1);
         startAurora(level, duration);
     }
 
@@ -401,7 +443,7 @@ public class AuroraEventHandler {
 
     /**
      * Tracks a bloom position for efficient removal later.
-     * O(1) insertion instead of requiring O(n³) search on removal.
+     * O(1) insertion instead of requiring O(nÂ³) search on removal.
      */
     private static void trackBloomPosition(ServerLevel level, BlockPos pos) {
         ResourceKey<Level> dimensionKey = level.dimension();
@@ -423,7 +465,7 @@ public class AuroraEventHandler {
 
     /**
      * Removes all tracked aurora blooms when the aurora ends.
-     * Uses position tracking for O(n) removal instead of O(n³) cube search.
+     * Uses position tracking for O(n) removal instead of O(nÂ³) cube search.
      */
     private static void removeAuroraBlooms(ServerLevel level) {
         ResourceKey<Level> dimensionKey = level.dimension();
