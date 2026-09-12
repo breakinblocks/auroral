@@ -1,9 +1,10 @@
 package com.breakinblocks.auroral.command;
 
 import com.breakinblocks.auroral.Auroral;
-import com.breakinblocks.auroral.net.AuroralNetworking;
+import com.breakinblocks.auroral.events.AuroraEventHandler;
 import com.breakinblocks.auroral.registry.ModDataAttachments.AuroraState;
 import com.breakinblocks.auroral.util.AuroraHelper;
+import com.breakinblocks.auroral.util.BiomeHelper;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -48,11 +49,19 @@ public class AuroraCommand {
         CommandSourceStack source = ctx.getSource();
         ServerLevel level = source.getLevel();
 
-        AuroraHelper.startAurora(level, duration);
-        AuroralNetworking.syncAuroraToAll(level, true);
+        if (!BiomeHelper.dimensionSupportsAurora(level)) {
+            source.sendFailure(Component.literal("Auroras cannot occur in this dimension"));
+            return 0;
+        }
+        if (!AuroraHelper.isNightTime(level)) {
+            source.sendFailure(Component.literal("Auroras can only start at night"));
+            return 0;
+        }
+
+        int actualDuration = AuroraEventHandler.startAurora(level, duration);
 
         // Calculate duration in seconds for display
-        int seconds = duration / 20;
+        int seconds = actualDuration / 20;
         int minutes = seconds / 60;
         int remainingSeconds = seconds % 60;
 
@@ -63,7 +72,7 @@ public class AuroraCommand {
             timeStr = String.format("%d sec", seconds);
         }
 
-        source.sendSuccess(() -> Component.literal("Aurora started for " + timeStr + " (" + duration + " ticks)"), true);
+        source.sendSuccess(() -> Component.literal("Aurora started for " + timeStr + " (" + actualDuration + " ticks)"), true);
         return 1;
     }
 
@@ -73,8 +82,7 @@ public class AuroraCommand {
 
         boolean wasActive = AuroraHelper.isAuroraActive(level);
 
-        AuroraHelper.endAurora(level);
-        AuroralNetworking.syncAuroraToAll(level, false);
+        AuroraEventHandler.endAurora(level);
 
         if (wasActive) {
             source.sendSuccess(() -> Component.literal("Aurora stopped"), true);

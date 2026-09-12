@@ -9,7 +9,11 @@ import com.breakinblocks.auroral.item.ShimmersteelSwordItem;
 import com.breakinblocks.auroral.registry.ModEffects;
 import com.breakinblocks.auroral.util.AuroraHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,6 +25,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -100,11 +106,12 @@ public class ShimmersteelEventHandler {
                     SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 1.5F, 1.5F);
 
                 BlockPos deathPos = target.blockPosition();
-                serverLevel.getServer().execute(() -> {
+                MinecraftServer server = serverLevel.getServer();
+                server.schedule(new TickTask(server.getTickCount() + 1, () -> {
                     if (target.isDeadOrDying()) {
                         ShimmersteelSwordItem.placeSnowOnKill(serverLevel, deathPos);
                     }
-                });
+                }));
             }
         }
     }
@@ -156,12 +163,12 @@ public class ShimmersteelEventHandler {
 
         // Shimmersteel Shovel: Silk Touch
         if (tool.getItem() instanceof ShimmersteelShovelItem) {
-            applySilkTouch(event, state, pos);
+            applySilkTouch(event, state, pos, tool);
         }
 
         // Shimmersteel Hoe: Silk Touch (for crops and other blocks)
         if (tool.getItem() instanceof ShimmersteelHoeItem) {
-            applySilkTouch(event, state, pos);
+            applySilkTouch(event, state, pos, tool);
         }
     }
 
@@ -187,31 +194,23 @@ public class ShimmersteelEventHandler {
     /**
      * Replaces normal drops with silk touch drops (the block itself).
      */
-    private static void applySilkTouch(BlockDropsEvent event, BlockState state, BlockPos pos) {
-        // Get the block's silk touch drop
-        Block block = state.getBlock();
-        ItemStack silkDrop = new ItemStack(block);
-
-        // Only apply if the block would give a different drop normally
-        // and if it's a valid silk touch target
-        if (silkDrop.isEmpty()) {
+    private static void applySilkTouch(BlockDropsEvent event, BlockState state, BlockPos pos, ItemStack tool) {
+        ServerLevel level = event.getLevel();
+        Holder<Enchantment> silkTouch = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.SILK_TOUCH);
+        if (tool.getEnchantmentLevel(silkTouch) > 0) {
             return;
         }
 
-        // Clear existing drops and add the block
+        ItemStack silkTool = tool.copy();
+        silkTool.enchant(silkTouch, 1);
+
         List<ItemEntity> drops = event.getDrops();
         drops.clear();
 
-        // Create new item entity with the silk touched block
-        ServerLevel level = event.getLevel();
-        ItemEntity newDrop = new ItemEntity(
-            level,
-            pos.getX() + 0.5,
-            pos.getY() + 0.5,
-            pos.getZ() + 0.5,
-            silkDrop
-        );
-        newDrop.setDefaultPickUpDelay();
-        drops.add(newDrop);
+        for (ItemStack drop : Block.getDrops(state, level, pos, event.getBlockEntity(), event.getBreaker(), silkTool)) {
+            ItemEntity newDrop = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
+            newDrop.setDefaultPickUpDelay();
+            drops.add(newDrop);
+        }
     }
 }

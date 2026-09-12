@@ -2,6 +2,7 @@ package com.breakinblocks.auroral.integration.jade;
 
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.block.GlacialBasinBlock;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -19,7 +20,7 @@ public enum GlacialBasinComponentProvider implements IBlockComponentProvider {
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
         int auraLevel = accessor.getBlockState().getValue(GlacialBasinBlock.AURA_LEVEL);
-        int maxLevel = GlacialBasinBlock.MAX_AURA_LEVEL;
+        int maxLevel = AuroralConfig.SERVER.basinMaxAura.get();
 
         Component auraText = Component.translatable("block.auroral.glacial_basin.aura_level", auraLevel, maxLevel);
         if (auraLevel == maxLevel) {

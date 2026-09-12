@@ -39,15 +39,14 @@ public class AuroraLanternBlock extends Block {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         for (Direction direction : context.getNearestLookingDirections()) {
-            if (direction == Direction.UP) {
-                BlockPos above = context.getClickedPos().above();
-                BlockState aboveState = context.getLevel().getBlockState(above);
-                if (canHangFrom(aboveState, context.getLevel(), above)) {
-                    return this.defaultBlockState().setValue(HANGING, true);
+            if (direction.getAxis() == Direction.Axis.Y) {
+                BlockState state = this.defaultBlockState().setValue(HANGING, direction == Direction.UP);
+                if (state.canSurvive(context.getLevel(), context.getClickedPos())) {
+                    return state;
                 }
             }
         }
-        return this.defaultBlockState().setValue(HANGING, false);
+        return null;
     }
 
     private static boolean canHangFrom(BlockState state, LevelReader level, BlockPos pos) {

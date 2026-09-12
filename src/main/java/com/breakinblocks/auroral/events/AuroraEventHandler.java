@@ -390,7 +390,10 @@ public class AuroraEventHandler {
 
         // Random duration between min and max
         int duration = minDuration + random.nextInt(maxDuration - minDuration + 1);
+        startAurora(level, duration);
+    }
 
+    public static int startAurora(ServerLevel level, int duration) {
         // Clamp duration to not extend past dawn
         long currentDayTime = level.getOverworldClockTime() % 24000;
         long ticksUntilDawn = (23000 - currentDayTime + 24000) % 24000;
@@ -411,12 +414,13 @@ public class AuroraEventHandler {
 
         // Sync to all clients
         AuroralNetworking.syncAuroraToAll(level, true);
+        return duration;
     }
 
     /**
      * Ends the current aurora event.
      */
-    private static void endAurora(ServerLevel level) {
+    public static void endAurora(ServerLevel level) {
         AuroraState currentState = AuroraHelper.getAuroraState(level);
         if (!currentState.active()) {
             return;

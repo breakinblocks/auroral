@@ -14,7 +14,6 @@ import net.minecraft.world.level.block.Blocks;
 public class ShimmersteelSwordItem extends Item {
 
     public static final float EXECUTE_THRESHOLD = 0.15f;
-    public static final int FROSTBITE_DURATION = 60;
 
     public ShimmersteelSwordItem(Properties properties) {
         super(properties.sword(ModToolTiers.SHIMMERSTEEL, 3, -2.4f));
@@ -22,7 +21,8 @@ public class ShimmersteelSwordItem extends Item {
 
     @Override
     public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
-        target.addEffect(new MobEffectInstance(ModEffects.FROSTBITE, FROSTBITE_DURATION, 0));
+        int duration = (int) (AuroralConfig.SERVER.swordFrostbiteDuration.get() * 20);
+        target.addEffect(new MobEffectInstance(ModEffects.FROSTBITE, duration, 0));
 
         super.postHurtEnemy(stack, target, attacker);
     }

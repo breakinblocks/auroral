@@ -13,6 +13,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -29,8 +31,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
@@ -251,24 +255,27 @@ public class ShimmerweaveEventHandler {
     }
 
     private static void handleFallingOverLava(Player player, ServerLevel level, BlockPos playerPos, int radius) {
-        int scanDepth = AuroralConfig.SERVER.skatesLavaFallScanDepth.get();
-        if (scanDepth <= 0 || player.getDeltaMovement().y >= 0 || player.isInLava()) {
+        int configDepth = AuroralConfig.SERVER.skatesLavaFallScanDepth.get();
+        Vec3 movement = player.getKnownMovement();
+        if (configDepth <= 0 || movement.y >= 0 || player.isSpectator() || player.isInLava()) {
             return;
         }
 
+        int scanDepth = Math.max(configDepth, Mth.ceil(-movement.y * 10));
         int minY = Math.max(level.getMinY(), playerPos.getY() - scanDepth);
         BlockPos.MutableBlockPos scanPos = playerPos.mutable();
 
         while (scanPos.getY() > minY) {
             scanPos.move(0, -1, 0);
             BlockState state = level.getBlockState(scanPos);
+            FluidState fluid = state.getFluidState();
 
-            if (state.getFluidState().is(Fluids.LAVA)) {
+            if (fluid.is(FluidTags.LAVA)) {
                 convertLavaAround(level, scanPos, radius);
                 return;
             }
 
-            if (!state.isAir()) {
+            if (!fluid.isEmpty() || !state.getCollisionShape(level, scanPos).isEmpty()) {
                 return;
             }
         }
@@ -281,7 +288,7 @@ public class ShimmerweaveEventHandler {
             for (int z = -radius; z <= radius; z++) {
                 mutablePos.set(center.getX() + x, center.getY(), center.getZ() + z);
 
-                if (mutablePos.closerThan(center, radius + 0.5) && level.getFluidState(mutablePos).is(Fluids.LAVA)) {
+                if (mutablePos.closerThan(center, radius + 0.5) && level.getFluidState(mutablePos).is(FluidTags.LAVA)) {
                     level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
                 }
             }

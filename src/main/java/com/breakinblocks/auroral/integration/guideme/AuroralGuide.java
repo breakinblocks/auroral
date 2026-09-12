@@ -2,7 +2,9 @@ package com.breakinblocks.auroral.integration.guideme;
 
 import com.breakinblocks.auroral.Auroral;
 import guideme.Guide;
+import guideme.GuidesCommon;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 
 public class AuroralGuide {
 
@@ -24,6 +26,10 @@ public class AuroralGuide {
 
     public static Guide getGuide() {
         return guide;
+    }
+
+    public static void openGuide(Player player) {
+        GuidesCommon.openGuide(player, GUIDE_ID);
     }
 
     public static boolean isGuideAvailable() {
