@@ -244,13 +244,13 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     @Override
     public boolean canPlaceItem(int slot, ItemStack stack) {
         if (slot == INGREDIENT_SLOT) {
-            // Accept any potion ingredient
-            return true;
+            PotionBrewing potionBrewing = this.level != null ? this.level.potionBrewing() : PotionBrewing.EMPTY;
+            return potionBrewing.isIngredient(stack);
         } else if (slot == FUEL_SLOT) {
             return isValidFuel(stack);
         } else {
             // Slots 0-2 are for bottles - check if it's a valid container
-            return isValidBottle(stack);
+            return isValidBottle(stack) && this.getItem(slot).isEmpty();
         }
     }
 

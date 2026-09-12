@@ -1,6 +1,7 @@
 package com.breakinblocks.auroral.integration.jade;
 
 import com.breakinblocks.auroral.block.GlacialBasinBlock;
+import com.breakinblocks.auroral.config.AuroralConfig;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -28,7 +29,7 @@ public enum GlacialBasinComponentProvider implements IBlockComponentProvider {
         }
 
         if (auraLevel > 0) {
-            tooltip.add(Component.translatable("tooltip.auroral.glacial_basin.aura_level", auraLevel, GlacialBasinBlock.MAX_AURA_LEVEL));
+            tooltip.add(Component.translatable("tooltip.auroral.glacial_basin.aura_level", auraLevel, AuroralConfig.SERVER.basinMaxAura.get()));
         } else {
             tooltip.add(Component.translatable("tooltip.auroral.glacial_basin.empty"));
         }

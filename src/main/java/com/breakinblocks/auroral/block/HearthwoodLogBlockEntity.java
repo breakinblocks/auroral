@@ -1,5 +1,6 @@
 package com.breakinblocks.auroral.block;
 
+import com.breakinblocks.auroral.config.AuroralConfig;
 import com.breakinblocks.auroral.registry.ModBlockEntities;
 import com.breakinblocks.auroral.registry.ModEffects;
 import net.minecraft.core.BlockPos;
@@ -26,16 +27,6 @@ import java.util.List;
 public class HearthwoodLogBlockEntity extends BlockEntity {
 
     /**
-     * Total burn time: 7 days = 7 * 24000 ticks = 168000 ticks
-     */
-    public static final int MAX_BURN_TIME = 168000;
-
-    /**
-     * Effect radius in blocks
-     */
-    public static final double EFFECT_RADIUS = 16.0;
-
-    /**
      * How often to apply effects (every 2 seconds)
      */
     private static final int EFFECT_INTERVAL = 40;
@@ -45,8 +36,16 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
      */
     private static final int EFFECT_DURATION = 60;
 
-    private int burnTimeRemaining = MAX_BURN_TIME;
+    private int burnTimeRemaining = getMaxBurnTime();
     private int effectTimer = 0;
+
+    public static int getMaxBurnTime() {
+        return AuroralConfig.SERVER.hearthwoodLogBurnTime.get();
+    }
+
+    public static double getEffectRadius() {
+        return AuroralConfig.SERVER.hearthwoodLogFrostbiteRadius.get();
+    }
 
     public HearthwoodLogBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.HEARTHWOOD_LOG.get(), pos, state);
@@ -87,7 +86,7 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
     }
 
     private void applyEffectsToNearbyPlayers(ServerLevel level, BlockPos pos) {
-        AABB effectBox = new AABB(pos).inflate(EFFECT_RADIUS);
+        AABB effectBox = new AABB(pos).inflate(getEffectRadius());
         List<Player> nearbyPlayers = level.getEntitiesOfClass(Player.class, effectBox);
 
         for (Player player : nearbyPlayers) {
@@ -106,7 +105,7 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
     }
 
     public void resetBurnTime() {
-        this.burnTimeRemaining = MAX_BURN_TIME;
+        this.burnTimeRemaining = getMaxBurnTime();
         this.effectTimer = 0;
         this.setChanged();
     }
@@ -116,7 +115,7 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
     }
 
     public float getBurnProgress() {
-        return (float) burnTimeRemaining / MAX_BURN_TIME;
+        return (float) burnTimeRemaining / getMaxBurnTime();
     }
 
     public boolean isLit() {
@@ -132,7 +131,7 @@ public class HearthwoodLogBlockEntity extends BlockEntity {
     @Override
     protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
-        burnTimeRemaining = tag.contains("BurnTime") ? tag.getInt("BurnTime") : MAX_BURN_TIME;
+        burnTimeRemaining = tag.contains("BurnTime") ? tag.getInt("BurnTime") : getMaxBurnTime();
     }
 
     @Nullable

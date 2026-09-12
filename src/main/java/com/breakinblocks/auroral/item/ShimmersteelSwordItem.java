@@ -29,11 +29,6 @@ public class ShimmersteelSwordItem extends SwordItem {
      */
     public static final float EXECUTE_THRESHOLD = 0.15f;
 
-    /**
-     * Duration of frostbite effect in ticks (3 seconds = 60 ticks).
-     */
-    public static final int FROSTBITE_DURATION = 60;
-
     public ShimmersteelSwordItem(Properties properties) {
         super(ModToolTiers.SHIMMERSTEEL, properties);
     }
@@ -41,7 +36,8 @@ public class ShimmersteelSwordItem extends SwordItem {
     @Override
     public void postHurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         // Apply frostbite on hit (thematic for Shimmersteel)
-        target.addEffect(new MobEffectInstance(ModEffects.FROSTBITE, FROSTBITE_DURATION, 0));
+        int duration = (int) (AuroralConfig.SERVER.swordFrostbiteDuration.get() * 20);
+        target.addEffect(new MobEffectInstance(ModEffects.FROSTBITE, duration, 0));
 
         super.postHurtEnemy(stack, target, attacker);
     }

@@ -96,8 +96,6 @@ public class PlayerEventHandler {
             }
         }
 
-        // Repair held items (main hand and off hand)
-        tryRepairItem(player.getMainHandItem(), repairAmount);
         tryRepairItem(player.getOffhandItem(), repairAmount);
 
         // Repair items in hotbar

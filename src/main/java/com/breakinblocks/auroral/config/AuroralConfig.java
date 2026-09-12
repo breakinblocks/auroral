@@ -1,5 +1,6 @@
 package com.breakinblocks.auroral.config;
 
+import com.breakinblocks.auroral.block.GlacialBasinBlock;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
 
@@ -73,7 +74,7 @@ public class AuroralConfig {
 
         // Combat settings
         public final ModConfigSpec.DoubleValue executeThreshold;
-        public final ModConfigSpec.DoubleValue swordSlownessDuration;
+        public final ModConfigSpec.DoubleValue swordFrostbiteDuration;
 
         // Equipment settings
         public final ModConfigSpec.IntValue gogglesGlowingRadius;
@@ -124,9 +125,9 @@ public class AuroralConfig {
                 .comment("Health percentage threshold for Shimmersteel Sword execute (0.0 to 1.0)")
                 .defineInRange("execute_threshold", 0.15, 0.0, 0.5);
 
-            swordSlownessDuration = builder
-                .comment("Duration in seconds of Slowness applied by Shimmersteel Sword")
-                .defineInRange("sword_slowness_duration", 3.0, 0.5, 10.0);
+            swordFrostbiteDuration = builder
+                .comment("Duration in seconds of Frostbite applied by Shimmersteel Sword hits")
+                .defineInRange("sword_frostbite_duration", 3.0, 0.5, 10.0);
 
             builder.pop().push("equipment");
 
@@ -147,7 +148,7 @@ public class AuroralConfig {
                 .defineInRange("skates_frost_walker_radius", 2, 1, 5);
 
             skatesLavaFallScanDepth = builder
-                .comment("How many blocks below a falling player wearing Shimmerweave Skates to check for lava and turn it into obsidian before they land (0 disables)")
+                .comment("Minimum distance in blocks below a falling player wearing Shimmerweave Skates to check for lava and turn it into obsidian before they land. Scales up with fall speed. 0 disables")
                 .defineInRange("skates_lava_fall_scan_depth", 16, 0, 64);
 
             leggingsSnowSpeedBoost = builder
@@ -193,8 +194,8 @@ public class AuroralConfig {
                 .defineInRange("basin_fill_rate", 100, 20, 1200);
 
             basinMaxAura = builder
-                .comment("Maximum aura levels a basin can hold")
-                .defineInRange("basin_max_aura", 3, 1, 10);
+                .comment("Maximum aura levels a basin can hold (1 to 3)")
+                .defineInRange("basin_max_aura", 3, 1, GlacialBasinBlock.MAX_AURA_LEVEL);
 
             builder.pop();
         }
