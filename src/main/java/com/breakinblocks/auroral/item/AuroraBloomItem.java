@@ -32,21 +32,19 @@ public class AuroraBloomItem extends BlockItem {
         // Powder snow isn't replaceable in vanilla, so the default flow would place
         // the bloom above it. Plant the bloom inside the powder snow as snow-logged.
         if (clickedState.is(Blocks.POWDER_SNOW)) {
-            return placeSnowLogged(context, clicked, false);
+            return placeSnowLogged(context, clicked, clickedState);
         }
         // Multi-layer snow (2+) isn't replaceable by non-snow items in vanilla. Force the
         // bloom to replace it at the same level so it's not placed floating above.
         if (SnowBlockHelper.isSnowLayer(clickedState)) {
-            return placeSnowLogged(context, clicked, true);
+            return placeSnowLogged(context, clicked, clickedState);
         }
         return super.useOn(context);
     }
 
-    private InteractionResult placeSnowLogged(UseOnContext context, BlockPos pos, boolean snowLayer) {
+    private InteractionResult placeSnowLogged(UseOnContext context, BlockPos pos, BlockState snow) {
         Level level = context.getLevel();
-        BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
-            .setValue(AuroraBloomBlock.SNOW_LOGGED, true)
-            .setValue(AuroraBloomBlock.SNOW_LOGGED_LAYER, snowLayer);
+        BlockState bloom = AuroraBloomBlock.withSnow(ModBlocks.AURORA_BLOOM.get().defaultBlockState(), snow);
         if (!bloom.canSurvive(level, pos) || !level.setBlock(pos, bloom, Block.UPDATE_ALL)) {
             return InteractionResult.FAIL;
         }

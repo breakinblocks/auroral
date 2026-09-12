@@ -98,8 +98,8 @@ public class ShimmeringIceBlock extends HalfTransparentBlock {
         }
         // Matches the 4-block horizontal / 1-block vertical radius used by vanilla farmland hydration checks.
         AABB aabb = new AABB(
-            immut.getX() - 4, immut.getY(), immut.getZ() - 4,
-            immut.getX() + 5, immut.getY() + 2, immut.getZ() + 5);
+            immut.getX() - 4, immut.getY() - 1, immut.getZ() - 4,
+            immut.getX() + 5, immut.getY() + 1, immut.getZ() + 5);
         AABBTicket ticket = FarmlandWaterManager.addAABBTicket(level, aabb);
         perLevel.put(immut, ticket);
     }

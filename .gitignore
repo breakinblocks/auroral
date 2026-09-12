@@ -1,4 +1,5 @@
 # ===== Gradle =====
+/tools/
 .gradle/
 build/
 out/
@@ -97,10 +98,3 @@ tokens.properties
 # Local testing
 test-output/
 local/
-
-# ===== Markdown Files =====
-*.md
-!LICENSE.md
-!README.md
-!metadata/changelogs/*.md
-!src/main/resources/assets/auroral/auroral/**/*.md

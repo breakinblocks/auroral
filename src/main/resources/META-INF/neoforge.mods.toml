@@ -1,6 +1,6 @@
 modLoader = "javafml"
 loaderVersion = "[${neoforge_loader_version},)"
-license = "MIT"
+license = "PolyForm-Shield-1.0.0 AND PolyForm-Perimeter-1.0.0"
 
 [[mods]]
 modId = "${mod_id}"

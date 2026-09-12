@@ -29,6 +29,17 @@ Auroras have a **33% chance** to begin each night in cold biomes. While one is a
 * The night is never fully dark.
 * The mod's magical effects switch on.
 
+<Row>
+  ### <Color id="aqua">Personal Settings</Color>
+</Row>
+
+Open **Mods > Auroral > Config > Client** to choose your effects:
+
+* **Aurora Sky Effect** controls the sky ribbons.
+* **Aurora Sounds** controls the music and start/end sounds.
+
+You can disable either setting independently. These choices apply only to you and do not change aurora gameplay.
+
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***
 

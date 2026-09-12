@@ -13,6 +13,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
@@ -20,6 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
@@ -70,7 +73,21 @@ public class StarShotEntity extends Projectile {
         return this.weaponItem;
     }
 
+    @Override
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        if (!weaponItem.isEmpty()) {
+            output.store("Weapon", ItemStack.CODEC, weaponItem);
+        }
+        output.putInt("Life", life);
+    }
 
+    @Override
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        weaponItem = input.read("Weapon", ItemStack.CODEC).orElse(ItemStack.EMPTY);
+        life = Math.max(0, input.getIntOr("Life", 0));
+    }
     @Override
     public void tick() {
         super.tick();
@@ -142,7 +159,25 @@ public class StarShotEntity extends Projectile {
             }
 
             int finalDamage = Mth.ceil(Mth.clamp(velocity * damage, 0.0, Integer.MAX_VALUE));
-            target.hurtServer(serverLevel, damageSource, finalDamage);
+            int previousFireTicks = target.getRemainingFireTicks();
+            boolean enderman = target.is(EntityType.ENDERMAN);
+            if (this.isOnFire() && !enderman) {
+                target.igniteForSeconds(5.0F);
+            }
+            if (target.hurtServer(serverLevel, damageSource, finalDamage)) {
+                if (target instanceof LivingEntity livingTarget && !enderman) {
+                    double knockback = EnchantmentHelper.modifyKnockback(
+                        serverLevel, weapon, target, damageSource, 0.0F);
+                    double resistance = Math.max(0.0, 1.0 - livingTarget.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
+                    Vec3 push = getDeltaMovement().multiply(1, 0, 1).normalize().scale(knockback * 0.6 * resistance);
+                    if (push.lengthSqr() > 0.0) {
+                        livingTarget.push(push.x, 0.1, push.z);
+                    }
+                    EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, target, damageSource, weapon);
+                }
+            } else {
+                target.setRemainingFireTicks(previousFireTicks);
+            }
 
             // Create flashbang effect
             createFlashbangEffect(serverLevel);

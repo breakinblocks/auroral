@@ -1,19 +1,14 @@
 package com.breakinblocks.auroral.item;
 
 import com.breakinblocks.auroral.registry.ModEffects;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.Level;
 
 /**
@@ -22,7 +17,7 @@ import net.minecraft.world.level.Level;
  * - Regeneration I (30 seconds)
  * - Frostbite Immunity (5 minutes)
  *
- * Returns an empty bucket when consumed (since it's made with milk bucket).
+ * The milk bucket is returned by the crafting recipe.
  */
 public class HotCocoaItem extends Item {
 
@@ -36,16 +31,11 @@ public class HotCocoaItem extends Item {
     private static final int FROSTBITE_IMMUNITY_DURATION = 6000; // 5 minutes
 
     public HotCocoaItem(Properties properties) {
-        super(properties.food(HOT_COCOA_FOOD).stacksTo(16));
+        super(properties.food(HOT_COCOA_FOOD, Consumables.DEFAULT_DRINK).stacksTo(16));
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-        if (entity instanceof ServerPlayer serverPlayer) {
-            CriteriaTriggers.CONSUME_ITEM.trigger(serverPlayer, stack);
-            serverPlayer.awardStat(Stats.ITEM_USED.get(this));
-        }
-
         if (!level.isClientSide()) {
             entity.addEffect(new MobEffectInstance(
                 MobEffects.REGENERATION,
@@ -66,12 +56,7 @@ public class HotCocoaItem extends Item {
             ));
         }
 
-        if (entity instanceof Player player) {
-            return ItemUtils.createFilledResult(stack, player, new ItemStack(Items.BUCKET));
-        }
-
-        stack.shrink(1);
-        return stack.isEmpty() ? new ItemStack(Items.BUCKET) : stack;
+        return super.finishUsingItem(stack, level, entity);
     }
 
     @Override

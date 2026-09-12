@@ -75,6 +75,7 @@ public class PlayerEventHandler {
         List<? extends AuroralNautilusEntity> followers = sourceLevel.getEntities(
             ModEntities.AURORAL_NAUTILUS.get(),
             n -> n.isTamed()
+                && !n.isSitting()
                 && playerId.equals(n.getOwnerUUID())
                 && (lastPos == null || n.position().distanceToSqr(lastPos) <= radiusSq)
         );
@@ -98,6 +99,11 @@ public class PlayerEventHandler {
         if (event.getEntity() instanceof ServerPlayer player) {
             AuroralNetworking.syncAuroraToPlayer(player);
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
+        preTransitPositions.remove(event.getEntity().getUUID());
     }
 
     /**

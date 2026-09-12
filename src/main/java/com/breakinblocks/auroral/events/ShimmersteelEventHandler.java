@@ -17,7 +17,6 @@ import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -34,7 +33,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.level.BlockDropsEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,8 +59,11 @@ public class ShimmersteelEventHandler {
         }
 
         ItemStack heldWeapon = source.getWeaponItem();
-        if (heldWeapon == null) {
+        if (heldWeapon == null && source.getDirectEntity() == attacker) {
             heldWeapon = attacker.getMainHandItem();
+        }
+        if (heldWeapon == null) {
+            return;
         }
 
         if (heldWeapon.getItem() instanceof ShimmerSpearItem) {
@@ -70,11 +71,7 @@ public class ShimmersteelEventHandler {
             return;
         }
 
-        ItemStack weapon = source.getWeaponItem();
-        if (weapon == null || !(weapon.getItem() instanceof ShimmersteelSwordItem)) {
-            weapon = attacker.getMainHandItem();
-        }
-        if (!(weapon.getItem() instanceof ShimmersteelSwordItem)) {
+        if (!(heldWeapon.getItem() instanceof ShimmersteelSwordItem)) {
             return;
         }
 
@@ -157,7 +154,7 @@ public class ShimmersteelEventHandler {
         // Shimmersteel Pickaxe: Fortune III for gems
         if (tool.getItem() instanceof ShimmersteelPickaxeItem) {
             if (ShimmersteelPickaxeItem.isGemBlock(state)) {
-                applyFortuneBonus(event.getDrops(), level.getRandom(), 3);
+                applyFortuneBonus(event, tool);
             }
         }
 
@@ -172,23 +169,17 @@ public class ShimmersteelEventHandler {
         }
     }
 
-    /**
-     * Applies Fortune bonus to drops by multiplying item counts.
-     * Uses vanilla Fortune formula: bonus = random(0 to fortuneLevel) + 1
-     */
-    private static void applyFortuneBonus(List<ItemEntity> drops, RandomSource random, int fortuneLevel) {
-        for (ItemEntity itemEntity : drops) {
-            ItemStack stack = itemEntity.getItem();
-            if (stack.getMaxStackSize() > 1) {
-                // Fortune formula: multiplier is 1 + random(0 to fortuneLevel)
-                // So Fortune III gives 1-4x drops
-                int multiplier = 1 + random.nextInt(fortuneLevel + 1);
-                if (multiplier > 1) {
-                    int newCount = Math.min(stack.getCount() * multiplier, stack.getMaxStackSize());
-                    stack.setCount(newCount);
-                }
-            }
+    private static void applyFortuneBonus(BlockDropsEvent event, ItemStack tool) {
+        var enchantments = event.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        Holder<Enchantment> silkTouch = enchantments.getOrThrow(Enchantments.SILK_TOUCH);
+        Holder<Enchantment> fortune = enchantments.getOrThrow(Enchantments.FORTUNE);
+        // Leave Silk Touch and an already equivalent or stronger Fortune roll intact.
+        if (tool.getEnchantmentLevel(silkTouch) > 0 || tool.getEnchantmentLevel(fortune) >= 3) {
+            return;
         }
+        ItemStack fortuneTool = tool.copy();
+        fortuneTool.enchant(fortune, 3);
+        replaceDrops(event, fortuneTool);
     }
 
     /**
@@ -203,11 +194,16 @@ public class ShimmersteelEventHandler {
 
         ItemStack silkTool = tool.copy();
         silkTool.enchant(silkTouch, 1);
+        replaceDrops(event, silkTool);
+    }
 
+    private static void replaceDrops(BlockDropsEvent event, ItemStack lootTool) {
+        ServerLevel level = event.getLevel();
+        BlockPos pos = event.getPos();
         List<ItemEntity> drops = event.getDrops();
         drops.clear();
 
-        for (ItemStack drop : Block.getDrops(state, level, pos, event.getBlockEntity(), event.getBreaker(), silkTool)) {
+        for (ItemStack drop : Block.getDrops(event.getState(), level, pos, event.getBlockEntity(), event.getBreaker(), lootTool)) {
             ItemEntity newDrop = new ItemEntity(level, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, drop);
             newDrop.setDefaultPickUpDelay();
             drops.add(newDrop);

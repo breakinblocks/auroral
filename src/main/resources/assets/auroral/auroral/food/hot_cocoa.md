@@ -39,5 +39,5 @@ navigation:
 </Column>
 
 * Keep a supply when exploring cold biomes.
-* The milk bucket from crafting returns as an empty bucket when consumed.
+* Crafting returns the empty milk bucket; drinking restores 4 hunger points.
 * Pairs well with <ItemLink id="frosted_cookies" /> for a cozy break.

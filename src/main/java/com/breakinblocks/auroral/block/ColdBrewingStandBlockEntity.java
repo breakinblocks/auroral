@@ -7,6 +7,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -89,6 +90,9 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     @Override
     protected void loadAdditional(ValueInput input) {
         super.loadAdditional(input);
+        this.items = NonNullList.withSize(5, ItemStack.EMPTY);
+        ContainerHelper.loadAllItems(input, this.items);
+        this.ingredient = null;
         this.brewTime = input.getIntOr("BrewTime", 0);
         this.fuel = input.getIntOr("Fuel", 0);
 
@@ -104,6 +108,7 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
     @Override
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
+        ContainerHelper.saveAllItems(output, this.items);
         output.putInt("BrewTime", this.brewTime);
         output.putInt("Fuel", this.fuel);
 

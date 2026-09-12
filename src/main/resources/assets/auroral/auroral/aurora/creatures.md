@@ -61,6 +61,7 @@ Feed a wild Nautilus an Aurora Shard. Each shard has a **33% chance** to tame. O
 </Row>
 
 * **Shift + Right-click** — toggle between **Follow** (orbits you) and **Stay** (hovers in place).
+* Nearby Nautili in Follow mode travel with you between dimensions. Nautili in Stay mode remain where you left them.
 
 <Row>
   <ItemImage id="auroral_nautilus_spawn_egg" />
@@ -85,9 +86,10 @@ Auroral Nautili can wear vanilla nautilus armor (Copper, Iron, Golden, Diamond, 
   ### <Color id="aqua">Drops</Color>
 </Row>
 
-When a Nautilus fades away or is slain, it may drop:
+When a player kills a Nautilus, it may drop:
 
-* 1–2 Aurora Shards (player kills only)
+* 1–2 Leather
+* A Prismarine Shard (5% chance)
 * Nautilus Shells (15% chance, player kills only)
 
 <Row>

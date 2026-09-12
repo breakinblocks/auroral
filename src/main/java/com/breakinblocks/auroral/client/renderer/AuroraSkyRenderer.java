@@ -95,36 +95,23 @@ public class AuroraSkyRenderer {
             return;
         }
 
-        if (!ClientAuroraState.isAuroraActive()) {
-            smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
-            if (smoothedIntensity <= 0.01f) {
-                return;
-            }
-        }
-
         Minecraft mc = Minecraft.getInstance();
         ClientLevel level = mc.level;
         if (level == null || mc.player == null) {
+            smoothedIntensity = 0.0f;
             return;
         }
 
         if (!level.dimensionType().hasSkyLight()) {
+            smoothedIntensity = 0.0f;
             return;
-        }
-
-        if (!BiomeHelper.canExperienceAurora(level, mc.player.blockPosition())) {
-            smoothedIntensity = Math.max(0.0f, smoothedIntensity - INTENSITY_LERP_SPEED);
-            if (smoothedIntensity <= 0.01f) {
-                return;
-            }
         }
 
         float nightProgress = getNightProgress(level);
-        if (nightProgress <= 0 && smoothedIntensity <= 0.01f) {
-            return;
-        }
-
-        float targetIntensity = calculateIntensity(nightProgress);
+        float targetIntensity = ClientAuroraState.isAuroraActive()
+                && BiomeHelper.canExperienceAurora(level, mc.player.blockPosition())
+                && nightProgress > 0
+            ? calculateIntensity(nightProgress) : 0.0f;
 
         targetIntensity *= AuroralConfig.CLIENT.auroraIntensity.get().floatValue();
 
@@ -356,6 +343,7 @@ public class AuroraSkyRenderer {
     }
 
     public static void dispose() {
+        smoothedIntensity = 0.0f;
         if (cachedVertexBuffer != null) {
             cachedVertexBuffer.close();
             cachedVertexBuffer = null;

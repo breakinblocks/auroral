@@ -170,8 +170,15 @@ public class GlacialBasinBlockEntity extends BlockEntity {
         }
     }
 
-    public void dropContents(Level level, BlockPos pos) {
-        Containers.dropContents(level, pos, inventory.copyToList());
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level != null && !level.isClientSide()) {
+            Containers.dropContents(level, pos, inventory.copyToList());
+            for (int slot = 0; slot < SLOT_COUNT; slot++) {
+                inventory.set(slot, ItemResource.EMPTY, 0);
+            }
+        }
     }
 
     public ItemStack takeOutput() {

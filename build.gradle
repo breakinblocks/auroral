@@ -50,6 +50,10 @@ neoForge {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+tasks.named('jar', Jar) {
+    from('LICENSE.md')
+}
+
 repositories {
     mavenCentral()
     maven {

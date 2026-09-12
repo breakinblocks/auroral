@@ -26,6 +26,9 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.neoforge.client.gui.ConfigurationScreen;
+import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -34,7 +37,8 @@ import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 @EventBusSubscriber(modid = Auroral.MOD_ID, value = Dist.CLIENT)
 public class AuroralClient {
 
-    public static void init(IEventBus eventBus) {
+    public static void init(IEventBus eventBus, ModContainer container) {
+        container.registerExtensionPoint(IConfigScreenFactory.class, (IConfigScreenFactory) ConfigurationScreen::new);
         eventBus.addListener(AuroralClient::registerLayerDefinitions);
         eventBus.addListener(AuroralClient::registerRenderers);
         eventBus.addListener(AuroralClient::registerParticleProviders);

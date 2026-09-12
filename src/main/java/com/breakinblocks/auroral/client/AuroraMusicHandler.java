@@ -13,6 +13,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.sound.PlaySoundEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 /**
@@ -28,8 +29,28 @@ public class AuroraMusicHandler {
     private static boolean auroraWasActive = false;
 
     @SubscribeEvent
+    public static void onPlaySound(PlaySoundEvent event) {
+        if (AuroralConfig.CLIENT.playAuroraAmbientSound.get()) {
+            return;
+        }
+        var id = event.getOriginalSound().getIdentifier();
+        if (id.equals(ModSounds.AURORA_MUSIC.get().location())
+                || id.equals(ModSounds.AURORA_START.get().location())
+                || id.equals(ModSounds.AURORA_END.get().location())) {
+            event.setSound(null);
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
         if (!(event.getEntity() instanceof LocalPlayer player)) {
+            return;
+        }
+
+        if (!AuroralConfig.CLIENT.playAuroraAmbientSound.get()) {
+            if (currentMusic != null) {
+                forceStop();
+            }
             return;
         }
 
@@ -45,18 +66,8 @@ public class AuroraMusicHandler {
         }
         auroraWasActive = auroraActive;
 
-        boolean ambientAllowed = AuroralConfig.CLIENT.playAuroraAmbientSound.get();
-        if (!ambientAllowed && wasPlaying) {
-            // Config was toggled off mid-aurora; fade out and mark played so it
-            // won't restart on the next tick if re-enabled during the same aurora.
-            stopMusic();
-            hasPlayedThisAurora = true;
-            return;
-        }
-
         Level level = player.level();
         boolean shouldPlay = auroraActive
-            && ambientAllowed
             && BiomeHelper.isColdBiome(level, player.blockPosition())
             && level.canSeeSky(player.blockPosition());
 
@@ -93,10 +104,10 @@ public class AuroraMusicHandler {
         if (currentMusic != null) {
             Minecraft.getInstance().getSoundManager().stop(currentMusic);
             currentMusic = null;
-            wasPlaying = false;
-            hasPlayedThisAurora = false;
-            auroraWasActive = false;
         }
+        wasPlaying = false;
+        hasPlayedThisAurora = false;
+        auroraWasActive = false;
     }
 
     /**

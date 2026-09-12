@@ -88,7 +88,9 @@ public class ModItems {
         props -> new ShimmersteelSwordItem(props));
 
     public static final DeferredItem<ShimmersteelBowItem> SHIMMERSTEEL_BOW = ITEMS.registerItem("shimmersteel_bow",
-        props -> new ShimmersteelBowItem(props.durability(384))); // Similar durability to iron tools
+        props -> new ShimmersteelBowItem(props.durability(384)
+            .enchantable(ModToolTiers.SHIMMERSTEEL.enchantmentValue())
+            .repairable(ModTags.Items.SHIMMERSTEEL_REPAIR)));
 
     public static final DeferredItem<ShimmersteelHoeItem> SHIMMERSTEEL_HOE = ITEMS.registerItem("shimmersteel_hoe",
         props -> new ShimmersteelHoeItem(props));

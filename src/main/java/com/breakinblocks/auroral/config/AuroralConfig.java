@@ -40,7 +40,8 @@ public class AuroralConfig {
                    .push("aurora_visuals");
 
             showAuroraEffect = builder
-                .comment("Show the aurora borealis sky effect")
+                .comment("Show the aurora borealis sky effect. Does not affect aurora sounds or gameplay.")
+                .translation("auroral.configuration.show_aurora_effect")
                 .define("show_aurora_effect", true);
 
             showAuroraParticles = builder
@@ -52,7 +53,8 @@ public class AuroralConfig {
                 .defineInRange("aurora_intensity", 1.0, 0.0, 2.0);
 
             playAuroraAmbientSound = builder
-                .comment("Play ambient sounds during aurora events")
+                .comment("Play aurora music and start/end sounds. Independent of the sky effect.")
+                .translation("auroral.configuration.play_aurora_ambient_sound")
                 .define("play_aurora_ambient_sound", true);
 
             builder.pop().push("footprints");

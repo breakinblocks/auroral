@@ -17,6 +17,11 @@ public class ModLanguageProvider extends LanguageProvider {
 
     @Override
     protected void addTranslations() {
+        add("auroral.configuration.show_aurora_effect", "Aurora Sky Effect");
+        add("auroral.configuration.show_aurora_effect.tooltip", "Show the aurora sky ribbons. This setting only affects your visuals.");
+        add("auroral.configuration.play_aurora_ambient_sound", "Aurora Sounds");
+        add("auroral.configuration.play_aurora_ambient_sound.tooltip", "Play aurora music and the sounds announcing the start and end of an aurora.");
+
         // Creative tab
         add("itemGroup." + Auroral.MOD_ID, "Auroral");
 

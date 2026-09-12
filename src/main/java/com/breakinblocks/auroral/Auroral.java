@@ -80,7 +80,7 @@ public class Auroral {
                 AuroralGuide.init();
             }
 
-            AuroralClient.init(eventBus);
+            AuroralClient.init(eventBus, container);
         }
 
         LOGGER.info("Auroral initialized successfully!");

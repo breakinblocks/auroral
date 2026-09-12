@@ -36,12 +36,15 @@ public class EnderBloomBlock extends BushBlock implements BonemealableBlock {
 
     public EnderBloomBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0));
+        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0)
+            .setValue(AuroraBloomBlock.SNOW_LOGGED, false)
+            .setValue(AuroraBloomBlock.SNOW_LOGGED_LAYER, false)
+            .setValue(AuroraBloomBlock.SNOW_LAYERS, 1));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(AGE);
+        builder.add(AGE, AuroraBloomBlock.SNOW_LOGGED, AuroraBloomBlock.SNOW_LOGGED_LAYER, AuroraBloomBlock.SNOW_LAYERS);
     }
 
     @SuppressWarnings("unchecked")
@@ -68,12 +71,21 @@ public class EnderBloomBlock extends BushBlock implements BonemealableBlock {
 
     @Override
     protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+        if (state.getValue(AuroraBloomBlock.SNOW_LOGGED)) {
+            return true;
+        }
         BlockPos below = pos.below();
         return this.mayPlaceOn(level.getBlockState(below), level, below);
     }
 
     public boolean isMaxAge(BlockState state) {
         return state.getValue(AGE) >= MAX_AGE;
+    }
+
+    @Override
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean isMoving) {
+        super.affectNeighborsAfterRemoval(state, level, pos, isMoving);
+        AuroraBloomBlock.restoreSnowAfterRemoval(state, level, pos);
     }
 
     @Override

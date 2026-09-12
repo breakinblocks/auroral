@@ -23,6 +23,9 @@ public class ModItemTagsProvider extends ItemTagsProvider {
 
     @Override
     protected void addTags(HolderLookup.Provider provider) {
+        tag(ModTags.Items.SHIMMERSTEEL_REPAIR).add(ModItems.SHIMMERSTEEL_INGOT.get());
+        tag(ModTags.Items.SHIMMERWEAVE_REPAIR).add(ModItems.SHIMMERWEAVE_FABRIC.get());
+
         // Add shimmersteel ingot to common ingots tag
         tag(Tags.Items.INGOTS)
             .add(ModItems.SHIMMERSTEEL_INGOT.get());

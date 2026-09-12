@@ -2,7 +2,7 @@
 
 > *"The sky gives, the ice remembers."*
 
-A comprehensive winter expansion mod for Minecraft 1.21.11 (NeoForge 21.11.0-beta) centered around celestial energy, mystical metallurgy, and specialized survival.
+A comprehensive winter expansion mod for Minecraft 26.1.2 (NeoForge 26.1.2.22-beta) centered around celestial energy, mystical metallurgy, and specialized survival.
 
 ## Overview
 
@@ -58,21 +58,14 @@ Bypass the Nether for your alchemical needs:
 
 ## Requirements
 
-- Minecraft 1.21.11
-- NeoForge 21.11.0-beta+
-- Java 21
+- Minecraft 26.1.2
+- NeoForge 26.1.2.22-beta+
+- Java 25
 
 ## Optional Dependencies
 
 - [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) - Shows Aurora status and block information tooltips
 - [GuideMe](https://www.curseforge.com/minecraft/mc-mods/guideme) - In-game guidebook for Auroral mechanics
-
-## Installation
-
-1. Install NeoForge 21.11.0-beta+ for Minecraft 1.21.11
-2. Download the latest Auroral JAR
-3. Place in your `mods/` folder
-4. Launch Minecraft
 
 ## Configuration
 
@@ -90,13 +83,13 @@ Server and client configuration files are generated on first run:
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the PolyForm Shield License 1.0.0 AND PolyForm Perimeter License 1.0.0. Use must comply with both; see [LICENSE.md](LICENSE.md) for the complete terms.
 
 ## Credits
 
 - **Author**: Saereth
-- **Minecraft Version**: 1.21.11
-- **Mod Loader**: NeoForge 21.11.0-beta
+- **Minecraft Version**: 26.1.2
+- **Mod Loader**: NeoForge 26.1.2.22-beta
 
 ---
 

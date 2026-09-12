@@ -46,7 +46,7 @@ Created by upgrading an **Iron Spear** at a Smithing Table with a **Shimmersteel
   ## <Color id="gold">Frostbite on Hit</Color>
 </Column>
 
-Every landing strike applies Frostbite to the target. Frostbite slows, ticks damage, and stacks the longer a fight runs.
+Every landing strike applies Frostbite to the target. Frostbite slows movement, reduces healing and armor, and makes shields wear faster. Further hits refresh the effect.
 
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***

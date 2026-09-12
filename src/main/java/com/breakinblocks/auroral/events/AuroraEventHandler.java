@@ -261,15 +261,14 @@ public class AuroraEventHandler {
                     if (!SnowBlockHelper.isBloomSurface(level.getBlockState(belowPos))) {
                         continue;
                     }
-                    BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
-                        .setValue(AuroraBloomBlock.SNOW_LOGGED, true)
-                        .setValue(AuroraBloomBlock.SNOW_LOGGED_LAYER, true);
+                    BlockState bloom = AuroraBloomBlock.withSnow(
+                        ModBlocks.AURORA_BLOOM.get().defaultBlockState(), surfaceState);
                     if (tryPlaceBloom(level, surfacePos, bloom, player)) {
                         break;
                     }
                 } else if (surfaceState.is(Blocks.POWDER_SNOW)) {
-                    BlockState bloom = ModBlocks.AURORA_BLOOM.get().defaultBlockState()
-                        .setValue(AuroraBloomBlock.SNOW_LOGGED, true);
+                    BlockState bloom = AuroraBloomBlock.withSnow(
+                        ModBlocks.AURORA_BLOOM.get().defaultBlockState(), surfaceState);
                     if (tryPlaceBloom(level, surfacePos, bloom, player)) {
                         break;
                     }
@@ -385,8 +384,10 @@ public class AuroraEventHandler {
      * Starts an aurora event.
      */
     private static void startAurora(ServerLevel level, long gameTime, RandomSource random) {
-        int minDuration = AuroralConfig.SERVER.auroraMinDuration.get();
-        int maxDuration = AuroralConfig.SERVER.auroraMaxDuration.get();
+        int configuredMin = AuroralConfig.SERVER.auroraMinDuration.get();
+        int configuredMax = AuroralConfig.SERVER.auroraMaxDuration.get();
+        int minDuration = Math.min(configuredMin, configuredMax);
+        int maxDuration = Math.max(configuredMin, configuredMax);
 
         // Random duration between min and max
         int duration = minDuration + random.nextInt(maxDuration - minDuration + 1);

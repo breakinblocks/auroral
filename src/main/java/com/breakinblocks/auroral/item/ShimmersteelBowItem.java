@@ -3,6 +3,7 @@ package com.breakinblocks.auroral.item;
 import com.breakinblocks.auroral.entity.StarShotEntity;
 import com.breakinblocks.auroral.registry.ModSounds;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 
 /**
@@ -82,13 +84,14 @@ public class ShimmersteelBowItem extends Item {
             return false;
         }
 
-        if (!level.isClientSide()) {
+        if (level instanceof ServerLevel serverLevel) {
             float power = getPowerForTime(useDuration);
 
             StarShotEntity starShot = new StarShotEntity(level, player);
             // Pass the bow stack so Power and other weapon enchantments apply on hit.
             starShot.setWeaponItem(stack);
             starShot.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, power * 3.0f, 1.0f);
+            EnchantmentHelper.onProjectileSpawned(serverLevel, stack, starShot, item -> {});
 
             EquipmentSlot slot = player.getUsedItemHand() == InteractionHand.MAIN_HAND
                 ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND;
