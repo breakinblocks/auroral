@@ -66,6 +66,7 @@ navigation:
 
 * Creates frosted ice when walking on water.
 * Converts **lava to obsidian** on contact.
+* Lava beneath you while falling turns to obsidian before you land.
 
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***
@@ -76,6 +77,7 @@ navigation:
 
 * Take no fall damage when landing on ice or obsidian.
 * Perfect for skating down from heights.
+* Jump down toward lava and land on fresh obsidian instead.
 
 <ItemImage id="minecraft:air" scale="0.25"/>
 ***

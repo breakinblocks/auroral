@@ -80,6 +80,7 @@ public class AuroralConfig {
         public final ModConfigSpec.DoubleValue skatesIceSpeedBoost;
         public final ModConfigSpec.DoubleValue skatesPackedIceSpeedBoost;
         public final ModConfigSpec.IntValue skatesFrostWalkerRadius;
+        public final ModConfigSpec.IntValue skatesLavaFallScanDepth;
         public final ModConfigSpec.DoubleValue leggingsSnowSpeedBoost;
         public final ModConfigSpec.DoubleValue leggingsSoulSpeedBoost;
 
@@ -144,6 +145,10 @@ public class AuroralConfig {
             skatesFrostWalkerRadius = builder
                 .comment("Radius in blocks for Shimmerweave Skates frost walker and lava walker effect")
                 .defineInRange("skates_frost_walker_radius", 2, 1, 5);
+
+            skatesLavaFallScanDepth = builder
+                .comment("How many blocks below a falling player wearing Shimmerweave Skates to check for lava and turn it into obsidian before they land (0 disables)")
+                .defineInRange("skates_lava_fall_scan_depth", 16, 0, 64);
 
             leggingsSnowSpeedBoost = builder
                 .comment("Speed multiplier for Shimmerweave Leggings on snow (0.2 = +20% speed)")

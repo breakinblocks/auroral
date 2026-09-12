@@ -218,11 +218,17 @@ public class ShimmerweaveEventHandler {
             return;
         }
 
-        if (!player.onGround() || (player.getDeltaMovement().x == 0 && player.getDeltaMovement().z == 0)) {
+        int radius = AuroralConfig.SERVER.skatesFrostWalkerRadius.get();
+
+        if (!player.onGround()) {
+            handleFallingOverLava(player, level, boots, playerPos, radius);
             return;
         }
 
-        int radius = AuroralConfig.SERVER.skatesFrostWalkerRadius.get();
+        if (player.getDeltaMovement().x == 0 && player.getDeltaMovement().z == 0) {
+            return;
+        }
+
         BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
 
         for (int x = -radius; x <= radius; x++) {
@@ -243,6 +249,45 @@ public class ShimmerweaveEventHandler {
                         level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
                         boots.hurtAndBreak(2, player, EquipmentSlot.FEET);
                     }
+                }
+            }
+        }
+    }
+
+    private static void handleFallingOverLava(Player player, ServerLevel level, ItemStack boots, BlockPos playerPos, int radius) {
+        int scanDepth = AuroralConfig.SERVER.skatesLavaFallScanDepth.get();
+        if (scanDepth <= 0 || player.getDeltaMovement().y >= 0 || player.isInLava()) {
+            return;
+        }
+
+        int minY = Math.max(level.getMinBuildHeight(), playerPos.getY() - scanDepth);
+        BlockPos.MutableBlockPos scanPos = playerPos.mutable();
+
+        while (scanPos.getY() > minY) {
+            scanPos.move(0, -1, 0);
+            BlockState state = level.getBlockState(scanPos);
+
+            if (state.getFluidState().is(Fluids.LAVA)) {
+                convertLavaAround(player, level, boots, scanPos, radius);
+                return;
+            }
+
+            if (!state.isAir()) {
+                return;
+            }
+        }
+    }
+
+    private static void convertLavaAround(Player player, ServerLevel level, ItemStack boots, BlockPos center, int radius) {
+        BlockPos.MutableBlockPos mutablePos = new BlockPos.MutableBlockPos();
+
+        for (int x = -radius; x <= radius; x++) {
+            for (int z = -radius; z <= radius; z++) {
+                mutablePos.set(center.getX() + x, center.getY(), center.getZ() + z);
+
+                if (mutablePos.closerThan(center, radius + 0.5) && level.getFluidState(mutablePos).is(Fluids.LAVA)) {
+                    level.setBlockAndUpdate(mutablePos, Blocks.OBSIDIAN.defaultBlockState());
+                    boots.hurtAndBreak(2, player, EquipmentSlot.FEET);
                 }
             }
         }

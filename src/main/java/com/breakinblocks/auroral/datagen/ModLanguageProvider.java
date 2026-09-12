@@ -94,6 +94,7 @@ public class ModLanguageProvider extends LanguageProvider {
         add("tooltip.auroral.shimmerweave_skates.ice_speed", "Ice skating speed on ice and packed ice");
         add("tooltip.auroral.shimmerweave_skates.frost_walker", "Freezes water underfoot");
         add("tooltip.auroral.shimmerweave_skates.lava_to_obsidian", "Turns surface lava into obsidian");
+        add("tooltip.auroral.shimmerweave_skates.lava_fall", "Turns lava beneath you into obsidian while falling");
         add("tooltip.auroral.shimmerweave_skates.no_ice_fall", "No fall damage on ice or obsidian");
 
         add("tooltip.auroral.hearthwood_log.burn_time", "Burns for 7 in-game days while loaded");

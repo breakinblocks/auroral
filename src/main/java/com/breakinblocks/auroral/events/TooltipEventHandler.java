@@ -44,6 +44,7 @@ public class TooltipEventHandler {
         b.ability(ModItems.SHIMMERWEAVE_SKATES::get, "tooltip.auroral.shimmerweave_skates.ice_speed");
         b.ability(ModItems.SHIMMERWEAVE_SKATES::get, "tooltip.auroral.shimmerweave_skates.frost_walker");
         b.ability(ModItems.SHIMMERWEAVE_SKATES::get, "tooltip.auroral.shimmerweave_skates.lava_to_obsidian");
+        b.ability(ModItems.SHIMMERWEAVE_SKATES::get, "tooltip.auroral.shimmerweave_skates.lava_fall");
         b.ability(ModItems.SHIMMERWEAVE_SKATES::get, "tooltip.auroral.shimmerweave_skates.no_ice_fall");
 
         b.info(ModBlocks.HEARTHWOOD_LOG::asItem, "tooltip.auroral.hearthwood_log.burn_time");
