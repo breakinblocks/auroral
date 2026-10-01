@@ -73,6 +73,7 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
     private boolean wasJumping = false;
     private int jumpChargeTime = 0;
     private int localBoostCountdown = 0;
+    private boolean followingOwner;
 
     public AuroralNautilusEntity(EntityType<? extends AuroralNautilusEntity> entityType, Level level) {
         super(entityType, level);
@@ -668,6 +669,11 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
         return isTamed() || super.isPersistenceRequired();
     }
 
+    @Override
+    public boolean canUsePortal(boolean allowPassengers) {
+        return (!isTamed() || isVehicle()) && super.canUsePortal(allowPassengers);
+    }
+
     // Inner Classes for AI
 
     class NautilusBodyRotationControl extends BodyRotationControl {
@@ -708,7 +714,8 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
             }
 
             // When sitting, hover in place with minimal movement
-            if (AuroralNautilusEntity.this.isSitting()) {
+            if (AuroralNautilusEntity.this.isSitting()
+                    || (AuroralNautilusEntity.this.isTamed() && !AuroralNautilusEntity.this.followingOwner)) {
                 // Slowly reduce velocity to hover
                 Vec3 currentVel = AuroralNautilusEntity.this.getDeltaMovement();
                 AuroralNautilusEntity.this.setDeltaMovement(currentVel.scale(0.9));
@@ -1020,11 +1027,13 @@ public class AuroralNautilusEntity extends Animal implements PlayerRideable, Pla
         @Override
         public void start() {
             this.ticksSinceOwnerSeen = 0;
+            AuroralNautilusEntity.this.followingOwner = true;
         }
 
         @Override
         public void stop() {
             this.owner = null;
+            AuroralNautilusEntity.this.followingOwner = false;
         }
 
         @Override

@@ -24,6 +24,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityTravelToDimensionEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,7 +44,10 @@ public class PlayerEventHandler {
 
     /** Position of each player just before a dimension change, so we can find pets nearby. */
     private static final Map<UUID, Vec3> preTransitPositions = new HashMap<>();
+    private static final Map<UUID, PendingFollow> pendingFollows = new HashMap<>();
     private static final double NAUTILUS_FOLLOW_RADIUS = 32.0;
+
+    private record PendingFollow(ResourceKey<Level> from, @Nullable Vec3 lastPos) {}
 
     @SubscribeEvent
     public static void onEntityTravelToDimension(EntityTravelToDimensionEvent event) {
@@ -56,20 +60,20 @@ public class PlayerEventHandler {
     public static void onPlayerChangeDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             AuroralNetworking.syncAuroraToPlayer(player);
-            bringTamedNautili(player, event.getFrom());
-            preTransitPositions.remove(player.getUUID());
+            pendingFollows.put(player.getUUID(),
+                new PendingFollow(event.getFrom(), preTransitPositions.remove(player.getUUID())));
         }
     }
 
-    private static void bringTamedNautili(ServerPlayer player, ResourceKey<Level> fromKey) {
+    private static void bringTamedNautili(ServerPlayer player, PendingFollow pending) {
         MinecraftServer server = player.level().getServer();
         if (server == null) return;
-        ServerLevel sourceLevel = server.getLevel(fromKey);
+        ServerLevel sourceLevel = server.getLevel(pending.from());
         ServerLevel destLevel = player.level();
-        if (sourceLevel == null || sourceLevel == destLevel) return;
+        if (sourceLevel == null) return;
 
         UUID playerId = player.getUUID();
-        Vec3 lastPos = preTransitPositions.get(playerId);
+        Vec3 lastPos = pending.lastPos();
         double radiusSq = NAUTILUS_FOLLOW_RADIUS * NAUTILUS_FOLLOW_RADIUS;
 
         List<? extends AuroralNautilusEntity> followers = sourceLevel.getEntities(
@@ -95,6 +99,15 @@ public class PlayerEventHandler {
     }
 
     @SubscribeEvent
+    public static void onPlayerClone(PlayerEvent.Clone event) {
+        if (event.isWasDeath() && event.getEntity() instanceof ServerPlayer player) {
+            Player original = event.getOriginal();
+            pendingFollows.put(player.getUUID(),
+                new PendingFollow(original.level().dimension(), original.position()));
+        }
+    }
+
+    @SubscribeEvent
     public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
             AuroralNetworking.syncAuroraToPlayer(player);
@@ -104,6 +117,7 @@ public class PlayerEventHandler {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         preTransitPositions.remove(event.getEntity().getUUID());
+        pendingFollows.remove(event.getEntity().getUUID());
     }
 
     /**
@@ -115,6 +129,13 @@ public class PlayerEventHandler {
         Player player = event.getEntity();
         if (player.level().isClientSide()) {
             return;
+        }
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            PendingFollow pending = pendingFollows.remove(serverPlayer.getUUID());
+            if (pending != null) {
+                bringTamedNautili(serverPlayer, pending);
+            }
         }
 
         // Check if player is holding Aurora Lantern in either hand
