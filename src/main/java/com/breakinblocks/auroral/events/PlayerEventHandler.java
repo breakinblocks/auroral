@@ -55,13 +55,16 @@ public class PlayerEventHandler {
             Vec3 origin = preTransitPositions.remove(player.getUUID());
             ServerLevel sourceLevel = player.serverLevel().getServer().getLevel(event.getFrom());
             if (sourceLevel != null && origin != null) {
-                bringTamedNautili(player, sourceLevel, origin);
+                pendingFollows.put(player.getUUID(), new PendingFollow(sourceLevel, origin));
             }
         }
     }
 
     private static final Map<UUID, Vec3> preTransitPositions = new HashMap<>();
+    private static final Map<UUID, PendingFollow> pendingFollows = new HashMap<>();
     private static final double NAUTILUS_FOLLOW_RADIUS = 32.0;
+
+    private record PendingFollow(ServerLevel sourceLevel, Vec3 origin) {}
 
     @SubscribeEvent
     public static void onEntityTravelToDimension(EntityTravelToDimensionEvent event) {
@@ -80,6 +83,7 @@ public class PlayerEventHandler {
     @SubscribeEvent
     public static void onPlayerLogout(PlayerEvent.PlayerLoggedOutEvent event) {
         preTransitPositions.remove(event.getEntity().getUUID());
+        pendingFollows.remove(event.getEntity().getUUID());
     }
 
     private static void bringTamedNautili(ServerPlayer player, ServerLevel sourceLevel, Vec3 origin) {
@@ -136,6 +140,13 @@ public class PlayerEventHandler {
         }
         // A cancelled dimension-travel event has no completion callback.
         preTransitPositions.remove(player.getUUID());
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            PendingFollow pending = pendingFollows.remove(serverPlayer.getUUID());
+            if (pending != null && pending.sourceLevel() != serverPlayer.serverLevel()) {
+                bringTamedNautili(serverPlayer, pending.sourceLevel(), pending.origin());
+            }
+        }
 
         // Check if player is holding Aurora Lantern in either hand
         boolean holdingLantern = player.getMainHandItem().is(ModBlocks.AURORA_LANTERN.asItem()) ||
