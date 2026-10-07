@@ -54,13 +54,15 @@ public class AuroraEventHandler {
             return;
         }
 
-        // Only process in overworld
         if (!BiomeHelper.dimensionSupportsAurora(level)) {
+            if (level.hasData(ModDataAttachments.AURORA_STATE) && AuroraHelper.isAuroraActive(level)) {
+                endAurora(level);
+            }
             return;
         }
 
         ResourceKey<Level> dimensionKey = level.dimension();
-        long currentDayTime = level.getOverworldClockTime() % 24000;
+        long currentDayTime = AuroraHelper.getDayTime(level);
         long gameTime = level.getGameTime();
 
         // Check for night start transition (13000) - per dimension
@@ -396,7 +398,7 @@ public class AuroraEventHandler {
 
     public static int startAurora(ServerLevel level, int duration) {
         // Clamp duration to not extend past dawn
-        long currentDayTime = level.getOverworldClockTime() % 24000;
+        long currentDayTime = AuroraHelper.getDayTime(level);
         long ticksUntilDawn = (23000 - currentDayTime + 24000) % 24000;
         duration = (int) Math.min(duration, ticksUntilDawn);
 

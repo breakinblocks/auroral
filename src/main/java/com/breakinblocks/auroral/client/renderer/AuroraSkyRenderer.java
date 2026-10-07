@@ -3,6 +3,7 @@ package com.breakinblocks.auroral.client.renderer;
 import com.breakinblocks.auroral.Auroral;
 import com.breakinblocks.auroral.client.ClientAuroraState;
 import com.breakinblocks.auroral.config.AuroralConfig;
+import com.breakinblocks.auroral.util.AuroraHelper;
 import com.breakinblocks.auroral.util.BiomeHelper;
 import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
@@ -325,7 +326,7 @@ public class AuroraSkyRenderer {
     }
 
     private static float getNightProgress(ClientLevel level) {
-        long dayTime = level.getOverworldClockTime() % 24000;
+        long dayTime = AuroraHelper.getDayTime(level);
         if (dayTime < 13000 || dayTime >= 23000) {
             return 0;
         }

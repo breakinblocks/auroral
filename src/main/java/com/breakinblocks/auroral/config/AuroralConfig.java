@@ -1,8 +1,11 @@
 package com.breakinblocks.auroral.config;
 
 import com.breakinblocks.auroral.block.GlacialBasinBlock;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.commons.lang3.tuple.Pair;
+
+import java.util.List;
 
 public class AuroralConfig {
     public static final ModConfigSpec clientSpec;
@@ -73,6 +76,7 @@ public class AuroralConfig {
         public final ModConfigSpec.IntValue auroraMinDuration;
         public final ModConfigSpec.IntValue auroraMaxDuration;
         public final ModConfigSpec.IntValue auroraRepairRate;
+        public final ModConfigSpec.ConfigValue<List<? extends String>> auroraDimensions;
 
         // Combat settings
         public final ModConfigSpec.DoubleValue executeThreshold;
@@ -120,6 +124,11 @@ public class AuroralConfig {
             auroraRepairRate = builder
                 .comment("Durability repaired per second on Shimmersteel/Shimmerweave gear during aurora")
                 .defineInRange("aurora_repair_rate", 1, 0, 10);
+
+            auroraDimensions = builder
+                .comment("Dimensions where auroras can occur, by dimension ID (for example minecraft:overworld). Auroras follow the night of each dimension's own day cycle, and the sky ribbons only show in dimensions that have a sky")
+                .defineListAllowEmpty("aurora_dimensions", List.of("minecraft:overworld"), () -> "minecraft:overworld",
+                    o -> o instanceof String s && Identifier.tryParse(s) != null);
 
             builder.pop().push("combat");
 

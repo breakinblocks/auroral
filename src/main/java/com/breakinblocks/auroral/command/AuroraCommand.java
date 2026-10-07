@@ -50,7 +50,7 @@ public class AuroraCommand {
         ServerLevel level = source.getLevel();
 
         if (!BiomeHelper.dimensionSupportsAurora(level)) {
-            source.sendFailure(Component.literal("Auroras cannot occur in this dimension"));
+            source.sendFailure(Component.literal("Auroras are not enabled in this dimension. Add it to aurora_dimensions in the server config"));
             return 0;
         }
         if (!AuroraHelper.isNightTime(level)) {
@@ -98,7 +98,7 @@ public class AuroraCommand {
 
         AuroraState state = AuroraHelper.getAuroraState(level);
         long gameTime = level.getGameTime();
-        long dayTime = level.getOverworldClockTime() % 24000;
+        long dayTime = AuroraHelper.getDayTime(level);
 
         boolean isNight = AuroraHelper.isNightTime(level);
 

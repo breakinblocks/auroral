@@ -41,13 +41,20 @@ public class AuroraHelper {
         return isAuroraActive(level) && BiomeHelper.canExperienceAurora(level, pos);
     }
 
+    public static long getDayTime(Level level) {
+        long ticks = level.dimensionType().defaultClock().isPresent()
+            ? level.getDefaultClockTime()
+            : level.getOverworldClockTime();
+        return ticks % 24000;
+    }
+
     public static boolean isNightTime(Level level) {
-        long dayTime = level.getOverworldClockTime() % 24000;
+        long dayTime = getDayTime(level);
         return dayTime >= 13000 && dayTime < 23000;
     }
 
     public static boolean isNightStart(Level level) {
-        long dayTime = level.getOverworldClockTime() % 24000;
+        long dayTime = getDayTime(level);
         return dayTime == 13000;
     }
 }
