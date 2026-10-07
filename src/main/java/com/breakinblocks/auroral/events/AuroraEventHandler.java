@@ -57,8 +57,10 @@ public class AuroraEventHandler {
             return;
         }
 
-        // Only process in overworld
         if (!BiomeHelper.dimensionSupportsAurora(level)) {
+            if (level.hasData(ModDataAttachments.AURORA_STATE) && AuroraHelper.isAuroraActive(level)) {
+                endAurora(level);
+            }
             return;
         }
 

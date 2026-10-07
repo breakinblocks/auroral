@@ -78,6 +78,7 @@ Server and client configuration files are generated on first run:
 |--------|---------|-------------|
 | `auroraChance` | 0.33 | Chance of Aurora each night (0.0-1.0) |
 | `auroraRepairRate` | 1 | Durability restored per second during Aurora |
+| `aurora_dimensions` | `["minecraft:overworld"]` | Dimension IDs where auroras can occur |
 | `executeThreshold` | 0.15 | HP percentage for Execute mechanic |
 | `glowingRadius` | 32 | Radius for Goggles' Glowing effect |
 
