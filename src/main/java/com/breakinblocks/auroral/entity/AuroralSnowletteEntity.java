@@ -177,8 +177,7 @@ public class AuroralSnowletteEntity extends TamableAnimal {
             level, null, spawnPos, MobSpawnType.CONVERSION, false, false);
         if (snowlette != null) {
             snowlette.setPos(x, y, z);
-            snowlette.setTame(true, true); // (tamed, applyTamingSideEffects)
-            snowlette.setOwnerUUID(owner.getUUID());
+            snowlette.tame(owner);
             level.addFreshEntity(snowlette);
 
             // Spawn transformation particles
