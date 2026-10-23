@@ -3,11 +3,13 @@ package com.breakinblocks.auroral.block;
 import com.breakinblocks.auroral.inventory.ColdBrewingStandMenu;
 import com.breakinblocks.auroral.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -31,10 +33,13 @@ import net.minecraft.world.level.block.state.BlockState;
  * 3: Ingredient
  * 4: Fuel (Snowballs)
  */
-public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
+public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
 
     private static final int INGREDIENT_SLOT = 3;
     private static final int FUEL_SLOT = 4;
+    private static final int[] SLOTS_FOR_UP = new int[]{INGREDIENT_SLOT};
+    private static final int[] SLOTS_FOR_DOWN = new int[]{0, 1, 2, INGREDIENT_SLOT};
+    private static final int[] SLOTS_FOR_SIDES = new int[]{0, 1, 2, FUEL_SLOT};
 
     /**
      * Fuel per snowball (vanilla blaze powder gives 20).
@@ -255,6 +260,25 @@ public class ColdBrewingStandBlockEntity extends BaseContainerBlockEntity {
             // Slots 0-2 are for bottles - check if it's a valid container
             return isValidBottle(stack) && this.getItem(slot).isEmpty();
         }
+    }
+
+    @Override
+    public int[] getSlotsForFace(Direction side) {
+        return switch (side) {
+            case UP -> SLOTS_FOR_UP;
+            case DOWN -> SLOTS_FOR_DOWN;
+            default -> SLOTS_FOR_SIDES;
+        };
+    }
+
+    @Override
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, Direction side) {
+        return this.canPlaceItem(slot, stack);
+    }
+
+    @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) {
+        return slot != INGREDIENT_SLOT || stack.is(Items.GLASS_BOTTLE);
     }
 
     /**
